@@ -1,6 +1,6 @@
-# MOXA AIG Series OpenAPI
+# MOXA AIG Series OpenAPI Documents
 
-|  Model Name  |  REST API  | Link |
-|  ----  |  ----  | ----  |
-| AIG-101 Series  | X | - |
-| AIG-301 Series  | V | [AIG301](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG301) |
+## AIG 301 Series
+| Date | VERSION | REST API  | Latest |
+|  ----  | ----  | ----  | ----  |
+| 2023-08| V1.5 | [Core](https://TPE-TIGER.github.io/AIG301/V1.5/core/#)<br />[Device](https://TPE-TIGER.github.io/AIG301/V1.5/device/#)<br />[Cloud](https://TPE-TIGER.github.io/AIG301/V1.5/cloud/#)<br />[Taghub](https://TPE-TIGER.github.io/AIG301/V1.5/taghub/#)<br />[ModbusMaster](https://TPE-TIGER.github.io/AIG301/V1.5/modbusmaster/#) | V |
