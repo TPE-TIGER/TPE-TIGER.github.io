@@ -1,0 +1,3734 @@
+openapi: 3.0.0
+info:
+  title: Modbus Master App API
+  description: Modbus Master App API
+  version: "2.2.0"
+servers:
+  - url: https://127.0.0.1/api/v1
+
+
+#security:
+#  - bearerAuth: []
+#
+#x-anchors:
+#
+#  remoteDevAllProps:
+#    remoteDevPropId: &REMOTE_DEV_PROP_ID
+#      remoteDevId:
+#        description: Unique remote device ID.
+#        type: integer
+#
+#    remoteDevPropSerPid: &REMOTE_DEV_PROP_SER_PID
+#      masterSerIfaceId:
+#        description: Master serial interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+#        type: integer
+#
+#    remoteDevPropTcpPid: &REMOTE_DEV_PROP_TCP_PID
+#      masterTcpIfaceId:
+#        description: Master TCP interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+#        type: integer
+#
+#    remoteDevProps: &REMOTE_DEV_PROPS
+#      name:
+#        description: Device name. "name" should be unique.
+#        type: string
+#        default: "device"
+#        minLength: 1
+#        maxLength: 128
+#        pattern: '^[\w\-.~]{1,128}$'
+#      enable:
+#        description: Enable all of this device's polling command.
+#        type: integer
+#        enum:
+#          - 0
+#          - 1
+#        x-enum-varnames:
+#          - disable
+#          - enable
+#        default: 1
+#      slaveId:
+#        description: Slave ID of remote device. "slaveId" should be unique in a masterSerIface. "slaveId + slaveIpaddr + slaveTcpPort" should be unique in a masterTcpIface.
+#        type: integer
+#        minimum: 0
+#        maximum: 255
+#        default: 1
+#      slaveIpaddr:
+#        description: Slave IP address of remote device.
+#        type: string
+#        default: "0.0.0.0"
+#      slaveTcpPort:
+#        description: Slave IP port of remote device.
+#        type: integer
+#        minimum: 1
+#        maximum: 65535
+#        default: 502
+#      mcmds:
+#        $ref: '#/components/schemas/mcmds'
+#
+#  tagAllProps:
+#    tagPropId: &TAG_PROP_ID
+#        tagId:
+#          description: Unique tag ID.
+#          type: integer
+#    tagPropMcmdPid: &TAG_PROP_MCMD_PID
+#        mcmdId:
+#          description: |
+#            Used as foreign key for tags table.
+#            Set either mcmdId or szoneId.
+#          type: integer
+#    tagPropSzonePid: &TAG_PROP_SZONE_PID
+#        szoneId:
+#          description: |
+#            Used as foreign key for tags table.
+#            Set either mcmdId or szoneId.
+#          type: integer
+#    tagProps: &TAG_PROPS
+#      name:
+#        description: |
+#            Tag name for tag mapping used. "name" should be unique in a remoteDev.
+#            Tag name should not be 'status'.
+#        type: string
+#        default: tag
+#        minLength: 1
+#        maxLength: 128
+#        pattern: '^[\w\-.~]{1,128}$'
+#      dataType:
+#        description: Data type of tag.
+#        type: string
+#        enum:
+#        - boolean
+#        - int8
+#        - int16
+#        - int32
+#        - int64
+#        - uint8
+#        - uint16
+#        - uint32
+#        - uint64
+#        - float
+#        - double
+#        - string
+#        - bytearray
+#        - raw
+#        default: raw
+#
+#      dataUnit:
+#        description: Real unit description of tag (e.g. ms, s, A, mA, ...).
+#        type: string
+#      access:
+#        description: Tag access for publish or subscribe.
+#        type: string
+#        enum:
+#          - r
+#          - w
+#          - rw
+#        default: rw
+#      dataSize:
+#        description: |
+#          Data size for data type (string, bytearray, raw).
+#          dataSize must exist in payload if data type is string/bytearray/raw.
+#          dataSize must not exist in payload if data type is not string/bytearray/raw.
+#        type: integer
+#        minimum: 1
+#      offset:
+#        description: Tag's start byte offset in Modbus command.
+#        type: integer
+#        default: 0
+#
+components:
+#  securitySchemes:
+#    bearerAuth:
+#      type: http
+#      scheme: bearer
+#      bearerFormat: JWT
+#
+  schemas:
+
+    masterParams:
+      type: array
+      items:
+        $ref: '#/components/schemas/masterParam'
+
+    masterParam:
+      description: Maximum count of masterParam is 1.
+      type: object
+      properties:
+        masterParamId:
+          description: Unique master parameters ID.
+          type: integer
+        configId:
+          description: Used as foreign key for master parameters table.
+          type: integer
+        enableTcpMasters:
+          description: Enable of all TCP masters.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        enableSerMasters:
+          description: Enable of all serial masters.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        enableDevFailEvent:
+          description: Enable of devices' fail event alarm.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        enableCmdFailEvent:
+          description: Enable of commands' fail event alarm.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+
+    tcpMasters:
+      type: array
+      items:
+        $ref: '#/components/schemas/tcpMaster'
+
+    tcpMaster:
+      description: Maximum count of tcpMasters is 1.
+      type: object
+      properties:
+        tcpMasterId:
+          description: Unique TCP master ID.
+          type: integer
+        configId:
+          description: Used as foreign key for TCP master table.
+          type: integer
+        name:
+          description: Provider name for full-tag name used. "name" should be unique.
+          type: string
+          default: modbus_tcp_master
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        masterTcpIfaces:
+          $ref: '#/components/schemas/masterTcpIfaces'
+
+    serMasters:
+      type: array
+      items:
+        $ref: '#/components/schemas/serMaster'
+
+    serMaster:
+      description: Maximum count of serMasters is 1.
+      type: object
+      properties:
+        serMasterId:
+          description: Unique serial master ID.
+          type: integer
+        configId:
+          description: Used as foreign key for serial master table.
+          type: integer
+        name:
+          description: Provider name for full-tag name used. "name" should be unique.
+          type: string
+          default: modbus_serial_master
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        masterSerIfaces:
+          $ref: '#/components/schemas/masterSerIfaces'
+
+
+    masterSerIfaces:
+      type: array
+      items:
+        $ref: '#/components/schemas/masterSerIface'
+
+    masterSerIface:
+      description: Maximum count of masterSerIfaces depends on the environment file.
+      type: object
+      required:
+      - serMasterId
+      - portValue
+      properties:
+        masterSerIfaceId:
+          description: Master serial interface ID.
+          type: integer
+        serMasterId:
+          description: Used as foreign key for master serial interface table.
+          type: integer
+        portValue:
+          description: Serial port index which should be unique.
+          type: integer
+        format:
+          description: Modbus serial mode (RTU, ASCII).
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - RTU
+            - ASCII
+          default: 0
+        initialDelay:
+          description: When Modbus module start, activate the serial master after initial delay time (ms).
+          type: integer
+          minimum: 0
+          maximum: 30000
+          default: 0
+        retryCount:
+          description: Modbus retry count. When Modbus command does not get response, resend the command by define times.
+          type: integer
+          minimum: 0
+          maximum: 5
+          default: 3
+        responseTout:
+          description: Modbus response timeout. Modbus master wait the request command time for response (ms).
+          type: integer
+          minimum: 10
+          maximum: 120000
+          default: 1000
+        frameInterval:
+          description: Modbus frame interval (t3.5), 0 is used by auto baud rate setting (ms).
+          type: integer
+          oneOf:
+            - minimum: 0
+              maximum: 0
+            - minimum: 10
+              maximum: 500
+          default: 0
+        charInterval:
+          description: Modbus char interval (t1.5), 0 is used by auto baud rate setting (ms).
+          type: integer
+          oneOf:
+            - minimum: 0
+              maximum: 0
+            - minimum: 10
+              maximum: 500
+          default: 0
+        remoteDevs:
+          $ref: '#/components/schemas/remoteDevsForSer'
+
+    masterTcpIfaces:
+      type: array
+      items:
+        $ref: '#/components/schemas/masterTcpIface'
+
+    masterTcpIface:
+      description: Maximum count of masterTcpIfaces depends on the environment file.
+      type: object
+      required:
+      - tcpMasterId
+      properties:
+        masterTcpIfaceId:
+          description: master TCP interface ID.
+          type: integer
+        tcpMasterId:
+          description: Used as foreign key for master TCP table.
+          type: integer
+        initialDelay:
+          description: When Modbus module start, activate the TCP master after initial delay time (ms).
+          type: integer
+          minimum: 0
+          maximum: 30000
+          default: 0
+        retryCount:
+          description: Modbus retry count. When Modbus command does not get response, resend the command by define times.
+          type: integer
+          minimum: 0
+          maximum: 5
+          default: 3
+        responseTout:
+          description: Modbus response timeout. Modbus master wait the request command time for response (ms).
+          type: integer
+          minimum: 10
+          maximum: 120000
+          default: 1000
+        remoteDevs:
+          $ref: '#/components/schemas/remoteDevsForTcp'
+
+
+    remoteDevsForSer:
+      type: array
+      items:
+         $ref: '#/components/schemas/remoteDevForSer'
+
+    remoteDevForSer:
+      type: object
+      required:
+      - masterSerIfaceId
+      properties:
+        remoteDevId:
+          description: Unique remote device ID.
+          type: integer
+        masterSerIfaceId:
+          description: Master serial interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+          type: integer
+        name:
+          description: Device name. "name" should be unique.
+          type: string
+          default: "device"
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        enable:
+          description: Enable all of this device's polling command.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        slaveId:
+          description: Slave ID of remote device. "slaveId" should be unique in a masterSerIface. "slaveId + slaveIpaddr + slaveTcpPort" should be unique in a masterTcpIface.
+          type: integer
+          minimum: 0
+          maximum: 255
+          default: 1
+        slaveIpaddr:
+          description: Slave IP address of remote device.
+          type: string
+          default: "0.0.0.0"
+        slaveTcpPort:
+          description: Slave IP port of remote device.
+          type: integer
+          minimum: 1
+          maximum: 65535
+          default: 502
+        mcmds:
+          $ref: '#/components/schemas/mcmds'
+
+    remoteDevsForTcp:
+      type: array
+      items:
+         $ref: '#/components/schemas/remoteDevForTcp'
+
+    remoteDevForTcp:
+      type: object
+      required:
+      - masterTcpIfaceId
+      properties:
+        remoteDevId:
+          description: Unique remote device ID.
+          type: integer
+        masterTcpIfaceId:
+          description: Master TCP interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+          type: integer
+        name:
+          description: Device name. "name" should be unique.
+          type: string
+          default: "device"
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        enable:
+          description: Enable all of this device's polling command.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        slaveId:
+          description: Slave ID of remote device. "slaveId" should be unique in a masterSerIface. "slaveId + slaveIpaddr + slaveTcpPort" should be unique in a masterTcpIface.
+          type: integer
+          minimum: 0
+          maximum: 255
+          default: 1
+        slaveIpaddr:
+          description: Slave IP address of remote device.
+          type: string
+          default: "0.0.0.0"
+        slaveTcpPort:
+          description: Slave IP port of remote device.
+          type: integer
+          minimum: 1
+          maximum: 65535
+          default: 502
+        mcmds:
+          $ref: '#/components/schemas/mcmds'
+
+    remoteDevs:
+      type: array
+      items:
+         $ref: '#/components/schemas/remoteDev'
+
+    remoteDev:
+      description: Maximum count of serial remoteDevs is 31. Maximum count of TCP remoteDevs is 32.
+      type: object
+      required:
+      - masterSerIfaceId
+      - masterTcpIfaceId
+      properties:
+        remoteDevId:
+          description: Unique remote device ID.
+          type: integer
+        masterSerIfaceId:
+          description: Master serial interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+          type: integer
+        masterTcpIfaceId:
+          description: Master TCP interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+          type: integer
+        name:
+          description: Device name. "name" should be unique.
+          type: string
+          default: "device"
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        enable:
+          description: Enable all of this device's polling command.
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        slaveId:
+          description: Slave ID of remote device. "slaveId" should be unique in a masterSerIface. "slaveId + slaveIpaddr + slaveTcpPort" should be unique in a masterTcpIface.
+          type: integer
+          minimum: 0
+          maximum: 255
+          default: 1
+        slaveIpaddr:
+          description: Slave IP address of remote device.
+          type: string
+          default: "0.0.0.0"
+        slaveTcpPort:
+          description: Slave IP port of remote device.
+          type: integer
+          minimum: 1
+          maximum: 65535
+          default: 502
+        mcmds:
+          $ref: '#/components/schemas/mcmds'
+      example:
+        remoteDevId: 1
+        masterSerIfaceId: 1
+        name: "dev1"
+        enable: 1
+        slaveId: 1
+        slaveIpaddr: "192.168.127.254"
+        slaveTcpPort: 502
+        mcmds:
+          mcmdId: 1
+          remoteDevId: 2
+          name: "read_command_1"
+          mode: 1
+          func: 3
+          readAddress: 0
+          readQuantity: 10
+          writeAddress: 0
+          writeQuantity: 1
+          pollInterval: 100
+          swap: 0
+          fpFunc: 0
+          fpTout: 60000
+          fpData: "00 00"
+          scalingFunc: 0
+          interceptSlope: 1
+          interceptOffset: 0
+          pointSourceMin: 0
+          pointSourceMax: 1
+          pointTargetMin: 0
+          pointTargetMax: 1
+          dataType: "raw"
+          tags:
+            tagId: 1
+            szoneId: 1
+            mcmdId: 1
+            name: "read_command_tag1"
+            dataType: "raw"
+            dataUnit: "%"
+            access: "r"
+            dataSize: 20
+            offset: 0
+    mcmds:
+      type: array
+      items:
+        $ref: '#/components/schemas/mcmd'
+    mcmdsAutoCreateTag:
+      type: array
+      items:
+        $ref: '#/components/schemas/mcmdAutoCreateTag'
+
+    mcmd:
+      description: Maximum count of mcmds is 2048. Maximum count of mcmds in a serial port is 128. Maximum count of mcmds in a TCP port is 2048.
+      type: object
+      required:
+      - remoteDevId
+      properties:
+        mcmdId:
+          description: Unique Modbus command name.
+          type: integer
+        remoteDevId:
+          description: |
+            Used as foreign key for mcmd table.
+          type: integer
+        name:
+          description: Modbus command name. "name" should be unique in a remoteDev.
+          type: string
+          default: command
+          minLength: 1
+          maxLength: 120
+          pattern: '^[\w\-.~]{1,120}$'
+        enable:
+          description: Enable this polling command (disable, enable).
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - disable
+            - enable
+          default: 1
+        mode:
+          description: Modbus command mode (cyclic, data change).
+          type: integer
+          enum:
+            - 0
+            - 1
+          x-enum-varnames:
+            - cyclic
+            - data change
+          default: 0
+        func:
+          description: Function code
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+            - 15
+            - 16
+            - 23
+          x-enum-varnames:
+            - read coils
+            - read discrete inputs
+            - read holding registers
+            - read input registers
+            - write single coil
+            - write single register
+            - write multiple coils
+            - write multiple registers
+            - read/write multiple registers
+          default: 3
+        readAddress:
+          description: Reading address.
+          type: integer
+          minimum: 0
+          maximum: 65535
+          default: 0
+        readQuantity:
+          description: Reading length (different maximum value depends on func. func 01, 02 - max 2000; func 03, 04, 23 - max 125).
+          type: integer
+          minimum: 1
+          maximum: 2000
+          default: 10
+        writeAddress:
+          description: Writing address.
+          type: integer
+          minimum: 0
+          maximum: 65535
+          default: 0
+        writeQuantity:
+          description: Writing length (different maximum value depends on func. func 05, 06 - max 1; func 15 - max 1968; func 16 - max 123; func 23 - max 121).
+          type: integer
+          minimum: 1
+          maximum: 1968
+          default: 1
+        pollInterval:
+          description: The polling interval for this Modbus command (ms).
+          type: integer
+          minimum: 100
+          maximum: 86400000
+          default: 1000
+        swap:
+          description: The swap mode for this Modbus command(none, byte, word, byte word).
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+          x-enum-varnames:
+            - none
+            - byte
+            - word
+            - byte word
+          default: 0
+        fpFunc:
+          description: Fault protection func (keep original data, all clear to zero, user define).
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 3
+          x-enum-varnames:
+            - Pause(Data Change) / Proceed - Keep Latest Data(Cyclic)
+            - Proceed - Clear data to zero
+            - Proceed - Set to User-Defined Value
+          default: 0
+        fpTout:
+          description: Fault protection timeout. After fault protection timeout, Modbus command data not update from other data will trigger fault protection function (s).
+          type: integer
+          minimum: 1
+          maximum: 86400
+          default: 3600
+        fpData:
+          description: User defined data for fault protection when fpFunc = 3. Data should be described as raw HEX, e.g. "1A 2B"
+          type: string
+          default: "00 00"
+        stFunc:
+          description: Status term function (Keep last data/set to zero/user defined).
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+          x-enum-varnames:
+            - Pause
+            - clear all data bit to 0
+            - set to user defined
+          default: 0
+        stData:
+          description: User defined data for status term when stFunc = 2. Data should be described as raw HEX, e.g. "1A 2B"
+          type: string
+          default: "00 00"
+        scalingFunc:
+          description: Modbus scaling function, (disable, intercept, point).
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+          x-enum-varnames:
+            - disable
+            - intercept
+            - point
+          default: 0
+        interceptSlope:
+          description: Slope for intercept of Modbus scaling function.
+          type: number
+          default: 1
+        interceptOffset:
+          description: Offset for intercept of Modbus scaling function.
+          type: number
+          default: 0
+        pointSourceMin:
+          description: Source minimum value for point of Modbus scaling function.
+          type: number
+          default: 0
+        pointSourceMax:
+          description: Source maximum value for point of Modbus scaling function.
+          type: number
+          default: 1
+        pointTargetMin:
+          description: Target minimum value for point of Modbus scaling function.
+          type: number
+          default: 0
+        pointTargetMax:
+          description: Target maximum value for point of Modbus scaling function.
+          type: number
+          default: 1
+        tags:
+          $ref: '#/components/schemas/tagsForMcmds'
+
+      example:
+        mcmdId: 1
+        remoteDevId: 2
+        name: "read_command_1"
+        mode: 1
+        func: 3
+        readAddress: 0
+        readQuantity: 10
+        writeAddress: 0
+        writeQuantity: 1
+        pollInterval: 100
+        swap: 0
+        fpFunc: 0
+        fpTout: 60000
+        fpData: "00 00"
+        stFunc: 0
+        stData: "00 00"
+        scalingFunc: 0
+        interceptSlope: 1
+        interceptOffset: 0
+        pointSourceMin: 0
+        pointSourceMax: 1
+        pointTargetMin: 0
+        pointTargetMax: 1
+        tags:
+          tagId: 1
+          szoneId: 1
+          mcmdId: 1
+          name: "read_command_tag1"
+          dataType: "raw"
+          dataUnit: "%"
+          access: "r"
+          dataSize: 20
+          offset: 0
+
+    mcmdAutoCreateTag:
+      allOf:
+        - $ref: '#/components/schemas/mcmd'
+        - type: object
+          properties:
+            dataType:
+              description: Data type of tag. Only require for "?autoCreate=tags".
+              type: string
+              enum:
+              - boolean
+              - int8
+              - int16
+              - int32
+              - int64
+              - uint8
+              - uint16
+              - uint32
+              - uint64
+              - float
+              - double
+              - string
+              - bytearray
+              - raw
+
+    tagsForMcmds:
+      type: array
+      items:
+        $ref: '#/components/schemas/tagForMcmds'
+
+    tagForMcmds:
+      type: object
+      required:
+      - mcmdId
+      properties:
+        tagId:
+          description: Unique tag ID.
+          type: integer
+        mcmdId:
+          description: |
+            Used as foreign key for tags table.
+            Set either mcmdId or szoneId.
+          type: integer
+        name:
+          description: |
+              Tag name for tag mapping used. "name" should be unique in a remoteDev.
+              Tag name should not be 'status'.
+          type: string
+          default: tag
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        dataType:
+          description: Data type of tag.
+          type: string
+          enum:
+          - boolean
+          - int8
+          - int16
+          - int32
+          - int64
+          - uint8
+          - uint16
+          - uint32
+          - uint64
+          - float
+          - double
+          - string
+          - bytearray
+          - raw
+          default: raw
+  
+        dataUnit:
+          description: Real unit description of tag (e.g. ms, s, A, mA, ...).
+          type: string
+        access:
+          description: Tag access for publish or subscribe.
+          type: string
+          enum:
+            - r
+            - w
+            - rw
+          default: rw
+        dataSize:
+          description: |
+            Data size for data type (string, bytearray, raw).
+            dataSize must exist in payload if data type is string/bytearray/raw.
+            dataSize must not exist in payload if data type is not string/bytearray/raw.
+          type: integer
+          minimum: 1
+        offset:
+          description: Tag's start byte offset in Modbus command.
+          type: integer
+          default: 0
+
+
+    tags:
+      type: array
+      items:
+        $ref: '#/components/schemas/tag'
+
+    tag:
+      description: Maximum count of tags is 2048.
+      type: object
+      required:
+      - mcmdId
+      - szoneId
+      properties:
+        tagId:
+          description: Unique tag ID.
+          type: integer
+        mcmdId:
+          description: |
+            Used as foreign key for tags table.
+            Set either mcmdId or szoneId.
+          type: integer
+        szoneId:
+          description: |
+            Used as foreign key for tags table.
+            Set either mcmdId or szoneId.
+          type: integer
+        name:
+          description: |
+              Tag name for tag mapping used. "name" should be unique in a remoteDev.
+              Tag name should not be 'status'.
+          type: string
+          default: tag
+          minLength: 1
+          maxLength: 128
+          pattern: '^[\w\-.~]{1,128}$'
+        dataType:
+          description: Data type of tag.
+          type: string
+          enum:
+          - boolean
+          - int8
+          - int16
+          - int32
+          - int64
+          - uint8
+          - uint16
+          - uint32
+          - uint64
+          - float
+          - double
+          - string
+          - bytearray
+          - raw
+          default: raw
+  
+        dataUnit:
+          description: Real unit description of tag (e.g. ms, s, A, mA, ...).
+          type: string
+        access:
+          description: Tag access for publish or subscribe.
+          type: string
+          enum:
+            - r
+            - w
+            - rw
+          default: rw
+        dataSize:
+          description: |
+            Data size for data type (string, bytearray, raw).
+            dataSize must exist in payload if data type is string/bytearray/raw.
+            dataSize must not exist in payload if data type is not string/bytearray/raw.
+          type: integer
+          minimum: 1
+        offset:
+          description: Tag's start byte offset in Modbus command.
+          type: integer
+          default: 0
+      example:
+        tagId: 1
+        szoneId: 1
+        mcmdId: 1
+        name: "read_command_tag1"
+        dataType: "raw"
+        dataUnit: "%"
+        access: "rw"
+        dataSize: 20
+        offset: 0
+
+    log_level_str:
+      type: string
+      description: system log level.
+      enum:
+        - ALL
+        - TRACE
+        - DEBUG
+        - INFO
+        - WARN
+        - ERROR
+        - FATAL
+        - OFF
+
+
+    protocolStatus:
+      description: protocol status.
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            status:
+              description: |
+                * 1 - OK # All master devices or slave device status are good
+                * 0 - Warning(Master Only) # One or more devices status are failed. [device status failed definition] TCP: 1. connection disconnect, 2. all commands exception, 3. all commands timeout; Serial: 1. all commands exception, 2. any one command timeout
+              type: integer
+              enum:
+                - 0
+                - 1
+
+    trafficRole:
+      type: string
+      enum:
+        - Master
+        - Slave
+
+    trafficPacketType:
+      type: string
+      enum:
+        - Request
+        - Response
+
+    trafficData:
+      description: Data of log with hex.
+      type: string
+      example: 'ff030000000601030000000a'
+
+    trafficTime:
+      type: string
+      example: '2020-01-01T12:30:10.00000+00:00'
+
+    trafficStatus:
+      type: string
+      enum:
+        - READ
+        - WRITE
+
+    tcpTrafficLog:
+      description: Modbus traffic log.
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/trafficLogDataTcp'
+
+    trafficLogDataTcp:
+      description: Modbus traffic log data for tcp.
+      type: object
+      properties:
+        tcp:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                $ref: '#/components/schemas/trafficRole'
+              packetType:
+                $ref: '#/components/schemas/trafficPacketType'
+              ip:
+                description: Remote ip and port.
+                type: string
+                example: '127.0.0.1:502'
+              slaveId:
+                type: integer
+                example: 1
+              functionCode:
+                type: integer
+                example: 3
+              data:
+                $ref: '#/components/schemas/trafficData'
+              time:
+                $ref: '#/components/schemas/trafficTime'
+              status:
+                $ref: '#/components/schemas/trafficStatus'
+        tcpCount:
+          description: Size of the array tcp.
+          type: integer
+
+    serTrafficLog:
+      description: Modbus traffic log.
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/trafficLogDataSer'
+          
+    trafficLogDataSer:
+      description: Modbus traffic log data for serial.
+      type: object
+      properties:
+        tcp:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                $ref: '#/components/schemas/trafficRole'
+              packetType:
+                $ref: '#/components/schemas/trafficPacketType'
+              serialPort:
+                description: Serial port.
+                type: integer
+                example: 0
+              slaveId:
+                type: integer
+                example: 1
+              functionCode:
+                type: integer
+                example: 3
+              data:
+                $ref: '#/components/schemas/trafficData'
+              time:
+                $ref: '#/components/schemas/trafficTime'
+              status:
+                $ref: '#/components/schemas/trafficStatus'
+        tcpCount:
+          description: Size of the array tcp.
+          type: integer
+    trafficAction:
+      description: The action to start or stop traffic log.
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - start
+            - stop
+
+    masterOverview:
+      description: Modbus master overview including TCP and serial.
+      type: object
+      properties:
+        version:
+          description: Modbus master module version.
+          type: string
+        enableDevFailEvent:
+          description: Enable for sending event of device level failed (disable, enable).
+          type: integer
+          minimum: 0
+          maximum: 1
+        enableCmdFailEvent:
+          description: Enable for sending event of command level failed (disable, enable).
+          type: integer
+          minimum: 0
+          maximum: 1
+        tcp:
+          $ref: '#/components/schemas/tcpMasterOverview'
+        serial:
+          $ref: '#/components/schemas/serMasterOverview'
+
+    tcpMasterOverview:
+      description: Modbus TCP master overview.
+      type: object
+      properties:
+        enable:
+          description: Enable for Modbus master TCP (disable, enable).
+          type: integer
+          minimum: 0
+          maximum: 1
+        masterTcpIfaces:
+          $ref: '#/components/schemas/masterTcpIfaceOverviews'
+
+    masterTcpIfaceOverviews:
+      type: array
+      items:
+        $ref: '#/components/schemas/masterTcpIfaceOverview'
+
+    masterTcpIfaceOverview:
+      description: Modbus master TCP overview.
+      type: object
+      properties:
+        masterTcpIfaceId:
+          description: Used as foreign key for masterTcpIface table.
+          type: integer
+        devCount:
+          description: Total amount of master TCP devices.
+          type: integer
+        cmdCount:
+          description: Total amount of master TCP devices' commands.
+          type: integer
+        enableDevCount:
+          description: Total amount of enabled master TCP devices. Only support in AIG Series.
+          type: integer
+
+    serMasterOverview:
+      description: Modbus serial master overview
+      type: object
+      properties:
+        enable:
+          description: Enable for Modbus serial master(disable, enable).
+          type: integer
+          minimum: 0
+          maximum: 1
+        masterTcpIfaces:
+          $ref: '#/components/schemas/masterSerIfacesOverviews'
+
+    masterSerIfacesOverviews:
+      type: array
+      items:
+        $ref: '#/components/schemas/masterSerIfacesOverview'
+
+    masterSerIfacesOverview:
+      description: Modbus master ports overview.
+      type: object
+      properties:
+        masterSerIfaceId:
+          description: Used as foreign key for masterSerIface table.
+          type: integer
+        portName:
+          description: Port name.
+          type: string
+        portNumber:
+          description: Port number. Only support in AIG Series
+          type: integer
+        format:
+          description: Modbus device's format (RTU, ASCII).
+          type: integer
+          minimum: 0
+          maximum: 1
+        devCount:
+          description: Total amount of master port devices.
+          type: integer
+        cmdCount:
+          description: Total amount of master port devices' commands.
+          type: integer
+        enableDevCount:
+          description: Total amount of enabled master serial port devices. Only support in AIG series.
+          type: integer 
+
+    platformTaglist:
+      description: Modbus tag list for platform.
+      type: array
+      items:
+        $ref: '#/components/schemas/platformTag'
+
+    platformTag:
+      description: Modbus tag information for platform.
+      type: object
+      properties:
+        prvdName:
+          description: provider name for full tag name used.
+          type: string
+        srcName:
+          description: source name for full tag name used.
+          type: string
+        tagName:
+          description: Tag name for full tag name used.
+          type: string
+        dataType:
+          description: Data type of tag.
+          type: string
+          enum:
+          - boolean
+          - int8
+          - int16
+          - int32
+          - int64
+          - uint8
+          - uint16
+          - uint32
+          - uint64
+          - float
+          - double
+          - string
+          - bytearray
+          - raw
+        access:
+          description: Tag access for publish or subscribe.
+          type: string
+          enum:
+            - r
+            - w
+            - rw
+        dataSize:
+          description: Data size of tag type (raw, string, bytearray)(bytes).
+          type: integer
+        dataUnit:
+          description: Real unit description of tag (Ex ms, s, A, mA, etc...).
+          type: string
+      example:
+        prvdName: "modbus_tcp_master"
+        srcName: "moxa_device"
+        tagName: "voltage"
+        dataType: "int32"
+        access: "w"
+        dataUnit: "%"
+
+    tcpConnStatus:
+      description: Modbus tcp connection status. In AIG series, each connetion status object is displayed data of ip:port and slave id
+      type: object
+      properties:
+        status:
+          description: Status of this connection.
+          type: string
+          enum:
+            - OK
+            - Invalid_request
+            - Invalid_response
+            - Exception_response
+            - Request_timeout
+            - Drop command
+            - Disconnecting
+        remoteIpPort:
+          description: Remote ip and port (Ex 127.0.0.1:502).
+          type: string
+        slaveId:
+          description: Slave id (1-255), only for modbus tcp master in series AIG
+          type: integer
+        sentReqs:
+          description: Number of requests send to this connection.
+          type: integer
+        recvValidResps:
+          description: Number of valid responses receive from this connection.
+          type: integer
+        recvInvalidResps:
+          description: Number of invalid responses receive from this connection.
+          type: integer
+        recvExceptions:
+          description: Number of exceptions occurred from this connection.
+          type: integer
+        timeout:
+          description: Number of timeout occurred from this connection.
+          type: integer
+
+    tcpStatus:
+      description: A tcp port status.
+      type: object
+      properties:
+        modbus_tcp:
+          type: array
+          items:
+            type: object
+            properties:
+              mode:
+                description: Modbus tcp mode.
+                type: string
+                enum:
+                  - Slave
+                  - Master
+              numConns:
+                description: Total number of connections in this port.
+                type: integer
+              sentReqs:
+                description: Total number of requests have been sent from this port.
+                type: integer
+              recvValidResps:
+                description: Total number of valid responses received from this port.
+                type: integer
+              recvInvalidResps:
+                description: Total number of invalid responses received from this port.
+                type: integer
+              recvExceptions:
+                description: Total number of exceptions occurred from this port.
+                type: integer
+              timeout:
+                description: Total number of timeout occurred from this port.
+                type: integer
+              conns:
+                description: Status of each tcp connection.
+                type: array
+                items:
+                  $ref: '#/components/schemas/tcpConnStatus'
+
+    serPortStatus:
+      description: Modbus serial port status.
+      type: object
+      properties:
+        portNumber:
+          description: Index of this serial port.
+          type: integer
+        break:
+          description: Number of break received from this serial port.
+          type: integer
+        frameError:
+          description: Number of frame error occurred from this serial port.
+          type: integer
+        parityError:
+          description: Number of parity error occurred from this serial port.
+          type: integer
+        overrunError:
+          description: Number of overrun error occurred from this serial port.
+          type: integer
+        mode:
+          description: mode of serial port.
+          type: string
+          enum:
+            - RTU
+            - ASCII
+        sentReqs:
+          description: Number of requests have been sent from this serial port.
+          type: integer
+        recvValidResps:
+          description: Number of valid responses received from this serial port.
+          type: integer
+        recvInvalidResps:
+          description: Number of invalid responses received from this serial port.
+          type: integer
+        recvCrcLrcErrors:
+          description: Number of crc/lrc error response received from this serial port.
+          type: integer
+        recvExceptions:
+          description: Number of exceptions occurred from this serial port.
+          type: integer
+        timeout:
+          description: Number of timeout occurred from this serial port.
+          type: integer
+
+    serStatus:
+      description: A serial port status.
+      type: object
+      properties:
+        modbus_serial:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                description: Modbus role.
+                type: string
+                enum:
+                  - Master
+                  - Slave
+              sentReqs:
+                description: Total number of requests have been sent from serial ports.
+                type: integer
+              recvValidResps:
+                description: Total number of valid responses received from serial ports.
+                type: integer
+              recvInvalidResps:
+                description: Total number of invalid responses received from serial ports.
+                type: integer
+              recvCrcLrcErrors:
+                description: Total number of crc/lrc error response received from this serial port.
+                type: integer
+              recvExceptions:
+                description: Total number of exceptions occurred from serial ports.
+                type: integer
+              timeout:
+                description: Total number of timeout occurred from serial ports.
+                type: integer
+              Ports:
+                description: Status of each serial port.
+                type: array
+                items:
+                  $ref: '#/components/schemas/serPortStatus'
+
+
+    error:
+      required:
+        - message
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+
+  responses:
+    Success:
+      description: Success.
+    Unauthorized:
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            Unauthorized:
+              value:
+                error:
+                  code: 401
+                  message: authentication required
+
+    UnexpectedError:
+      description: Error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+
+    ImportUnexpectedError:
+      description: Import file error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            Column error:
+              value:
+                error:
+                  message: Column error in [tableName]
+            Data error:
+              value:
+                error:
+                  message: Data error at line [lineIndex]. [subErrorMsg]
+            Fail to find key:
+              value:
+                error:
+                  message: Fail to find [key]
+            Fail to parse:
+              value:
+                error:
+                  message: Fail to parse line [lineIndex]
+            Version error:
+              value:
+                error:
+                  message: Version error
+            Invalid table:
+              value:
+                error:
+                  message: Invalid table [tableName]
+
+    ImportMasterResponse:
+      description: Import file successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    configId:
+                      description: Unique ID for adding Modbus role used.
+                      type: integer
+                    masterParams:
+                      $ref: '#/components/schemas/masterParams'
+                    tcpMasters:
+                      $ref: '#/components/schemas/tcpMasters'
+                    serMasters:
+                      $ref: '#/components/schemas/serMasters'
+              count:
+                type: integer
+
+
+    ImportMcmdResponse:
+      description: Import file successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/mcmds'
+              count:
+                type: integer
+
+
+paths:
+
+  /modbusmaster/config/master-params:
+    get:
+      summary: Get general parameters of masters
+      tags:
+      - Master Parameters
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterParams'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+    put:
+      summary: Modify all general parameters of masters
+      description: The configuration which does not belong to the request would be the default value.
+      tags:
+      - Master Parameters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/masterParams'
+            examples:
+              modbus_put_enable_ser_masters:
+                value:
+                  enableSerMasters: 1
+              modbus_put_enable_tcp_masters:
+                value:
+                  enableTcpMasters: 1
+              modbus_put_enable_device_failed_event:
+                value:
+                  enableDevFailEvent: 1
+              modbus_put_enable_command_failed_event:
+                value:
+                  enableCmdFailEvent: 1
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterParams'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+    patch:
+      summary: Modify some general parameters of masters
+      description: The configuration which does not belong to the request would not be changed.
+      tags:
+      - Master Parameters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/masterParams'
+            examples:
+              modbus_patch_enable_ser_masters:
+                value:
+                  enableSerMasters: 1
+              modbus_patch_enable_tcp_masters:
+                value:
+                  enableTcpMasters: 1
+              modbus_patch_enable_device_failed_event:
+                value:
+                  enableDevFailEvent: 1
+              modbus_patch_enable_command_failed_event:
+                value:
+                  enableCmdFailEvent: 1
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterParams'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/master-tcp-ifaces:
+    get:
+      summary: Get all of master TCPs' configurations
+      tags:
+      - Master TCP Interfaces
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterTcpIfaces'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/master-tcp-ifaces/{masterTcpIfaceId}:
+    get:
+      summary: Get specific master TCP's configuration
+      tags:
+      - Master TCP Interfaces
+      parameters:
+        - name: "masterTcpIfaceId"
+          in : "path"
+          description: ID of TCP.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterTcpIface'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      summary: Modify all of master TCP configuration
+      description: The configuration which does not belong to the request would be the default value.
+      tags:
+      - Master TCP Interfaces
+      parameters:
+        - name: masterTcpIfaceId
+          in: "path"
+          description: ID of TCP.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/masterTcpIfaces'
+            examples:
+              modbus_tcp_master_put_master_tcp:
+                value:
+                  tcpMasterId: 1
+                  initialDelay: 0
+                  retryCount: 3
+                  responseTout: 1000
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterTcpIface'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    patch:
+      summary: Modify some of specific master TCP configuration
+      description: The configuration which does not belong to the request would not be changed.
+      tags:
+      - Master TCP Interfaces
+      parameters:
+        - name: masterTcpIfaceId
+          in: "path"
+          description: ID of TCP.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/masterTcpIfaces'
+            examples:
+              modbus_tcp_master_patch_master_tcp:
+                value:
+                  tcpMasterId: 1
+                  initialDelay: 0
+                  retryCount: 3
+                  responseTout: 1000
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterTcpIface'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/master-ser-ifaces:
+    get:
+      summary: Get all of master ports' configurations
+      tags:
+      - Master Serial Interfaces
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterSerIfaces'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/master-ser-ifaces/{masterSerIfaceId}:
+    get:
+      summary: Get specific master port's configuration
+      tags:
+      - Master Serial Interfaces
+      parameters:
+        - name: "masterSerIfaceId"
+          in : "path"
+          description: ID of port.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterSerIface'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      summary: Modify all of master port configuration
+      description: The configuration which does not belong to the request would be the default value.
+      tags:
+      - Master Serial Interfaces
+      parameters:
+        - name: masterSerIfaceId
+          in: "path"
+          description: ID of port.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/masterSerIfaces'
+            examples:
+              modbus_serial_master_put_master_port0:
+                value:
+                  serMasterId: 1
+                  portValue: 0
+                  format: 0
+                  initialDelay: 0
+                  retryCount: 3
+                  responseTout: 1000
+                  frameInterval: 0
+                  charInterval: 0
+              modbus_serial_master_put_master_port1_ASCII:
+                value:
+                  serMasterId: 1
+                  portValue: 1
+                  format: 1
+                  initialDelay: 0
+                  retryCount: 3
+                  responseTout: 1000
+                  frameInterval: 0
+                  charInterval: 0
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterSerIface'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    patch:
+      summary: Modify some of specific master port configuration
+      description: The configuration which does not belong to the request would not be changed.
+      tags:
+      - Master Serial Interfaces
+      parameters:
+        - name: masterSerIfaceId
+          in: "path"
+          description: ID of port.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/masterSerIfaces'
+            examples:
+              modbus_serial_master_patch_master_port0:
+                value:
+                  serMasterId: 1
+                  portValue: 0
+                  format: 0
+                  initialDelay: 0
+                  retryCount: 3
+                  responseTout: 1000
+                  frameInterval: 0
+                  charInterval: 0
+              modbus_serial_master_patch_master_port1_ASCII:
+                value:
+                  serMasterId: 1
+                  portValue: 1
+                  format: 1
+                  initialDelay: 0
+                  retryCount: 3
+                  responseTout: 1000
+                  frameInterval: 0
+                  charInterval: 0
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/masterSerIface'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/remote-devs:
+    get:
+      summary: Get all of remote devices' configurations
+      tags:
+      - Remote Devices
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/remoteDevs'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    post:
+      summary: Add remote device(s) configuration
+      tags:
+        - Remote Devices
+      parameters:
+        - in: query
+          name: autoCreate
+          description: /remote-devs?autoCreate=tags would create tags automatically. dataType must be added in payload of mcmds.
+          schema:
+            type: string
+            enum: [tags]
+      requestBody:
+        description:  remote device data.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/remoteDev'
+                - $ref: '#/components/schemas/remoteDevs'
+            examples:
+              modbus_serial_master_post_remote_device:
+                value:
+                  masterSerIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveId: 1
+              modbus_tcp_master_post_remote_device:
+                value:
+                  masterTcpIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveIpaddr: "0.0.0.0"
+                  slaveTcpPort: 502
+              modbus_tcp_master_post_remote_devices:
+                value:
+                  - masterTcpIfaceId: 1
+                    name: "dev1"
+                    enable: 1
+                    slaveIpaddr: "0.0.0.0"
+                    slaveTcpPort: 502
+                  - masterTcpIfaceId: 1
+                    name: "dev2"
+                    enable: 1
+                    slaveIpaddr: "0.0.0.1"
+                    slaveTcpPort: 503
+              modbus_tcp_master_post_remote_device_with_auto_create_tags:
+                value:
+                  masterTcpIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveIpaddr: "0.0.0.0"
+                  slaveTcpPort: 502
+                  mcmds: [{"name":"mcmd1","dataType":"raw","func":3, "readQuantity":10},{"name":"mcmd2","dataType":"raw", "func":3, "readQuantity":10}]
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mcmdsFile:
+                  description: Master command csv file.
+                  type: string
+                masterSerIfaceId:
+                  description: Master serial interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+                  type: string
+                masterTcpIfaceId:
+                  description: Master TCP interface ID. Either "masterSerIfaceId" or "masterTcpIfaceId" should be set.
+                  type: string
+                name:
+                  description: Device name. "name" should be unique.
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  pattern: '^[\w\-.~]{1,128}$'
+                enable:
+                  description: Enable all of this device's polling command.
+                  type: string
+                slaveId:
+                  description: Slave ID of remote device. "slaveId" should be unique in a masterSerIface. "slaveId + slaveIpaddr + slaveTcpPort" should be unique in a masterTcpIface.
+                  type: integer
+                slaveIpaddr:
+                  description: Slave IP address of remote device.
+                  type: string
+                slaveTcpPort:
+                  description: Slave IP port of remote device.
+                  type: string
+            encoding:
+              mcmdsFile:
+                  contentType: csv
+      responses:
+        201:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/remoteDev'
+                - $ref: '#/components/schemas/remoteDevs'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    delete:
+      summary: Delete all remote devices configuration
+      tags:
+      - Remote Devices
+      responses:
+        204:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/remote-devs/{remoteDevId}:
+    get:
+      summary: Get specific remote device's configuration
+      tags:
+      - Remote Devices
+      parameters:
+        - name: "remoteDevId"
+          in : "path"
+          description: ID of remoteDev.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/remoteDev'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    delete:
+      summary: Delete specific remote device's configuration
+      tags:
+      - Remote Devices
+      parameters:
+        - name: remoteDevId
+          in : "path"
+          description: ID of remoteDev.
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      summary: Modify all of remote device configuration
+      description: The configuration which does not belong to the request would be the default value.
+      tags:
+      - Remote Devices
+      parameters:
+        - name: remoteDevId
+          in: "path"
+          description: ID of remoteDev.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/remoteDev'
+            examples:
+              modbus_serial_master_put_remote_device:
+                value:
+                  masterSerIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveId: 1
+              modbus_tcp_master_put_remote_device:
+                value:
+                  masterTcpIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveIpaddr: "0.0.0.0"
+                  slaveTcpPort: 502
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/remoteDev'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+    patch:
+      summary: Modify some of specific remote device configuration
+      description: The configuration which does not belong to the request would not be changed.
+      tags:
+      - Remote Devices
+      parameters:
+        - name: remoteDevId
+          in: "path"
+          description: ID of remoteDev.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/remoteDev'
+            examples:
+              modbus_serial_master_patch_remote_device:
+                value:
+                  masterSerIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveId: 1
+              modbus_tcp_master_patch_remote_device:
+                value:
+                  masterTcpIfaceId: 1
+                  name: "dev1"
+                  enable: 1
+                  slaveIpaddr: "0.0.0.0"
+                  slaveTcpPort: 502
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/remoteDev'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/mcmds:
+    get:
+      summary: Get all of master commands' configurations
+      tags:
+      - Master Commands
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mcmds'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    post:
+      summary: Add master command(s) configuration
+      tags:
+        - Master Commands
+      parameters:
+        - in: query
+          name: autoCreate
+          description: /mcmds?autoCreate=tags would create tags automatically. dataType must be added in payload.
+          schema:
+            type: string
+            enum: [tags]
+      requestBody:
+        description: Master command data.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/mcmd'
+                - $ref: '#/components/schemas/mcmds'
+                - $ref: '#/components/schemas/mcmdAutoCreateTag'
+                - $ref: '#/components/schemas/mcmdsAutoCreateTag'
+            examples:
+              modbus_master_post_read_coils_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 1
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_post_read_coils_command_with_status_term:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+                  stFunc: 1
+              modbus_master_post_read_coils_command_with_status_term_user_defined:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 2
+                  pollInterval: 1000
+                  swap: 0
+                  stFunc: 2
+                  stData: "00 00 00 00"
+              modbus_master_post_read_coils_commands:
+                value:
+                  - remoteDevId: 1
+                    name: "cmd1"
+                    mode: 0
+                    func: 1
+                    readAddress: 0
+                    readQuantity: 10
+                    pollInterval: 1000
+                    swap: 0
+                  - remoteDevId: 2
+                    name: "cmd2"
+                    mode: 1
+                    func: 1
+                    readAddress: 10
+                    readQuantity: 10
+                    pollInterval: 1000
+                    swap: 0
+              modbus_master_post_read_coils_command_with_auto_create_tags:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+                  dataType: "boolean"
+              modbus_master_post_read_coils_commands_with_auto_create_tags:
+                value:
+                  - remoteDevId: 1
+                    name: "cmd1"
+                    mode: 0
+                    func: 1
+                    readAddress: 0
+                    readQuantity: 10
+                    pollInterval: 1000
+                    swap: 0
+                    dataType: "boolean"
+                  - remoteDevId: 1
+                    name: "cmd2"
+                    mode: 1
+                    func: 1
+                    readAddress: 10
+                    readQuantity: 10
+                    pollInterval: 1000
+                    swap: 0
+                    dataType: "boolean"
+              modbus_master_post_read_discrete_inputs_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd2"
+                  mode: 0
+                  func: 2
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_post_read_holding_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd3"
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_post_read_input_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd4"
+                  mode: 0
+                  func: 4
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_post_write_single_coil_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd5"
+                  mode: 1
+                  func: 5
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+              modbus_master_post_write_single_register_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd6"
+                  mode: 1
+                  func: 6
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+              modbus_master_post_write_multiple_coils_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd15"
+                  mode: 1
+                  func: 15
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_post_write_multiple_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd16"
+                  mode: 1
+                  func: 16
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_post_read_write_multiple_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd23"
+                  mode: 1
+                  func: 23
+                  readAddress: 0
+                  readQuantity: 10
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_post_write_command_with_fault_protection:
+                value:
+                  remoteDevId: 1
+                  name: "cmd6"
+                  mode: 1
+                  func: 6
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+                  fpFunc: 1
+                  fpTout: 60000
+              modbus_master_post_write_command_with_fault_protection_user_defined:
+                value:
+                  remoteDevId: 1
+                  name: "cmd6"
+                  mode: 1
+                  func: 6
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+                  fpFunc: 3
+                  fpTout: 60000
+                  fpData: "00 00"
+              modbus_master_post_read_command_with_scaling:
+                value:
+                  remoteDevId: 1
+                  name: "cmd3"
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+                  scalingFunc: 1
+                  interceptSlope: 1
+                  interceptOffset: 0
+              modbus_master_post_read_command_with_single_tag:
+                value:
+                  remoteDevId: 1
+                  name: "read_command_single_tag"
+                  enable: 1
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 2
+                  tags:
+                    - name: "read_command_single_tag"
+                      dataType: "int32"
+                      access: "r"
+              modbus_master_post_read_command_with_multiple_tag:
+                value:
+                  remoteDevId: 1
+                  name: "read_command_multiple_tag"
+                  enable: 1
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 5
+                  tags:
+                    - name: "read_command_multiple_tag1"
+                      dataType: "int16"
+                      access: "r"
+                    - name: "read_command_multiple_tag2"
+                      dataType: "int16"
+                      access: "r"
+                    - name: "read_command_multiple_tag3"
+                      dataType: "int16"
+                      access: "r"
+                    - name: "read_command_multiple_tag4"
+                      dataType: "int16"
+                      access: "r"
+                    - name: "read_command_multiple_tag5"
+                      dataType: "int16"
+                      access: "r"
+      responses:
+        201:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/mcmd'
+                  - $ref: '#/components/schemas/mcmds'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    delete:
+      summary: Delete all master command configuration
+      tags:
+      - Master Commands
+      responses:
+        204:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/mcmds/{mcmdId}:
+    get:
+      summary: Get specific master command's configuration
+      tags:
+      - Master Commands
+      parameters:
+        - name: "mcmdId"
+          in : "path"
+          description: ID of mcmd.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mcmd'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    delete:
+      summary: Delete specific master command's configuration
+      tags:
+      - Master Commands
+      parameters:
+        - name: mcmdId
+          in : "path"
+          description: ID of mcmd.
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      summary: Modify all of master command configuration
+      description: The configuration which does not belong to the request would be the default value.
+      tags:
+      - Master Commands
+      parameters:
+        - name: mcmdId
+          in: "path"
+          description: ID of mcmd.
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: autoCreate
+          description: /mcmds?autoCreate=tags would create tags automatically. dataType must be added in payload.
+          schema:
+            type: string
+            enum: [tags]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/mcmd'
+                - $ref: '#/components/schemas/mcmdAutoCreateTag'
+            examples:
+              modbus_master_put_read_coils_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_put_read_coils_command_with_auto_create_tags:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+                  dataType: "boolean"
+              modbus_master_put_read_discrete_inputs_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd2"
+                  mode: 0
+                  func: 2
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_put_read_holding_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd3"
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_put_read_input_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd4"
+                  mode: 0
+                  func: 4
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_put_write_single_coil_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd5"
+                  mode: 1
+                  func: 5
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+              modbus_master_put_write_single_register_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd6"
+                  mode: 1
+                  func: 6
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+              modbus_master_put_write_multiple_coils_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd15"
+                  mode: 1
+                  func: 15
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_put_write_multiple_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd16"
+                  mode: 1
+                  func: 16
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_put_read_write_multiple_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd23"
+                  mode: 1
+                  func: 23
+                  readAddress: 0
+                  readQuantity: 10
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mcmd'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    patch:
+      summary: Modify some of specific master command configuration
+      description: The configuration which does not belong to the request would not be changed.
+      tags:
+      - Master Commands
+      parameters:
+        - name: mcmdId
+          in: "path"
+          description: ID of mcmd.
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: autoCreate
+          description: /mcmds?autoCreate=tags would create tags automatically. dataType must be added in payload.
+          schema:
+            type: string
+            enum: [tags]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/mcmd'
+                - $ref: '#/components/schemas/mcmdAutoCreateTag'
+            examples:
+              modbus_master_patch_read_coils_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_patch_read_coils_command_with_auto_create_tags:
+                value:
+                  remoteDevId: 1
+                  name: "cmd1"
+                  mode: 0
+                  func: 1
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+                  dataType: "boolean"
+              modbus_master_patch_read_discrete_inputs_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd2"
+                  mode: 0
+                  func: 2
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_patch_read_holding_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd3"
+                  mode: 0
+                  func: 3
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_patch_read_input_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd4"
+                  mode: 0
+                  func: 4
+                  readAddress: 0
+                  readQuantity: 10
+                  pollInterval: 1000
+                  swap: 0
+              modbus_master_patch_write_single_coil_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd5"
+                  mode: 1
+                  func: 5
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+              modbus_master_patch_write_single_register_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd6"
+                  mode: 1
+                  func: 6
+                  writeAddress: 0
+                  writeQuantity: 1
+                  swap: 0
+              modbus_master_patch_write_multiple_coils_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd15"
+                  mode: 1
+                  func: 15
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_patch_write_multiple_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd16"
+                  mode: 1
+                  func: 16
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+              modbus_master_patch_read_write_multiple_registers_command:
+                value:
+                  remoteDevId: 1
+                  name: "cmd23"
+                  mode: 1
+                  func: 23
+                  readAddress: 0
+                  readQuantity: 10
+                  writeAddress: 0
+                  writeQuantity: 10
+                  swap: 0
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mcmd'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/tags:
+    get:
+      summary: Get all of tags' configurations
+      tags:
+      - Tags
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tags'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    post:
+      summary: Add tag(s) configuration
+      tags:
+        - Tags
+      requestBody:
+        description: Tag data.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/tag'
+              - $ref: '#/components/schemas/tags'
+            examples:
+              modbus_master_read_command_int16_tag:
+                value:
+                  mcmdId: 1
+                  name: "read_command_int16_tag"
+                  dataType: "int16"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_int16_tags:
+                value:
+                  - mcmdId: 1
+                    name: "read_command_int16_tag"
+                    dataType: "int16"
+                    access: "r"
+                    offset: 0
+                  - mcmdId: 1
+                    name: "read_command_int16_tag2"
+                    dataType: "int16"
+                    access: "r"
+                    offset: 2
+              modbus_master_read_command_int32_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int32_tag"
+                  dataType: "int32"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_int64_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int64_tag"
+                  dataType: "int64"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_uint16_tag:
+                value:
+                  mcmdId: 1
+                  name: "read_command_uint16_tag"
+                  dataType: "uint16"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_uint32_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_uint32_tag"
+                  dataType: "uint32"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_uint64_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int64_tag"
+                  dataType: "uint64"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_float_tag:
+                value:
+                  mcmdId: 3
+                  name: "read_command_float_tag"
+                  dataType: "float"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_double_tag:
+                value:
+                  mcmdId: 3
+                  name: "read_command_double_tag"
+                  dataType: "double"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_boolean_tag:
+                value:
+                  mcmdId: 1
+                  name: "read_command_boolean_tag"
+                  dataType: "boolean"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_string_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "read_command_string_tag_with_20bytes"
+                  dataType: "string"
+                  access: "r"
+                  dataSize: 20
+                  offset: 0
+              modbus_master_read_command_rawdata_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "read_command_rawdata_tag_with_20bytes"
+                  dataType: "raw"
+                  access: "r"
+                  dataSize: 20
+                  offset: 0
+              modbus_master_write_command_rawdata_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "write_command_rawdata_tag_with_20bytes"
+                  dataType: "raw"
+                  access: "w"
+                  dataSize: 20
+                  offset: 0
+              modbus_master_readwrite_command_rawdata_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "readwrite_command_rawdata_tag_with_20bytes"
+                  dataType: "raw"
+                  access: "rw"
+                  dataSize: 20
+                  offset: 0
+              modbus_master_read_command_int16_tag_without_offset:
+                value:
+                  mcmdId: 1
+                  name: "read_command_int16_tag_without_offset"
+                  dataType: "int16"
+                  access: "r"
+                  offset: 0
+              modbus_master_read_command_int16_tag_with_offset:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int16_tag_with_offset"
+                  dataType: "int16"
+                  access: "r"
+                  offset: 2
+      responses:
+        201:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    oneOf:
+                      - $ref: '#/components/schemas/tag'
+                      - $ref: '#/components/schemas/tags'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    delete:
+      summary: Delete all tags configuration
+      tags:
+      - Tags
+      responses:
+        204:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/config/tags/{tagId}:
+    get:
+      summary: Get specific tag's configuration
+      tags:
+      - Tags
+      parameters:
+        - name: "tagId"
+          in : "path"
+          description: ID of tag.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/tag'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    delete:
+      summary: Delete specific tag's configuration
+      tags:
+      - Tags
+      parameters:
+        - name: tagId
+          in : "path"
+          description: ID of tag.
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      summary: Modify all of tag configuration
+      description: The configuration which does not belong to the request would be the default value.
+      tags:
+      - Tags
+      parameters:
+        - name: tagId
+          in: "path"
+          description: ID of tag.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tag'
+            examples:
+              modbus_master_read_command_int16_tag:
+                value:
+                  mcmdId: 1
+                  name: "read_command_int16_tag"
+                  dataType: "int16"
+                  access: "r"
+              modbus_master_read_command_int32_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int32_tag"
+                  dataType: "int32"
+                  access: "r"
+              modbus_master_read_command_int64_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int64_tag"
+                  dataType: "int64"
+                  access: "r"
+              modbus_master_read_command_uint16_tag:
+                value:
+                  mcmdId: 1
+                  name: "read_command_uint16_tag"
+                  dataType: "uint16"
+                  access: "r"
+              modbus_master_read_command_uint32_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_uint32_tag"
+                  dataType: "uint32"
+                  access: "r"
+              modbus_master_read_command_uint64_tag:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int64_tag"
+                  dataType: "uint64"
+                  access: "r"
+              modbus_master_read_command_float_tag:
+                value:
+                  mcmdId: 3
+                  name: "read_command_float_tag"
+                  dataType: "float"
+                  access: "r"
+              modbus_master_read_command_double_tag:
+                value:
+                  mcmdId: 3
+                  name: "read_command_double_tag"
+                  dataType: "double"
+                  access: "r"
+              modbus_master_read_command_boolean_tag:
+                value:
+                  mcmdId: 1
+                  name: "read_command_boolean_tag"
+                  dataType: "boolean"
+                  access: "r"
+              modbus_master_read_command_string_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "read_command_string_tag_with_20bytes"
+                  dataType: "string"
+                  access: "r"
+                  dataSize: 20
+              modbus_master_read_command_rawdata_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "read_command_rawdata_tag_with_20bytes"
+                  dataType: "raw"
+                  access: "r"
+                  dataSize: 20
+              modbus_master_write_command_rawdata_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "write_command_rawdata_tag_with_20bytes"
+                  dataType: "raw"
+                  access: "w"
+                  dataSize: 20
+              modbus_master_readwrite_command_rawdata_tag_with_20bytes:
+                value:
+                  mcmdId: 1
+                  name: "readwrite_command_rawdata_tag_with_20bytes"
+                  dataType: "raw"
+                  access: "rw"
+                  dataSize: 20
+              modbus_master_read_command_int16_tag_without_offset:
+                value:
+                  mcmdId: 1
+                  name: "read_command_int16_tag_without_offset"
+                  dataType: "int16"
+                  access: "r"
+              modbus_master_read_command_int16_tag_with_offset:
+                value:
+                  mcmdId: 2
+                  name: "read_command_int16_tag_with_offset"
+                  dataType: "int16"
+                  access: "r"
+                  offset: 2
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tag'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/daemon/start:
+    put:
+      summary: Start the Modbus module, configuration will reload
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/daemon/stop:
+    put:
+      summary: Stop the Modbus module
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/daemon/restart:
+    put:
+      summary: Restart the Modbus module, configuration will reload
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/config/factory-default:
+    put:
+      summary: Reset the configuration of Modbus module
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/config/apply:
+    put:
+      summary: Apply the Modbus configuration(it will restart the modbus daemon)
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/config/undo:
+    put:
+      summary: Undo the Modbus configuration for un-applied status.
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+
+  /modbusmaster/control/config/masters/export:
+    get:
+      summary: export the configuration of Modbus masters
+      tags:
+        - Control
+      responses:
+        200:
+          description: Success.
+          content:
+            application/octet-stream:
+              schema:
+               description: Modbus configuration file (.csv).
+               type: string
+               format: binary
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/config/masters/import:
+    post:
+      summary: import a configuration file into Modbus masters
+      tags:
+        - Control
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mastersFile:
+                  description: Modbus masters csv file.
+                  type: string
+            encoding:
+              mastersFile:
+                  contentType: csv
+      responses:
+        201:
+          $ref: '#/components/responses/ImportMasterResponse'
+        400:
+          $ref: '#/components/responses/ImportUnexpectedError'
+
+  /modbusmaster/control/config/mcmds/export:
+    get:
+      summary: export the configuration of master commands
+      tags:
+        - Control
+      parameters:
+        - in: query
+          name: remoteDevId
+          description: /export?remoteDevId=1.
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Success.
+          content:
+            application/octet-stream:
+              schema:
+               description: Modbus configuration file (.csv).
+               type: string
+               format: binary
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/control/config/mcmds/import:
+    post:
+      summary: import a configuration file into master commands for a remote device
+      tags:
+        - Control
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mcmdsFile:
+                  description: Master command csv file.
+                  type: string
+                remoteDevId:
+                  description: Remote device ID.
+            encoding:
+              mcmdsFile:
+                  contentType: csv
+      responses:
+        201:
+          $ref: '#/components/responses/ImportMcmdResponse'
+        400:
+          $ref: '#/components/responses/ImportUnexpectedError'
+  /modbusmaster/control/log-level:
+    get:
+      summary: Get current modbus daemon system log level
+      tags:
+      - Control
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/log_level_str'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+    put:
+      summary: set modbus dameon system log level
+      tags:
+        - Control
+      requestBody:
+        description: system log level.
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                logLevel:
+                  $ref: '#/components/schemas/log_level_str'
+            examples:
+              set_debug_level:
+                  value:
+                    logLevel: "DEBUG"
+
+      responses:
+        200:
+          description: set system log level success.
+
+        400:
+          description: Invalid log level parameter.
+
+  /modbusmaster/operate/direct-read-tag:
+    put:
+      summary: trigger the tag's related command to polling and get the tag data result
+      tags:
+        - Operate
+      requestBody:
+        description: Tag information.
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                prvdName:
+                  type: string
+                  description: Provider name.
+                srcName:
+                  type: string
+                  description: Source name.
+                tagName:
+                  type: string
+                  description: Tag name.
+            examples:
+              trigger_master_device_tag:
+                value:
+                  prvdName: "modbus_tcp_master"
+                  srcName: "ieg_device"
+                  tagName: "command_1"
+
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  prvdName:
+                    type: string
+                    description: Provider name.
+                  srcName:
+                    type: string
+                    description: Source name.
+                  tagName:
+                    type: string
+                    description: Tag name.
+                  timestamp:
+                    type: number
+                    description: Slave response time (us).
+                  dataType:
+                    type: string
+                    description: Tag type.
+                    enum:
+                      - raw
+                      - bytearray
+                      - string
+                      - boolean
+                      - int8
+                      - int16
+                      - int32
+                      - int64
+                      - uint8
+                      - uint16
+                      - uint32
+                      - uint64
+                      - float
+                      - double
+                  dateValue:
+                    oneOf:
+                      - type: string
+                      - type: number
+                    description: Tag value.
+
+              examples:
+                read_float_tag:
+                  value:
+                    prvdName: "modbus_tcp_master"
+                    srcName: "moxa_device"
+                    tagName: "command_float"
+                    timestamp: 939700
+                    dataType: "float"
+                    dataValue: 3.14
+                read_int32_tag:
+                  value:
+                    prvdName: "modbus_tcp_master"
+                    srcName: " moxa_device"
+                    tagName: "command_int"
+                    timestamp: 939788
+                    dataType: "int32"
+                    dataValue: 9
+                read_raw_tag:
+                  value:
+                    prvdName: "modbus_tcp_master"
+                    srcName: " moxa_device"
+                    tagName: "command_raw_4byte"
+                    timestamp: 939700
+                    dataType: "raw"
+                    dataValue: "05FF3244"
+
+        400:
+          description: Invalid parameters or trigger command timeout.
+
+  /modbusmaster/operate/direct-write-tag:
+    put:
+      summary: trigger the tag's related command to polling and post the tag data
+      tags:
+        - Operate
+      requestBody:
+        description: Tag information.
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                prvdName:
+                  type: string
+                  description: Provider name.
+                srcName:
+                  type: string
+                  description: Device name.
+                tagName:
+                  type: string
+                  description: Tag name.
+                dataType:
+                    type: string
+                    description: Tag type.
+                    enum:
+                    - boolean
+                    - int8
+                    - int16
+                    - int32
+                    - int64
+                    - uint8
+                    - uint16
+                    - uint32
+                    - uint64
+                    - float
+                    - double
+                    - string
+                    - bytearray
+                    - raw
+                dateValue:
+                  oneOf:
+                    - type: string
+                    - type: number
+                  description: Tag value.
+            examples:
+              write_float_tag:
+                  value:
+                    prvdName: "modbus_tcp_master"
+                    srcName: "moxa_device"
+                    tagName: "command_float"
+                    dataType: "float"
+                    dataValue: 3.14
+              write_int32_tag:
+                value:
+                  prvdName: "modbus_tcp_master"
+                  srcName: "moxa_device"
+                  tagName: "command_int"
+                  dataType: "int32"
+                  dataValue: 9
+              write_raw_tag:
+                value:
+                  prvdName: "modbus_tcp_master"
+                  srcName: "moxa_device"
+                  tagName: "command_raw_4byte"
+                  dataType: "raw"
+                  dataValue: "05FF3244"
+
+      responses:
+        200:
+          description: Trigger command to write tag value success.
+
+        400:
+          description: Invalid parameters or trigger command timeout.
+
+  /modbusmaster/diagnose/tcp-status:
+    get:
+      summary: Get all of TCP connection diagnose information (include masters and slaves)
+      tags:
+      - Diagnose
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tcpStatus'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/diagnose/serial-status:
+    get:
+      summary: Get all of serial connection diagnose information (include masters and slaves)
+      tags:
+      - Diagnose
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serStatus'
+              examples:
+                serial_master_response:
+                  value:
+                    data:
+                      modbus_serial:
+                        - role: "Master"
+                          sentReqs: 0
+                          recvValidResps: 0
+                          recvInvalidResps: 0
+                          recvCrcLrcErrors: 0
+                          recvExceptions: 0
+                          timeout: 0
+                          Ports:
+                            - portNumber: 1
+                              break: 0
+                              frameError: 0
+                              parityError: 0
+                              overrunError: 0
+                              mode: "RTU"
+                              sentReqs: 0
+                              recvValidResps: 0
+                              recvInvalidResps: 0
+                              recvCrcLrcErrors: 0
+                              recvExceptions: 0
+                              timeout: 0
+                            - portNumber: 2
+                              break: 0
+                              frameError: 0
+                              parityError: 0
+                              overrunError: 0
+                              mode: "ASCII"
+                              sentReqs: 0
+                              recvValidResps: 0
+                              recvInvalidResps: 0
+                              recvCrcLrcErrors: 0
+                              recvExceptions: 0
+                              timeout: 0
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+
+  /modbusmaster/diagnose/protocol-status:
+    get:
+      summary: Get protocol status. Only support in AIG Series
+      tags:
+      - Diagnose
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/protocolStatus'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+        404:
+          description: protocol is disabled.
+          
+  /modbusmaster/diagnose/traffic/start:
+    post:
+      summary: Start traffic modbus log. For TPE use.
+      tags:
+      - Diagnose
+      responses:
+        201:
+          description: Success to start traffic log.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+  /modbusmaster/diagnose/traffic/stop:
+    post:
+      summary: Stop traffic modbus log. For TPE use.
+      tags:
+      - Diagnose
+      responses:
+        201:
+          description: Success to stop traffic log, and get the log file.
+          content:
+            application/octet-stream:
+              schema:
+               description: Modbus traffic log file.
+               type: string
+               format: binary
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+          
+  /modbusmaster/traffic-log/master-tcp-interfaces/{masterTcpIfaceId}:
+    get:
+      summary: Get traffic logs by master tcp interface id. Only support in AIG Series.
+      tags:
+      - Traffic-log
+      parameters:
+        - name: "masterTcpIfaceId"
+          in : "path"
+          description: tcp master tcp interface id.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success to get traffic logs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tcpTrafficLog'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+    post:
+      summary: Start/stop traffic modbus log by master tcp interface id. Only support in AIG Series.
+      tags:
+      - Traffic-log
+      parameters:
+        - name: "masterTcpIfaceId"
+          in : "path"
+          description: tcp master interface id.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Action of traffic log.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/trafficAction'
+      responses:
+        201:
+          description: Success to start/stop traffic log.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/traffic-log/master-ser-interfaces/{masterSerIfaceId}:
+    get:
+      summary: Get traffic logs by master serial interface id. Only support in AIG Series.
+      tags:
+      - Traffic-log
+      parameters:
+        - name: "masterSerIfaceId"
+          in : "path"
+          description: tcp master serial interface id.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success to get traffic logs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serTrafficLog'
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+    post:
+      summary: Start/stop traffic modbus log by master serial interface id. Only support in AIG Series.
+      tags:
+      - Traffic-log
+      parameters:
+        - name: "masterSerIfaceId"
+          in : "path"
+          description: tcp master serial interface id.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Action of traffic log.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/trafficAction'
+      responses:
+        201:
+          description: Success to start/stop traffic log.
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/status/config/change:
+    get:
+      summary: Get status of Modbus database was modified or not
+      tags:
+      - Status
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      result:
+                        description: The status of Modbus master's database was modified or not (unchanged, changed).
+                        type: integer
+                example:
+                  data:
+                    result: 1
+
+  /modbusmaster/status/config/master-overview:
+    get:
+      summary: Get overview of Modbus master
+      tags:
+      - Status
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/masterOverview'
+              example:
+                version: "0.2.1"
+                enableDevFailEvent: 1
+                enableCmdFailEvent: 1
+                tcp:
+                  enable: 1
+                  masterTcpIfaces:
+                  - masterTcpIfaceId: 1
+                    devCount: 4
+                    cmdCount: 20
+                serial:
+                  enable: 1
+                  masterSerIfaces:
+                  - masterSerIfaceId: 1
+                    portName: "COM1"
+                    portNumber: 1
+                    format: 0
+                    devCount: 3
+                    cmdCount: 30
+                  - masterSerIfaceId: 2
+                    portName: "COM2"
+                    portNumber: 2
+                    format: 1
+                    devCount: 2
+                    cmdCount: 15
+                  - masterSerIfaceId: 3
+                    portName: "COM3"
+                    portNumber: 3
+                    format: 1
+                    devCount: 6
+                    cmdCount: 35
+                  - masterSerIfaceId: 4
+                    portName: "COM4"
+                    portNumber: 4
+                    format: 0
+                    devCount: 2
+                    cmdCount: 15
+        400:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /modbusmaster/platform/master-tags:
+    get:
+      summary: Get tag list of Modbus master
+      tags:
+      - Platform
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/platformTaglist'
+              example:
+                - prvdName: "modbus_tcp_master"
+                  srcName: "moxa-device"
+                  tagName: "voltage"
+                  dataType: "int32"
+                  access: "w"
+                  dataUnit: "%"
+                - prvdName: "modbus_tcp_master"
+                  srcName: "moxa-device2"
+                  tagName: "voltage"
+                  dataType: "raw"
+                  access: "r"
+                  dataSize: 5
+                  dataUnit: "%"
+        400:
+          $ref: '#/components/responses/UnexpectedError'

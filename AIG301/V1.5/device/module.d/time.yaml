@@ -1,0 +1,290 @@
+openapi: 3.0.0
+info:
+  version: '1.3.0'
+  title: 'Time Configuration APIs'
+  description: |
+    Release Date: 2019/12/10
+    Time Configuration APIs
+
+components:
+  schemas:
+    TimeInformation:
+      title: Device time configuration
+      properties:
+        type:
+          type: string
+          description: Interface type.
+          example: "time"
+          readOnly: true
+        lastUpdateTime:
+          type: string
+          description: |
+            Last update time with RFC3339 format after time settings.
+            '-' means not updated yet since NTP updated and enabled.
+          readOnly: true
+          example: "2015-03-26T16:00:00+08:00"
+        time:
+          type: string
+          description: "Current system time (format: RFC3339)."
+          minLength: 20
+          maxLength: 35
+          example: "2015-03-26T16:27:48+08:00"
+        timezone:
+          type: string
+          description: device timezone.
+          minLength: 1
+          maxLength: 64
+          example: "Asia/Taipei"
+        ntp:
+          type: object
+          properties:
+            enable:
+              type: boolean
+              description: enable/disable sync time from time server
+              example: false
+            source:
+              type: string
+              description: time sync source
+              enum:
+                - timeserver
+                - gps
+              default: timeserver
+            server:
+              type: string
+              description: ntp server url
+              minLength: 2
+              maxLength: 253
+              pattern: >-
+                (?=^.{2,253}$)(?:^(?!\.|-)[a-zA-Z0-9\-]{0,62}[a-zA-Z0-9])(?:\.(?!\.|\-)[a-zA-Z0-9\-]{0,62}[a-zA-Z0-9])*$
+              example: pool.ntp.org
+            gpsLongJump:
+              type: boolean
+              description: allow gps sync time with long-distance jumps
+              default: true
+            interval:
+              type: integer
+              description: ntpd update interval
+              minimum: 60
+              maximum: 2592000
+              example: 7200
+    TimezoneInfo:
+      description: Timezone information
+      type: object
+      required:
+      - zone
+      - iso3166
+      properties:
+        zone:
+          description: TZ zone list with cca2 and TZ
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TimezoneZone'
+        iso3166:
+          description: ISO 3166 alpha-2 country codes
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TimezoneIso3166'
+      example:
+        data:
+          zone:
+            - cca2: AD
+              name: Europe/Andorra
+              offset: '+0100'
+            - cca2: AE
+              name: Asia/Dubai
+              offset: '+0400'
+            - cca2: AF
+              name: Asia/Kabul
+              offset: '+0430'
+          iso3166:
+            - cca2: AD
+              name: Andorra
+            - cca2: AE
+              name: United Arab Emirates
+            - cca2: AF
+              name: Afghanistan
+    TimezoneZone:
+      description: ISO 3166 alpha-2 country code and zone name
+      type: object
+      required:
+      - cca2
+      - name
+      - offset
+      properties:
+        cca2:
+          description: ISO 3166 alpha-2 country code
+          type: string
+          pattern: '[A-Z]{2}'
+        name:
+          description: zone name
+          type: string
+        offset:
+          description: zone offset (format should be "+0800", etc)
+          type: string
+    TimezoneIso3166:
+      description: ISO 3166 alpha-2 country code and country name
+      type: object
+      required:
+      - cca2
+      - name
+      properties:
+        cca2:
+          description: ISO 3166 alpha-2 country code
+          type: string
+          pattern: '[A-Z]{2}'
+        name:
+          description: The usual English name for the coded region
+          type: string
+  examples:
+    NtpDisabled:
+      value:
+        data:
+          type: time
+          lastUpdateTime: "-"
+          time: "2015-03-26T16:27:48+08:00"
+          timezone: "Asia/Taipei"
+          ntp:
+            enable: false
+            source: "timeserver"
+            server: "pool.ntp.org"
+            gpsLongJump: true
+            interval: 86400
+    NtpTimeServerEnabled:
+      value:
+        data:
+          type: time
+          lastUpdateTime: "-"
+          time: "2015-03-26T16:27:48+08:00"
+          timezone: "Asia/Taipei"
+          ntp:
+            enable: true
+            source: "timeserver"
+            server: "pool.ntp.org"
+            gpsLongJump: true
+            interval: 86400
+    NtpTimeServerEnabledAndSynced:
+      value:
+        data:
+          type: time
+          lastUpdateTime: "2015-03-26T16:00:00+08:00"
+          time: "2015-03-26T16:27:48+08:00"
+          timezone: "Asia/Taipei"
+          ntp:
+            enable: true
+            source: "timeserver"
+            server: "pool.ntp.org"
+            gpsLongJump: true
+            interval: 86400
+    NtpGpsEnabled:
+      value:
+        data:
+          type: time
+          lastUpdateTime: "-"
+          time: "2015-03-26T16:27:48+08:00"
+          timezone: "Asia/Taipei"
+          ntp:
+            enable: true
+            source: "gps"
+            server: ""
+            gpsLongJump: true
+            interval: 86400
+    NtpGpsEnabledAndSynced:
+      value:
+        data:
+          type: time
+          lastUpdateTime: "2015-03-26T16:00:00+08:00"
+          time: "2015-03-26T16:27:48+08:00"
+          timezone: "Asia/Taipei"
+          ntp:
+            enable: true
+            source: "gps"
+            server: ""
+            gpsLongJump: true
+            interval: 86400
+
+paths:
+  /device/time:
+    get:
+      description: Get device time configuration.
+      tags: ["device", "time"]
+      responses:
+        200:
+          description: Device time configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeInformation'
+              examples:
+                NtpDisabled:
+                  $ref: '#/components/examples/NtpDisabled'
+                NtpTimeServerEnabled:
+                  $ref: '#/components/examples/NtpTimeServerEnabled'
+                NtpTimeServerEnabledAndSynced:
+                  $ref: '#/components/examples/NtpTimeServerEnabledAndSynced'
+                NtpGpsEnabled:
+                  $ref: '#/components/examples/NtpGpsEnabled'
+                NtpGpsEnabledAndSynced:
+                  $ref: '#/components/examples/NtpGpsEnabledAndSynced'
+    patch:
+      tags: ["device", "time"]
+      description: Update device time configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeInformation'
+            examples:
+              update time:
+                value:
+                  time: "2015-03-26T16:27:48+08:00"
+              update timezone:
+                value:
+                  timezone: "Asia/Taipei"
+              sync time from time server:
+                value:
+                  ntp:
+                    enable: true
+                    source: "timeserver"
+                    server: "tock.stdtime.gov.tw"
+                    gpsLongJump: true
+                    interval: 6000
+              sync time by gps:
+                value:
+                  ntp:
+                    enable: true
+                    source: "gps"
+                    server: ""
+                    gpsLongJump: true
+                    interval: 6000
+      responses:
+        200:
+          description: Device time configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeInformation'
+              examples:
+                NtpDisabled:
+                  $ref: '#/components/examples/NtpDisabled'
+                NtpTimeServerEnabled:
+                  $ref: '#/components/examples/NtpTimeServerEnabled'
+                NtpTimeServerEnabledAndSynced:
+                  $ref: '#/components/examples/NtpTimeServerEnabledAndSynced'
+                NtpGpsEnabled:
+                  $ref: '#/components/examples/NtpGpsEnabled'
+                NtpGpsEnabledAndSynced:
+                  $ref: '#/components/examples/NtpGpsEnabledAndSynced'
+  /device/zoneinfo:
+    get:
+      tags: ["device", "zoneinfo"]
+      description: Get current timezone information
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimezoneInfo'

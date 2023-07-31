@@ -1,0 +1,555 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://127.0.0.1/api/v1'
+security:
+  - bearerAuth: []
+info:
+  description: ThingsPro Edge Function API Doc
+  version: "1.0.0"
+  title: ThingsPro Edge Function
+  contact:
+    email: justincp.tung@moxa.com
+
+paths:
+  /function:
+    get:
+      summary: display function list
+      description: |
+        Display so far user defined functions.
+      parameters:
+      - description: Enable server-sent event
+        in: query
+        name: event
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Return current functions list.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Function'
+              examples:
+                hello-world:
+                  $ref: '#/components/examples/HelloWorld'
+    post:
+      summary: add target function
+      description: |
+        Add a new function by upload tar.gz that packs function index.py(python program) and package.json(metadata)
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                force:
+                  default: false
+                  description: Force to add the function even duplicated name
+                  type: boolean
+                file:
+                  description: configuration file
+                  format: binary
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: function added
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Function'
+              examples:
+                data-driven:
+                  $ref: '#/components/examples/TimeDrivenResp'
+        '400':
+          content:
+            application/json:
+              examples:
+                metadataincomplete:
+                  summary: incomplete package of metadata lost
+                  value:
+                    error:
+                      code: 400
+                      message: Metadata(package.json) is incomplete
+                functionincomplete:
+                  summary: incomplete package of executable program lost
+                  value:
+                    error:
+                      code: 400
+                      message: No any executable program(index.py)
+              schema:
+                properties:
+                  error:
+                    properties:
+                      code:
+                        type: integer
+                      message:
+                        type: string
+          description: bad request
+    patch:
+      summary: update target function by function name
+      description: |
+        Edit an existed function by function name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchFunction'
+            examples:
+              disable-rule:
+                  $ref: '#/components/examples/DisableTimeDriven'
+      responses:
+        '200':
+          description: function updated
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Function'
+              examples:
+                data-driven:
+                  $ref: '#/components/examples/DisableTimeDrivenResp'
+        '400':
+          description: 'invalid input'
+    delete:
+      parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID is target function's name
+      summary: delete target function
+      description: |
+        Delete an existed function
+      responses:
+        '200':
+          description: function deleted
+        '400':
+          description: 'invalid id'
+  /function/log:
+    parameters:
+    - in: query
+      name: id
+      schema:
+        type: string
+      required: true
+      description: ID is target function's name
+    get:
+      summary: show target function runtime log
+      description: |
+        Streamingly to show target function runtime log
+      responses:
+        '200':
+          description: function updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+        '201':
+          description: function existed but inactive
+        '400':
+          description: 'invalid id'
+  /function/preview:
+    post:
+      summary: provide a preview result of user script
+      description: |
+        As same as normal function definition, users can test their draft script by this 
+        API. The response will present the result streamingly.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Function'
+            examples:
+              time-driven:
+                  $ref: '#/components/examples/TimeDriven'
+      responses:
+        '200':
+          description: function applied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+  /function/httpproxy:
+    get:
+      summary: display running http function endpoints
+      description: |
+        Display running http function endpoints
+      responses:
+        '200':
+          description: Return current http function endpoints.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Endpoints'
+              examples:
+                hello-world:
+                  $ref: '#/components/examples/Endpoints'
+  /function/requirements:
+    put:
+      summary: install/uninstall desired python modules
+      description: |
+        install/uninstall desired python modules
+      parameters:
+      - in: query
+        name: uninstall
+        schema:
+          type: boolean
+        description: a flag to change operation from install to uninstall python modules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                timeout:
+                  type: integer
+                pip:
+                  type: array
+                  items:
+                    type: string
+            examples:
+              install/uninstall:
+                value:
+                  timeout: 60
+                  pip:
+                    [
+                      "numpy"
+                    ]
+      responses:
+        '200':
+          description: Succeed to install/uninstall python modules
+        '400':
+          description: Fail to install/uninstall python modules
+    get:
+      summary: get up-to-date all installed python modules
+      description: |
+        up-to-date all installed python modules
+      responses:
+        '200':
+          description: Return current all installed python modules.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                all-installed-modules:
+                  $ref: '#/components/examples/InstalledModules'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    PatchFunction:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: ASCII alphanumeric characters or hyphens (a-z, A-Z, 0-9, "-")
+        enabled:
+          type: boolean
+        trigger:
+          $ref: '#/components/schemas/Trigger'
+    Function:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: ASCII alphanumeric characters or hyphens (a-z, A-Z, 0-9, "-")
+        enabled:
+          type: boolean
+        trigger:
+          $ref: '#/components/schemas/Trigger'
+        executable:
+          $ref: '#/components/schemas/Executable'
+        expose:
+          $ref: '#/components/schemas/Expose'
+        params:
+          type: object
+          items:
+            type: object
+            additionalProperties:
+              type: object
+    Executable:
+      type: object
+      properties:
+        language:
+          type: string
+          enum:
+            - python
+        context:
+          type: string
+        lastUpTime:
+          type: string
+        state:
+          type: string
+          enum:
+            - inactive
+            - running
+            - failure
+        error:
+          type: string
+    Trigger:
+      type: object
+      properties:
+        driven:
+          type: string
+          enum:
+            - timeDriven
+        timeDrive:
+          $ref: '#/components/schemas/TimeDriven'
+    TimeDriven:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - boot
+            - cronJob
+        cronJob:
+          type: string
+
+    Expose:
+      type: object
+      properties:
+        tags:
+          type: object
+          properties:
+            prvdName:
+              type: string
+            srcName:
+              type: string
+            tagName:
+              type: string
+            dataType:
+              type: string
+              enum:
+              - uint8
+              - uint16
+              - uint32
+              - uint64
+              - uint32
+              - int8
+              - int16
+              - int32
+              - int64
+              - float
+              - double
+              - string
+              - boolean
+              - byte-array
+              - raw
+    Endpoints:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            GET:
+              type: array
+              items:
+                type: string
+            PUT:
+              type: array
+              items:
+                type: string
+            POST:
+              type: array
+              items:
+                type: string
+            DELETE:
+              type: array
+              items:
+                type: string
+  examples:
+    HelloWorld:
+      value:
+        data:
+          - name: helloworld
+            enabled: true
+            trigger:
+              dirven: "timeDriven"
+              timeDriven:
+                mode: boot
+                cronJob: ''
+            expose:
+              tags:
+                - prvdName: demo
+                  srcName: user
+                  tagName: hello
+                  dataType: string
+            executable:
+              language: "python"
+            params: {}
+    DisableTimeDriven:
+      value:
+        name: timedriven
+        enabled: false
+    DisableTimeDrivenResp:
+      value:
+        data:
+          - name: timedriven
+            enabled: false
+            trigger:
+              driven: timeDriven
+              timeDriven:
+                mode: boot
+                cronJob: ''
+            expose:
+              tags:
+                - prvdName: user
+                  srcName: define
+                  tagName: tag
+                  dataType: double
+            executable:
+              language: python
+              context: |+
+                #!/usr/bin/python
+                # -*- coding: utf-8 -*-
+                """
+                ThingsPro Edge Function time driven function template
+                """
+                from thingspro.edge.func_v1 import package
+                if __name__ == "__main__":
+                    # create function client instance
+                    config = package.Configuration()
+                    # print parameters defined inpackage.json
+                    print(config.parameters())
+    
+                    # infinite loop
+                    while True:
+                      time.sleep(1)
+            
+              lastUpTime: '2021-01-15T16:14:08+08:00'
+              state: running
+              error: ''
+            params:
+              version: 1.0.0
+    TimeDriven:
+      value:
+        name: timedriven
+        enabled: true
+        trigger:
+          driven: timeDriven
+          timeDriven:
+            mode: boot
+            cronJob: ''
+        expose:
+          tags:
+            - prvdName: user
+              srcName: define
+              tagName: tag
+              dataType: double
+        executable:
+          language: python
+          context: |+
+            #!/usr/bin/python
+            # -*- coding: utf-8 -*-
+            """
+            ThingsPro Edge Function time driven function template
+            """
+            from thingspro.edge.func_v1 import package
+            if __name__ == "__main__":
+                # create function client instance
+                config = package.Configuration()
+                # print parameters defined inpackage.json
+                print(config.parameters())
+
+                # infinite loop
+                while True:
+                  time.sleep(1)
+        params:
+          version: 1.0.0
+    TimeDrivenResp:
+      value:
+        data:
+          - name: timedriven
+            enabled: true
+            trigger:
+              driven: timeDriven
+              timeDriven:
+                mode: boot
+                cronJob: ''
+            expose:
+              tags:
+                - prvdName: user
+                  srcName: define
+                  tagName: tag
+                  dataType: double
+            executable:
+              language: python
+              context: |+
+                #!/usr/bin/python
+                # -*- coding: utf-8 -*-
+                """
+                ThingsPro Edge Function time driven function template
+                """
+                from thingspro.edge.func_v1 import package
+                if __name__ == "__main__":
+                    # create function client instance
+                    config = package.Configuration()
+                    # print parameters defined inpackage.json
+                    print(config.parameters())
+    
+                    # infinite loop
+                    while True:
+                      time.sleep(1)
+            
+              lastUpTime: '2021-01-15T16:14:08+08:00'
+              state: running
+              error: ''
+            params:
+              version: 1.0.0
+    Endpoints:
+      value:
+        data:
+          GET:
+            - /world/hello
+          PUT:
+            - /world/hello
+          POST:
+            - /world/hello
+          DELETE:
+            - /world/hello
+    InstalledModules:
+      value:
+        data:
+          - "certifi=2021.5.30"
+          - "charset-normalizer=2.0.6"
+          - "enum34=1.1.10"
+          - "grpcio=1.30.0"
+          - "idna=3.2"
+          - "pip=21.2.4"
+          - "protobuf=3.18.1"
+          - "requests=2.26.0"
+          - "requests-unixsocket=0.2.0"
+          - "setuptools=57.5.0"
+          - "six=1.16.0"
+          - "urllib3=1.26.7"
+          - "wheel=0.37.0"

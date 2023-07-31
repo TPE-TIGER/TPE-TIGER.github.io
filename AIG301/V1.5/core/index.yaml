@@ -1,0 +1,5073 @@
+components:
+  responses:
+    Success:
+      description: success
+  schemas:
+    Permission:
+      properties:
+        description:
+          description: Description of permission.
+          type: string
+        id:
+          type: string
+        name:
+          description: Name of permission.
+          type: string
+    Role:
+      properties:
+        description:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+        permissions:
+          items:
+            $ref: '#/components/schemas/Permission'
+          type: array
+        users:
+          items:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+    User:
+      properties:
+        changedPasswordAt:
+          format: date-time
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        email:
+          type: string
+        expiredAfter:
+          format: date-time
+          type: string
+        id:
+          type: integer
+        isActive:
+          type: boolean
+        loginAt:
+          format: date-time
+          type: string
+        name:
+          type: string
+        permissions:
+          items:
+            description: ID of permission
+            type: string
+        roles:
+          items:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+    Users:
+      items:
+        properties:
+          changedPasswordAt:
+            format: date-time
+            type: string
+          createdAt:
+            format: date-time
+            type: string
+          email:
+            type: string
+          expiredAfter:
+            format: date-time
+            type: string
+          id:
+            type: integer
+          isActive:
+            type: boolean
+          loginAt:
+            format: date-time
+            type: string
+          name:
+            type: string
+          permissions:
+            items:
+              description: ID of permission
+              type: string
+          roles:
+            items:
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+      type: array
+    requestResource:
+      properties:
+        id:
+          description: Resource ID
+          type: integer
+        value:
+          description: Resource allocation argument
+          type: object
+    resource:
+      properties:
+        allocations:
+          items:
+            properties:
+              app:
+                description: App name of the allocated resource
+                type: string
+              value:
+                description: Properties of the allocated resource
+                type: object
+            type: object
+          type: array
+        displayName:
+          description: Resource Name
+          readOnly: true
+          type: string
+        exclusive:
+          readOnly: true
+          type: boolean
+        id:
+          description: |
+            Resource ID
+            * 1: CPU shares
+            * 2: CPU core
+            * 3: memory
+            * 4: forward port
+            * 5: filter port
+          enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          readOnly: true
+          type: integer
+        type:
+          description: Resource type
+          readOnly: true
+          type: string
+    resourceList:
+      properties:
+        count:
+          description: Array length.
+          type: integer
+        data:
+          items:
+            $ref: '#/components/schemas/resource'
+          type: array
+      title: All current allocated resources
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+info:
+  title: Core
+  version: 2.3.0
+openapi: 3.0.0
+paths:
+  /apps:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 5
+                data:
+                - arch: armhf
+                  attributes:
+                  - started
+                  - installed
+                  availableVersions: []
+                  category: device
+                  description: MOXA hardware service
+                  desiredState: ready
+                  displayName: Device
+                  hardwares: []
+                  health: wait
+                  icon: /app-icons/device.png
+                  id: device
+                  imageSize: 86970368
+                  license:
+                    paid: false
+                    type: propetual
+                  menuID: app-device
+                  name: device
+                  state: starting
+                  version: 1.0.0-284-uc-8112a-me
+                - arch: armhf
+                  attributes:
+                  - started
+                  - installed
+                  availableVersions: []
+                  category: cloud
+                  description: Azure IoT Edge
+                  desiredState: ready
+                  displayName: Azure IoT Edge
+                  hardwares: []
+                  health: wait
+                  icon: ""
+                  id: aie
+                  imageSize: 71293440
+                  license:
+                    paid: true
+                    type: free
+                  menuID: app-aie
+                  name: aie
+                  state: starting
+                  version: 0.3.1-52
+                - arch: armhf
+                  attributes:
+                  - openInSameTab
+                  availableVersions: []
+                  category: protocol
+                  description: MOXA Modbus TCP Client (Master)
+                  desiredState: ready
+                  displayName: Modbus TCP Client (Master)
+                  hardwares: []
+                  health: wait
+                  icon: /app-icons/modbusmaster-tcp.png
+                  id: modbusmaster-tcp
+                  imageSize: 61130240
+                  license:
+                    paid: true
+                    type: free
+                  menuID: app-modbusmaster-tcp
+                  name: modbusmaster-tcp
+                  state: starting
+                  version: 3.14.0-278
+                - arch: armhf
+                  attributes:
+                  - installed
+                  - started
+                  - hide
+                  availableVersions: []
+                  category: intelligence
+                  description: |
+                    ThingsPro frontend web application
+                  desiredState: ready
+                  displayName: ThingsPro Edge Web
+                  hardwares: []
+                  health: good
+                  icon: ""
+                  id: edge-web
+                  imageSize: 0
+                  license:
+                    paid: true
+                    type: free
+                  menuID: app-edge-web
+                  name: edge-web
+                  state: ready
+                  version: 0.28.0-322
+                - arch: armhf
+                  attributes:
+                  - installed
+                  - started
+                  - openInSameTab
+                  availableVersions: []
+                  category: intelligence
+                  description: |
+                    ThingsPro Tag Framework Core
+                  desiredState: ready
+                  displayName: Tag Service
+                  hardwares: []
+                  health: running
+                  icon: ""
+                  id: tagservice
+                  imageSize: 84914688
+                  license:
+                    paid: true
+                    type: free
+                  menuID: app-tagservice
+                  name: tagservice
+                  state: starting
+                  version: 1.5.0-168
+              schema:
+                properties:
+                  data:
+                    items:
+                      properties:
+                        arch:
+                          enum:
+                          - armhf
+                          - amd64
+                          type: string
+                        attributes:
+                          items:
+                            enum:
+                            - started
+                            - installed
+                            - hide
+                            - openInNewTab
+                            - openInSameTab
+                            type: string
+                          type: array
+                        availableVersions:
+                          description: version can be installed from MPKG site(source)
+                          items:
+                            type: string
+                          type: array
+                        description:
+                          type: string
+                        displayName:
+                          type: string
+                        error:
+                          description: this field is appear if error happened
+                          type: string
+                        hardware:
+                          description: hardware required for this APP
+                          items:
+                            type: string
+                          type: array
+                        health:
+                          enum:
+                          - wait
+                          - good
+                          - running
+                          - error
+                          type: string
+                        icon:
+                          description: URL of the icon
+                          type: string
+                        id:
+                          description: internal and unique APP name
+                          type: string
+                        imageSize:
+                          type: integer
+                        license:
+                          properties:
+                            paid:
+                              type: boolean
+                            type:
+                              description: type of license
+                              enum:
+                              - propetual
+                              - free
+                              type: string
+                          type: object
+                        menuID:
+                          description: ID of menu
+                          type: string
+                        name:
+                          description: internal and unique APP name
+                          type: string
+                        progress:
+                          description: this field is appear if progress is available
+                          properties:
+                            currentTask:
+                              description: current running subtask number starting
+                                from 1
+                              type: integer
+                            message:
+                              type: string
+                            percentage:
+                              description: current subtask finish percentage from
+                                0 to 100
+                              type: integer
+                            totalTask:
+                              description: total subtask
+                              type: integer
+                          type: object
+                        state:
+                          enum:
+                          - init
+                          - uninstalled
+                          - installing
+                          - stopped
+                          - starting
+                          - ready
+                          - restarting
+                          - stopping
+                          - uninstalling
+                          - recovering
+                          type: string
+                        version:
+                          type: string
+                    type: array
+          description: success
+      summary: Return all APPs
+      tags:
+      - apps
+  /apps/{appname}:
+    get:
+      parameters:
+      - description: name of APP
+        in: path
+        name: appname
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  arch: armhf
+                  attributes:
+                  - installed
+                  - started
+                  - openInSameTab
+                  availableVersions: []
+                  category: intelligence
+                  description: |
+                    ThingsPro Tag Framework Core
+                  desiredState: ready
+                  displayName: Tag Service
+                  hardwares: []
+                  health: good
+                  icon: ""
+                  id: tagservice
+                  imageSize: 84914688
+                  license:
+                    paid: true
+                    type: free
+                  name: tagservice
+                  state: ready
+                  version: 1.5.0-168
+              schema:
+                properties:
+                  data:
+                    properties:
+                      arch:
+                        enum:
+                        - armhf
+                        - amd64
+                        type: string
+                      attributes:
+                        items:
+                          enum:
+                          - started
+                          - installed
+                          - hide
+                          - openInNewTab
+                          - openInSameTab
+                          type: string
+                        type: array
+                      availableVersions:
+                        description: version can be installed from MPKG site(source)
+                        items:
+                          type: string
+                        type: array
+                      description:
+                        type: string
+                      displayName:
+                        type: string
+                      error:
+                        description: this field is appear if error happened
+                        type: string
+                      hardware:
+                        description: hardware required for this APP
+                        items:
+                          type: string
+                        type: array
+                      health:
+                        enum:
+                        - wait
+                        - good
+                        - running
+                        - error
+                        type: string
+                      icon:
+                        description: URL of the icon
+                        type: string
+                      id:
+                        description: internal and unique APP name
+                        type: string
+                      imageSize:
+                        type: integer
+                      license:
+                        properties:
+                          paid:
+                            type: boolean
+                          type:
+                            description: type of license
+                            enum:
+                            - propetual
+                            - free
+                            type: string
+                        type: object
+                      menuID:
+                        description: ID of menu
+                        type: string
+                      name:
+                        description: internal and unique APP name
+                        type: string
+                      progress:
+                        description: this field is appear if progress is available
+                        properties:
+                          currentTask:
+                            description: current running subtask number starting from
+                              1
+                            type: integer
+                          message:
+                            type: string
+                          percentage:
+                            description: current subtask finish percentage from 0
+                              to 100
+                            type: integer
+                          totalTask:
+                            description: total subtask
+                            type: integer
+                        type: object
+                      state:
+                        enum:
+                        - init
+                        - uninstalled
+                        - installing
+                        - stopped
+                        - starting
+                        - ready
+                        - restarting
+                        - stopping
+                        - uninstalling
+                        - recovering
+                        type: string
+                      version:
+                        type: string
+          description: success
+      summary: Find APP by name
+      tags:
+      - apps
+  /apps/{appname}/{action}:
+    put:
+      parameters:
+      - description: name of APP
+        in: path
+        name: appname
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: action
+        required: true
+        schema:
+          enum:
+          - start
+          - stop
+          - uninstall
+          - restart
+          type: string
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  arch: armhf
+                  attributes:
+                  - installed
+                  - started
+                  - openInSameTab
+                  availableVersions: []
+                  category: intelligence
+                  description: |
+                    ThingsPro Tag Framework Core
+                  desiredState: ready
+                  displayName: Tag Service
+                  hardwares: []
+                  health: good
+                  icon: ""
+                  id: tagservice
+                  imageSize: 84914688
+                  license:
+                    paid: true
+                    type: free
+                  name: tagservice
+                  state: ready
+                  version: 1.5.0-168
+              schema:
+                properties:
+                  data:
+                    properties:
+                      arch:
+                        enum:
+                        - armhf
+                        - amd64
+                        type: string
+                      attributes:
+                        items:
+                          enum:
+                          - started
+                          - installed
+                          - hide
+                          - openInNewTab
+                          - openInSameTab
+                          type: string
+                        type: array
+                      availableVersions:
+                        description: version can be installed from MPKG site(source)
+                        items:
+                          type: string
+                        type: array
+                      description:
+                        type: string
+                      displayName:
+                        type: string
+                      error:
+                        description: this field is appear if error happened
+                        type: string
+                      hardware:
+                        description: hardware required for this APP
+                        items:
+                          type: string
+                        type: array
+                      health:
+                        enum:
+                        - wait
+                        - good
+                        - running
+                        - error
+                        type: string
+                      icon:
+                        description: URL of the icon
+                        type: string
+                      id:
+                        description: internal and unique APP name
+                        type: string
+                      imageSize:
+                        type: integer
+                      license:
+                        properties:
+                          paid:
+                            type: boolean
+                          type:
+                            description: type of license
+                            enum:
+                            - propetual
+                            - free
+                            type: string
+                        type: object
+                      menuID:
+                        description: ID of menu
+                        type: string
+                      name:
+                        description: internal and unique APP name
+                        type: string
+                      progress:
+                        description: this field is appear if progress is available
+                        properties:
+                          currentTask:
+                            description: current running subtask number starting from
+                              1
+                            type: integer
+                          message:
+                            type: string
+                          percentage:
+                            description: current subtask finish percentage from 0
+                              to 100
+                            type: integer
+                          totalTask:
+                            description: total subtask
+                            type: integer
+                        type: object
+                      state:
+                        enum:
+                        - init
+                        - uninstalled
+                        - installing
+                        - stopped
+                        - starting
+                        - ready
+                        - restarting
+                        - stopping
+                        - uninstalling
+                        - recovering
+                        type: string
+                      version:
+                        type: string
+          description: success
+      summary: Operate an APP
+      tags:
+      - apps
+  /auth:
+    get:
+      description: This API returns wether authentication token in header is valid
+        by HTTP status code
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data: ok
+          description: success
+        401:
+          description: unauthorized
+      summary: Get authentication status
+      tags:
+      - authentication
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              acceptEULA: true
+              name: admin
+              password: moxa1234
+            schema:
+              properties:
+                acceptEULA:
+                  type: boolean
+                name:
+                  type: string
+                password:
+                  type: string
+              required:
+              - name
+              - password
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InRlc3QiLCJpYXQiOjE1NjM0MjA5MTQsImV4cCI6NDcxNzAyMDkxNH0.7oGA1VHBingnzeG7hHgWEiZ4JmoserFguyeb7_GUK6E
+                  user:
+                    changedPasswordAt: null
+                    email: null
+                    expiredAfter: null
+                    id: 1
+                    isActive: true
+                    loginAt: "0001-01-01T00:00:00Z"
+                    name: admin
+                    permissions:
+                    - SYS_MAINTENANCE_RW
+                    - SYS_USER_RW
+                    roles:
+                    - id: 1
+                      name: Administrator
+              schema:
+                properties:
+                  data:
+                    properties:
+                      token:
+                        type: string
+                      user:
+                        $ref: '#/components/schemas/User'
+          description: success
+        401:
+          description: the account or password you entered is not correct
+        403:
+          description: permission denied
+        423:
+          description: the account was banned temporarily
+      security: []
+      summary: Sign in
+      tags:
+      - authentication
+  /auth/websocket-token:
+    put:
+      description: The token one-shot authentication for websocket only and valid
+        in 30 seconds
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiUm9sZUlEIjoxLCJleHAiOjE1NjM2MTIxNjJ9.CaKmYYCyFXvWXZN0ZXO7dNk_9tBlhNaB9LIMX4bCujY
+          description: success
+        401:
+          description: unauthorized
+      summary: Get websocket token
+      tags:
+      - authentication
+  /events:
+    delete:
+      responses:
+        204:
+          description: success
+      summary: Clear event logs
+      tags:
+      - event
+    get:
+      parameters:
+      - description: Limit the number of result (default:100).
+        in: query
+        name: limit
+        schema:
+          type: integer
+      - description: Log starting from the offset (default:0).
+        in: query
+        name: offset
+        schema:
+          type: integer
+      - description: Order by key (default:time).
+        in: query
+        name: order
+        schema:
+          enum:
+          - time
+          - category
+          - eventName
+          type: string
+      - description: sorting (default:desc).
+        in: query
+        name: sort
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+      - description: Match by category which keywords seperated by comma(,)
+        in: query
+        name: categories
+        schema:
+          type: string
+      - description: Match by event name which keywords seperated by comma(,)
+        in: query
+        name: eventNames
+        schema:
+          type: string
+      - description: Filter out by severity which keywords seperated by comma(,)
+        in: query
+        name: severities
+        schema:
+          type: string
+      - description: Get the specified service of logs.
+        in: query
+        name: origins
+        schema:
+          items:
+            type: string
+          type: array
+      - description: Enable server-sent event (Value is always true if having this
+          field).
+        in: query
+        name: event
+        schema:
+          type: boolean
+      - description: Download event as zip file (Value is always true if having this
+          field).
+        in: query
+        name: download
+        schema:
+          type: boolean
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 2
+                data:
+                - category: system
+                  createdAt: "2020-02-25T00:08:54.97510268+08:00"
+                  event: software installation completed
+                  id: 20340
+                  message: aaaaaaaaaaa bbbbbbbbbb ccccccccccc
+                  origin: system
+                  severity: info
+                  user: admin
+                  userOrigin: 10.144.49.123
+                - category: system
+                  createdAt: "2020-02-25T00:08:54.92855576+08:00"
+                  event: software installation completed
+                  id: 20339
+                  message: aaaaaaaaaaa bbbbbbbbbb ccccccccccc
+                  origin: system
+                  severity: info
+                  user: admin
+                  userOrigin: 10.144.49.123
+                limit: 2
+                offset: 0
+                total: 14154
+              schema:
+                properties:
+                  data:
+                    properties:
+                      category:
+                        description: Event category
+                        type: string
+                      createdAt:
+                        description: Event time in RFC3339 format (default:now).
+                        type: string
+                      event:
+                        description: Event message
+                        type: string
+                      message:
+                        description: Event message in detail
+                        type: string
+                      origin:
+                        description: Which service/APP publish the event
+                        type: string
+                      severity:
+                        description: Event severity (default:info).
+                        enum:
+                        - alert
+                        - warning
+                        - info
+                        type: string
+                      user:
+                        description: Username who trigger the event
+                        type: string
+                      userOrigin:
+                        description: User comes from. It's normally an IP address.
+                        type: string
+            application/zip:
+              schema:
+                format: binary
+                type: string
+            text/event-stream:
+              example: |
+                : connected
+
+                id:137
+                event:message
+                data:{"id":137,"severity":"info","origin":"system","event":"App Start","category":"system","message":"Application started: Cloud Application","createdAt":"2020-02-12T01:09:06.60498948+08:00","user":""}
+
+                id:136
+                event:message
+                data:{"id":136,"severity":"warning","origin":"system","event":"App Stop","category":"system","message":"Application stopped: Cloud Application","createdAt":"2020-02-12T01:08:50.2650116+08:00","user":""}
+          description: success
+      summary: Get events
+      tags:
+      - event
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              category: system
+              event: software installation completed
+              message: 'Installation completed. Job id: 1, software name: update-123'
+              origin: system
+              severity: info
+            schema:
+              properties:
+                category:
+                  description: Event category
+                  type: string
+                createdAt:
+                  description: Event time in RFC3339 format (default:now).
+                  type: string
+                event:
+                  description: Event message
+                  type: string
+                message:
+                  description: Event message in detail
+                  type: string
+                origin:
+                  description: Which service/APP publish the event
+                  type: string
+                severity:
+                  description: Event severity (default:info).
+                  enum:
+                  - alert
+                  - warning
+                  - info
+                  type: string
+                user:
+                  description: Username who trigger the event
+                  type: string
+                userOrigin:
+                  description: User comes from. It's normally an IP address.
+                  type: string
+              required:
+              - origin
+              - event
+              - category
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data: ok
+          description: success
+      summary: Create log
+      tags:
+      - event
+  /events/configuration:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  desiredDiskCacheSizeMB: 2
+                  disks:
+                  - device: /dev/root
+                    free: 1347792896
+                    mount: /
+                    name: System
+                    percent: 75.34374779889012
+                    protect: 838860800
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 4118540288
+                  - device: /dev/mmcblk0p1
+                    free: 7636680704
+                    mount: /media/sd-mmcblk0p1
+                    name: SD1-1
+                    percent: 4.071308614330875
+                    protect: 0
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 7960788992
+                    used: 324108288
+                  enable: true
+                  enableTimeToLiveSec: true
+                  reachThresholdPolicy: rotate
+                  targetDiskName: System
+                  timeToLiveSec: 86400
+              schema:
+                properties:
+                  data:
+                    properties:
+                      desiredDiskCacheSizeMB:
+                        type: string
+                      enable:
+                        type: boolean
+                      enableTimeToLiveSec:
+                        type: boolean
+                      reachThresholdPolicy:
+                        description: default to rotate
+                        enum:
+                        - rotate
+                        - stop
+                        type: string
+                      timeToLiveSec:
+                        description: unlimit if value <= 0
+                        type: integer
+          description: success
+      summary: Get configuration of events
+      tags:
+      - event
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              desiredDiskCacheSizeMB: 2
+              enable: true
+              enableTimeToLiveSec: true
+              reachThresholdPolicy: rotate
+              targetDiskName: System
+              timeToLiveSec: 86400
+            schema:
+              properties:
+                desiredDiskCacheSizeMB:
+                  type: string
+                enable:
+                  type: boolean
+                enableTimeToLiveSec:
+                  type: boolean
+                reachThresholdPolicy:
+                  description: default to rotate
+                  enum:
+                  - rotate
+                  - stop
+                  type: string
+                timeToLiveSec:
+                  description: unlimit if value <= 0
+                  type: integer
+              type: object
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  desiredDiskCacheSizeMB: 2
+                  disks:
+                  - device: /dev/root
+                    free: 1347792896
+                    mount: /
+                    name: System
+                    percent: 75.34374779889012
+                    protect: 838860800
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 4118540288
+                  - device: /dev/mmcblk0p1
+                    free: 7636680704
+                    mount: /media/sd-mmcblk0p1
+                    name: SD1-1
+                    percent: 4.071308614330875
+                    protect: 0
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 7960788992
+                    used: 324108288
+                  enable: true
+                  enableTimeToLiveSec: true
+                  reachThresholdPolicy: rotate
+                  targetDiskName: System
+                  timeToLiveSec: 86400
+              schema:
+                properties:
+                  data:
+                    properties:
+                      desiredDiskCacheSizeMB:
+                        type: string
+                      enable:
+                        type: boolean
+                      enableTimeToLiveSec:
+                        type: boolean
+                      reachThresholdPolicy:
+                        description: default to rotate
+                        enum:
+                        - rotate
+                        - stop
+                        type: string
+                      timeToLiveSec:
+                        description: unlimit if value <= 0
+                        type: integer
+          description: success
+      summary: Set event configuration
+      tags:
+      - event
+  /events/profile:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  categories:
+                  - azure
+                  - device setting
+                  - modbus
+                  - mqtt
+                  - network
+                  - store-forward
+                  - system
+                  eventNames:
+                  - app crash
+                  - app start
+                  - app stop
+                  - buffer active
+                  - buffer clean
+                  - buffer full
+                  - buffer inactive
+                  - buffer sending
+                  - cellular no signal
+                  - cellular signal good
+                  - cellular signal low
+                  - configuration update failed
+                  - configuration update success
+                  - device connect
+                  - device connect fail
+                  - device connected
+                  - device connection fail
+                  - device disconnect
+                  - device reboot
+                  - device send properties fail
+                  - device send telemetry fail
+                  - edge connected
+                  - edge disconnected
+                  - edge send properties fail
+                  - edge send telemetry fail
+                  - function failed
+                  - function recover
+                  - master device conncted
+                  - master device disconnected
+                  - memory usage > 90%
+                  - ota download cancel
+                  - ota download completed
+                  - ota download failed
+                  - ota download resume
+                  - ota download suspend
+                  - slave device connected
+                  - slave device failed
+                  - software installation completed
+                  - software installation failed
+                  - system load 5 min > 1
+                  - system load 5 min > 3
+                  - system storage usage > 90%
+                  - system storage usage > 95%
+                  - time sync failed
+                  - time sync success
+                  - upgrade roll back completed
+                  - uplink change
+                  - user login fail
+                  - wrong function called
+                  events:
+                  - category: device setting
+                    enable: true
+                    event: configuration update failed
+                    id: 1
+                    severity: alert
+                  - category: device setting
+                    enable: false
+                    event: configuration update success
+                    id: 2
+                    severity: info
+                  - category: network
+                    enable: true
+                    event: uplink change
+                    id: 3
+                    severity: warning
+                  - category: device setting
+                    enable: true
+                    event: time sync failed
+                    id: 4
+                    severity: warning
+                  - category: device setting
+                    enable: false
+                    event: time sync success
+                    id: 5
+                    severity: info
+                  - category: network
+                    enable: true
+                    event: cellular no signal
+                    id: 6
+                    severity: alert
+                  - category: network
+                    enable: true
+                    event: cellular signal low
+                    id: 7
+                    severity: warning
+                  - category: network
+                    enable: false
+                    event: cellular signal good
+                    id: 8
+                    severity: info
+                  - category: system
+                    enable: true
+                    event: system storage usage > 90%
+                    id: 9
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: system storage usage > 95%
+                    id: 10
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: system load 5 min > 1
+                    id: 11
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: system load 5 min > 3
+                    id: 12
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: memory usage > 90%
+                    id: 13
+                    severity: warning
+                  - category: azure
+                    enable: false
+                    event: edge connected
+                    id: 14
+                    severity: info
+                  - category: azure
+                    enable: true
+                    event: edge disconnected
+                    id: 15
+                    severity: warning
+                  - category: azure
+                    enable: true
+                    event: edge send properties fail
+                    id: 16
+                    severity: alert
+                  - category: azure
+                    enable: true
+                    event: edge send telemetry fail
+                    id: 17
+                    severity: alert
+                  - category: azure
+                    enable: false
+                    event: device connected
+                    id: 18
+                    severity: info
+                  - category: azure
+                    enable: true
+                    event: device disconnect
+                    id: 19
+                    severity: warning
+                  - category: azure
+                    enable: true
+                    event: device connection fail
+                    id: 20
+                    severity: alert
+                  - category: azure
+                    enable: true
+                    event: device send properties fail
+                    id: 21
+                    severity: alert
+                  - category: azure
+                    enable: true
+                    event: device send telemetry fail
+                    id: 22
+                    severity: alert
+                  - category: store-forward
+                    enable: true
+                    event: buffer active
+                    id: 23
+                    severity: warning
+                  - category: store-forward
+                    enable: false
+                    event: buffer inactive
+                    id: 24
+                    severity: info
+                  - category: store-forward
+                    enable: false
+                    event: buffer sending
+                    id: 25
+                    severity: info
+                  - category: store-forward
+                    enable: false
+                    event: buffer clean
+                    id: 26
+                    severity: info
+                  - category: store-forward
+                    enable: true
+                    event: buffer full
+                    id: 27
+                    severity: alert
+                  - category: mqtt
+                    enable: false
+                    event: device connect
+                    id: 28
+                    severity: info
+                  - category: mqtt
+                    enable: true
+                    event: device disconnect
+                    id: 29
+                    severity: warning
+                  - category: mqtt
+                    enable: true
+                    event: device connect fail
+                    id: 30
+                    severity: alert
+                  - category: mqtt
+                    enable: true
+                    event: device send telemetry fail
+                    id: 31
+                    severity: alert
+                  - category: modbus
+                    enable: true
+                    event: configuration update success
+                    id: 37
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: configuration update failed
+                    id: 38
+                    severity: warning
+                  - category: modbus
+                    enable: false
+                    event: slave device connected
+                    id: 39
+                    severity: info
+                  - category: modbus
+                    enable: true
+                    event: slave device failed
+                    id: 40
+                    severity: alert
+                  - category: modbus
+                    enable: false
+                    event: function recover
+                    id: 41
+                    severity: info
+                  - category: modbus
+                    enable: true
+                    event: function failed
+                    id: 42
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: master device conncted
+                    id: 45
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: master device disconnected
+                    id: 46
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: wrong function called
+                    id: 47
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: device reboot
+                    id: 48
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: user login fail
+                    id: 49
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: app stop
+                    id: 50
+                    severity: warning
+                  - category: system
+                    enable: false
+                    event: app start
+                    id: 51
+                    severity: info
+                  - category: system
+                    enable: true
+                    event: app crash
+                    id: 52
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: ota download failed
+                    id: 53
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: ota download suspend
+                    id: 54
+                    severity: warning
+                  - category: system
+                    enable: false
+                    event: ota download resume
+                    id: 55
+                    severity: info
+                  - category: system
+                    enable: false
+                    event: ota download completed
+                    id: 56
+                    severity: info
+                  - category: system
+                    enable: true
+                    event: ota download cancel
+                    id: 57
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: software installation failed
+                    id: 58
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: upgrade roll back completed
+                    id: 59
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: software installation completed
+                    id: 60
+                    severity: info
+                  origins:
+                  - AID App
+                  - AIE App
+                  - Device App
+                  - MQTT Client
+                  - Modbus
+                  - system
+                  severities:
+                  - info
+                  - warning
+                  - alert
+          description: success
+      summary: Event profile
+      tags:
+      - event
+    patch:
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byid:
+                summary: update by ID
+                value:
+                  events:
+                  - enable: true
+                    id: 60
+              byname:
+                summary: update by name and category
+                value:
+                  events:
+                  - category: system
+                    enable: true
+                    event: software installation completed
+            schema: {}
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  categories:
+                  - azure
+                  - device setting
+                  - modbus
+                  - mqtt
+                  - network
+                  - store-forward
+                  - system
+                  eventNames:
+                  - app crash
+                  - app start
+                  - app stop
+                  - buffer active
+                  - buffer clean
+                  - buffer full
+                  - buffer inactive
+                  - buffer sending
+                  - cellular no signal
+                  - cellular signal good
+                  - cellular signal low
+                  - configuration update failed
+                  - configuration update success
+                  - device connect
+                  - device connect fail
+                  - device connected
+                  - device connection fail
+                  - device disconnect
+                  - device reboot
+                  - device send properties fail
+                  - device send telemetry fail
+                  - edge connected
+                  - edge disconnected
+                  - edge send properties fail
+                  - edge send telemetry fail
+                  - function failed
+                  - function recover
+                  - master device conncted
+                  - master device disconnected
+                  - memory usage > 90%
+                  - ota download cancel
+                  - ota download completed
+                  - ota download failed
+                  - ota download resume
+                  - ota download suspend
+                  - slave device connected
+                  - slave device failed
+                  - software installation completed
+                  - software installation failed
+                  - system load 5 min > 1
+                  - system load 5 min > 3
+                  - system storage usage > 90%
+                  - system storage usage > 95%
+                  - time sync failed
+                  - time sync success
+                  - upgrade roll back completed
+                  - uplink change
+                  - user login fail
+                  - wrong function called
+                  events:
+                  - category: device setting
+                    enable: true
+                    event: configuration update failed
+                    id: 1
+                    severity: alert
+                  - category: device setting
+                    enable: false
+                    event: configuration update success
+                    id: 2
+                    severity: info
+                  - category: network
+                    enable: true
+                    event: uplink change
+                    id: 3
+                    severity: warning
+                  - category: device setting
+                    enable: true
+                    event: time sync failed
+                    id: 4
+                    severity: warning
+                  - category: device setting
+                    enable: false
+                    event: time sync success
+                    id: 5
+                    severity: info
+                  - category: network
+                    enable: true
+                    event: cellular no signal
+                    id: 6
+                    severity: alert
+                  - category: network
+                    enable: true
+                    event: cellular signal low
+                    id: 7
+                    severity: warning
+                  - category: network
+                    enable: false
+                    event: cellular signal good
+                    id: 8
+                    severity: info
+                  - category: system
+                    enable: true
+                    event: system storage usage > 90%
+                    id: 9
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: system storage usage > 95%
+                    id: 10
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: system load 5 min > 1
+                    id: 11
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: system load 5 min > 3
+                    id: 12
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: memory usage > 90%
+                    id: 13
+                    severity: warning
+                  - category: azure
+                    enable: false
+                    event: edge connected
+                    id: 14
+                    severity: info
+                  - category: azure
+                    enable: true
+                    event: edge disconnected
+                    id: 15
+                    severity: warning
+                  - category: azure
+                    enable: true
+                    event: edge send properties fail
+                    id: 16
+                    severity: alert
+                  - category: azure
+                    enable: true
+                    event: edge send telemetry fail
+                    id: 17
+                    severity: alert
+                  - category: azure
+                    enable: false
+                    event: device connected
+                    id: 18
+                    severity: info
+                  - category: azure
+                    enable: true
+                    event: device disconnect
+                    id: 19
+                    severity: warning
+                  - category: azure
+                    enable: true
+                    event: device connection fail
+                    id: 20
+                    severity: alert
+                  - category: azure
+                    enable: true
+                    event: device send properties fail
+                    id: 21
+                    severity: alert
+                  - category: azure
+                    enable: true
+                    event: device send telemetry fail
+                    id: 22
+                    severity: alert
+                  - category: store-forward
+                    enable: true
+                    event: buffer active
+                    id: 23
+                    severity: warning
+                  - category: store-forward
+                    enable: false
+                    event: buffer inactive
+                    id: 24
+                    severity: info
+                  - category: store-forward
+                    enable: false
+                    event: buffer sending
+                    id: 25
+                    severity: info
+                  - category: store-forward
+                    enable: false
+                    event: buffer clean
+                    id: 26
+                    severity: info
+                  - category: store-forward
+                    enable: true
+                    event: buffer full
+                    id: 27
+                    severity: alert
+                  - category: mqtt
+                    enable: false
+                    event: device connect
+                    id: 28
+                    severity: info
+                  - category: mqtt
+                    enable: true
+                    event: device disconnect
+                    id: 29
+                    severity: warning
+                  - category: mqtt
+                    enable: true
+                    event: device connect fail
+                    id: 30
+                    severity: alert
+                  - category: mqtt
+                    enable: true
+                    event: device send telemetry fail
+                    id: 31
+                    severity: alert
+                  - category: modbus
+                    enable: true
+                    event: configuration update success
+                    id: 37
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: configuration update failed
+                    id: 38
+                    severity: warning
+                  - category: modbus
+                    enable: false
+                    event: slave device connected
+                    id: 39
+                    severity: info
+                  - category: modbus
+                    enable: true
+                    event: slave device failed
+                    id: 40
+                    severity: alert
+                  - category: modbus
+                    enable: false
+                    event: function recover
+                    id: 41
+                    severity: info
+                  - category: modbus
+                    enable: true
+                    event: function failed
+                    id: 42
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: master device conncted
+                    id: 45
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: master device disconnected
+                    id: 46
+                    severity: warning
+                  - category: modbus
+                    enable: true
+                    event: wrong function called
+                    id: 47
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: device reboot
+                    id: 48
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: user login fail
+                    id: 49
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: app stop
+                    id: 50
+                    severity: warning
+                  - category: system
+                    enable: false
+                    event: app start
+                    id: 51
+                    severity: info
+                  - category: system
+                    enable: true
+                    event: app crash
+                    id: 52
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: ota download failed
+                    id: 53
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: ota download suspend
+                    id: 54
+                    severity: warning
+                  - category: system
+                    enable: false
+                    event: ota download resume
+                    id: 55
+                    severity: info
+                  - category: system
+                    enable: false
+                    event: ota download completed
+                    id: 56
+                    severity: info
+                  - category: system
+                    enable: true
+                    event: ota download cancel
+                    id: 57
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: software installation failed
+                    id: 58
+                    severity: alert
+                  - category: system
+                    enable: true
+                    event: upgrade roll back completed
+                    id: 59
+                    severity: warning
+                  - category: system
+                    enable: true
+                    event: software installation completed
+                    id: 60
+                    severity: info
+                  origins:
+                  - AID App
+                  - AIE App
+                  - Device App
+                  - MQTT Client
+                  - Modbus
+                  - system
+                  severities:
+                  - info
+                  - warning
+                  - alert
+          description: success
+      summary: Switch event enablement
+      tags:
+      - event
+  /jobs:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 1
+                data:
+                - at: null
+                  completedAt: null
+                  createdAt: "2019-10-31T14:05:48.287613208+08:00"
+                  id: 6
+                  lastState: ""
+                  nextTriggerAt: null
+                  now: true
+                  owner: system
+                  pendingAt: "2019-10-31T14:05:48.464809333+08:00"
+                  resourceID: 4
+                  resourceType: installation
+                  startedAt: "2019-10-31T14:05:48.481181202+08:00"
+                  state: running
+              schema:
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    items:
+                      properties:
+                        at:
+                          description: Run the job periodically
+                          properties:
+                            day:
+                              type: string
+                            dayOfWeek:
+                              type: string
+                            hour:
+                              type: string
+                            minute:
+                              type: string
+                            month:
+                              type: string
+                        completedAt:
+                          format: date-time
+                          type: string
+                        completedTask:
+                          type: integer
+                        createdAt:
+                          format: date-time
+                          type: string
+                        errorMessage:
+                          description: appear when state is failed
+                          type: string
+                        id:
+                          type: integer
+                        lastState:
+                          description: When suspended, lastState is the last active
+                            state
+                          type: string
+                        nextTriggerAt:
+                          description: When setting `at`, this field shows the time
+                            to start
+                          format: date-time
+                          type: string
+                        owner:
+                          description: User whom creating this job
+                          type: string
+                        pendingAt:
+                          format: date-time
+                          type: string
+                        resourceID:
+                          description: resource id associating to this job
+                          type: integer
+                        resourceType:
+                          description: resource type associating to this job
+                          enum:
+                          - installation
+                          - reboot
+                          type: string
+                        startedAt:
+                          format: date-time
+                          type: string
+                        state:
+                          enum:
+                          - created
+                          - pending
+                          - running
+                          - succeed
+                          - failed
+                          - canceling
+                          - canceled
+                          - suppending
+                          - suppended
+                          - resuming
+                          type: string
+                        totalTask:
+                          type: integer
+                    type: array
+          description: success
+      summary: Get jobs
+      tags:
+      - job
+  /permissions:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 2
+                data:
+                - description: ""
+                  id: SYS_USER_RW
+                  name: User/Role Management
+                - description: ""
+                  id: SYS_MAINTENANCE_RW
+                  name: Device Management
+              schema:
+                items:
+                  $ref: '#/components/schemas/Permission'
+                type: array
+          description: success
+      summary: Query permissions
+      tags:
+      - users
+  /roles:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 1
+                data:
+                - description: ""
+                  id: 1
+                  name: Administrator
+                  permissions:
+                  - SYS_USER_RW
+                  - SYS_MAINTENANCE_RW
+                  users:
+                  - id: 1
+                    name: admin
+                  - id: 2
+                    name: myuser
+              schema:
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    items:
+                      $ref: '#/components/schemas/Role'
+                    type: array
+          description: success
+      summary: Query roles
+      tags:
+      - users
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              description: ""
+              name: myrole
+              permissions:
+              - SYS_USER_RW
+            schema:
+              properties:
+                description:
+                  type: string
+                name:
+                  type: string
+                permissions:
+                  items:
+                    description: ID of permission
+                    type: string
+              required:
+              - name
+              - permissions
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  description: moxa best
+                  id: 2
+                  name: myrole
+                  permissions:
+                  - SYS_USER_RW
+                  users: []
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Role'
+          description: success
+      summary: create a role
+      tags:
+      - users
+  /roles/{id}:
+    delete:
+      responses:
+        204:
+          description: success
+      summary: Delete role by ID
+      tags:
+      - users
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  description: moxa best
+                  id: 2
+                  name: myrole
+                  permissions:
+                  - SYS_USER_RW
+                  users: []
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Role'
+          description: success
+      summary: get role by ID
+      tags:
+      - users
+    parameters:
+    - description: ID of role
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              description: ""
+              name: myrole
+              permissions:
+              - SYS_USER_RW
+            schema:
+              properties:
+                description:
+                  type: string
+                name:
+                  type: string
+                permissions:
+                  items:
+                    description: ID of permission
+                    type: string
+              required:
+              - name
+              - permissions
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  description: moxa best
+                  id: 2
+                  name: myrole
+                  permissions:
+                  - SYS_USER_RW
+                  users: []
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Role'
+          description: success
+      summary: update role by ID
+      tags:
+      - users
+  /system/configuration:
+    get:
+      parameters:
+      - description: action to be executed
+        in: query
+        name: action
+        required: true
+        schema:
+          default: download
+          enum:
+          - download
+          - get-profile
+          type: string
+      - description: Use password to encryption (default:true)
+        in: query
+        name: encryption
+        schema:
+          default: true
+          type: boolean
+      - description: If encryption is true, use this field as password (default:serial
+          number), which should contain a number and a special char.
+        in: header
+        name: password
+        schema:
+          type: string
+      - description: select configurations by profiles. If no value is given, it will
+          select all.
+        example: |
+          [{"app":"modbusmaster"},{"app":"cloud"}]
+        in: query
+        name: select
+        schema:
+          format: string
+      - description: filter out configurations by profiles. It will do `select` first,
+          then do `filter`.
+        example: |
+          [{"labels":["credential"]},{"labels":["network"]}]
+        in: query
+        name: filter
+        schema:
+          format: string
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 21
+                data:
+                - app: system
+                  labels: []
+                  section: core
+                - app: device
+                  labels:
+                  - network
+                  section: cellulars
+                - app: device
+                  labels: []
+                  section: dhcpservers
+                - app: device
+                  labels: []
+                  section: discovery
+                - app: device
+                  labels:
+                  - network
+                  section: ethernets
+                - app: device
+                  labels: []
+                  section: firewall
+                - app: device
+                  labels: []
+                  section: general
+                - app: device
+                  labels: []
+                  section: gps
+                - app: device
+                  labels: []
+                  section: iptables
+                - app: device
+                  labels: []
+                  section: minicards
+                - app: device
+                  labels:
+                  - network
+                  section: route
+                - app: device
+                  labels: []
+                  section: serials
+                - app: device
+                  labels: []
+                  section: time
+                - app: device
+                  labels:
+                  - network
+                  section: wifi
+                - app: cloud
+                  labels: []
+                  section: core
+                - app: edge-web
+                  labels: []
+                  section: core
+                - app: eipscanner
+                  labels: []
+                  section: core
+                - app: function
+                  labels: []
+                  section: core
+                - app: modbusmaster
+                  labels: []
+                  section: core
+                - app: opcuaserver
+                  labels: []
+                  section: core
+                - app: tagservice
+                  labels: []
+                  section: core
+              schema:
+                properties:
+                  data:
+                    items:
+                      properties:
+                        app:
+                          description: filter by APP name or `system` as internal
+                            services. Keep this empty or skip this if needed.
+                          type: string
+                        labels:
+                          description: filter by labels
+                          items:
+                            type: string
+                        section:
+                          description: filter by configuration section name. Keep
+                            this empty or skip this if needed.
+                          type: string
+                      type: object
+                    type: array
+            application/tar+gz:
+              schema:
+                format: binary
+                type: string
+          description: |
+            success to return one of content-type
+              1. `application/tar+gz` when query parameter `action` == `download`
+              2. `application/json` when query parameter `action` == `get-profile`
+        400:
+          description: |
+            1. Bad format of query string
+      summary: Export configurations
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                apply:
+                  default: false
+                  description: Apply configuration and will check if model name or
+                    version has conflict.
+                  type: boolean
+                encryption:
+                  default: true
+                  description: Use password to encryption (default:true)
+                  type: boolean
+                file:
+                  description: configuration file
+                  format: binary
+                  type: string
+                password:
+                  description: password (default:serial number)
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              examples:
+                Both different:
+                  summary: Both different
+                  value:
+                    data:
+                      diff:
+                        current:
+                          model: uc-3100
+                          tpeversion: 2.0.0-1600
+                        imported:
+                          model: uc-8100-lx
+                          tpeversion: 1.1.0-1234
+                      fileName: 2019-12-19-13-52-backup.tar.gz
+                      fileSize: 46272
+                Devicedifferent:
+                  summary: Device different
+                  value:
+                    data:
+                      diff:
+                        current:
+                          model: uc-3100
+                          tpeversion: 2.0.0-1600
+                        imported:
+                          model: uc-8100-lx
+                          tpeversion: 2.0.0-1600
+                      fileName: 2019-12-19-13-52-backup.tar.gz
+                      fileSize: 46272
+                Nodifference:
+                  summary: No difference
+                  value:
+                    data:
+                      diff: null
+                      fileName: 2019-12-19-13-52-backup.tar.gz
+                      fileSize: 46272
+                TPEversiondifferent:
+                  summary: TPE version different
+                  value:
+                    data:
+                      diff:
+                        current:
+                          model: uc-3100
+                          tpeversion: 2.0.0-1600
+                        imported:
+                          model: uc-3100
+                          tpeversion: 1.1.0-1234
+                      fileName: 2019-12-19-13-52-backup.tar.gz
+                      fileSize: 46272
+              schema:
+                properties:
+                  data:
+                    properties:
+                      diff:
+                        properties:
+                          current:
+                            properties:
+                              model:
+                                type: string
+                              tpeversion:
+                                type: string
+                            type: object
+                          imported:
+                            properties:
+                              model:
+                                type: string
+                              tpeversion:
+                                type: string
+                            type: object
+                        type: object
+                      filename:
+                        type: string
+                      filesize:
+                        type: integer
+          description: success
+        400:
+          content:
+            application/json:
+              examples:
+                extract:
+                  summary: invalid extract
+                  value:
+                    error:
+                      code: 10001
+                      message: 'extract: invalid file or authentication failed'
+                filesize:
+                  summary: file size is over limitation
+                  value:
+                    error:
+                      code: 10000
+                      message: file is over size
+              schema:
+                properties:
+                  error:
+                    properties:
+                      code:
+                        type: integer
+                      message:
+                        type: string
+          description: error
+      summary: Upload configurations
+      tags:
+      - systems
+  /system/configuration/{filename}:
+    parameters:
+    - description: |
+        The `filename` value returned in the response the `filename` in `PUT /system/configuration`.
+      in: path
+      name: filename
+      required: true
+      schema:
+        type: string
+    patch:
+      description: |
+        Apply configuration that uploaded by `PUT /system/configuration`. After applying configuration, system will be rebooted in 5 seconds.
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  diff: null
+                  fileName: 2019-12-20-04-51-backup.tar.gz
+                  fileSize: 46297
+              schema:
+                properties:
+                  data:
+                    properties:
+                      fileName:
+                        type: string
+                      fileSize:
+                        type: integer
+          description: success
+      summary: Apply configuration
+      tags:
+      - systems
+  /system/discovery:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable discovery service
+                        type: boolean
+          description: success
+      summary: Get discovery service status
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              enable: true
+            schema:
+              properties:
+                enable:
+                  description: enable discovery service
+                  type: boolean
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable discovery service
+                        type: boolean
+          description: success
+      summary: Set discovery service configuration
+      tags:
+      - systems
+  /system/httpserver:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  certFileName: default.crt
+                  httpEnable: true
+                  httpPort: 80
+                  httpsEnable: true
+                  httpsPort: 443
+                  keyFileName: default.key
+              schema:
+                properties:
+                  data:
+                    properties:
+                      certFilename:
+                        description: filename of https certificate
+                        type: string
+                      httpEnable:
+                        type: boolean
+                      httpPort:
+                        description: listen port for http
+                        type: integer
+                      httpsEnable:
+                        type: boolean
+                      httpsPort:
+                        description: listen port for https
+                        type: integer
+                      keyFilename:
+                        description: filename of https key
+                        type: string
+          description: success
+      summary: Get httpserver configuration
+      tags:
+      - systems
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                cert:
+                  description: (JSON only) certificate content
+                  type: string
+                certFile:
+                  description: |
+                    (form-data only) certificate for https. The suffix of filename must be one of `.crt`, `.cer` or `.pem` with PEM format which the content starts with `----- BEGIN CERTIFICATE -----`
+                  format: binary
+                  type: string
+                certFilename:
+                  description: (JSON only) filename of client authentication certificate
+                  type: string
+                httpEnable:
+                  type: boolean
+                httpPort:
+                  description: listen port for http
+                  type: integer
+                httpsEnable:
+                  type: boolean
+                httpsPort:
+                  description: listen port for https
+                  type: integer
+                key:
+                  description: (JSON only) key content
+                  type: string
+                keyFile:
+                  description: |
+                    (form-data only) key for https. The suffix of filename must be one of `.key`, `.pk` or `.pem` with PEM format which the content starts with `----- BEGIN RSA PRIVATE KEY -----`
+                  format: binary
+                  type: string
+                keyFilename:
+                  description: (JSON only) filename of client authentication key
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  certFileName: default.crt
+                  httpEnable: true
+                  httpPort: 80
+                  httpsEnable: true
+                  httpsPort: 443
+                  keyFileName: default.key
+              schema:
+                properties:
+                  data:
+                    properties:
+                      certFilename:
+                        description: filename of https certificate
+                        type: string
+                      httpEnable:
+                        type: boolean
+                      httpPort:
+                        description: listen port for http
+                        type: integer
+                      httpsEnable:
+                        type: boolean
+                      httpsPort:
+                        description: listen port for https
+                        type: integer
+                      keyFilename:
+                        description: filename of https key
+                        type: string
+          description: success
+      summary: Set httpserver configuration partially
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                cert:
+                  description: (JSON only) certificate content
+                  type: string
+                certFile:
+                  description: |
+                    (form-data only) certificate for https. The suffix of filename must be one of `.crt`, `.cer` or `.pem` with PEM format which the content starts with `----- BEGIN CERTIFICATE -----`
+                  format: binary
+                  type: string
+                certFilename:
+                  description: (JSON only) filename of client authentication certificate
+                  type: string
+                httpEnable:
+                  type: boolean
+                httpPort:
+                  description: listen port for http
+                  type: integer
+                httpsEnable:
+                  type: boolean
+                httpsPort:
+                  description: listen port for https
+                  type: integer
+                key:
+                  description: (JSON only) key content
+                  type: string
+                keyFile:
+                  description: |
+                    (form-data only) key for https. The suffix of filename must be one of `.key`, `.pk` or `.pem` with PEM format which the content starts with `----- BEGIN RSA PRIVATE KEY -----`
+                  format: binary
+                  type: string
+                keyFilename:
+                  description: (JSON only) filename of client authentication key
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  certFileName: default.crt
+                  httpEnable: true
+                  httpPort: 80
+                  httpsEnable: true
+                  httpsPort: 443
+                  keyFileName: default.key
+              schema:
+                properties:
+                  data:
+                    properties:
+                      certFilename:
+                        description: filename of https certificate
+                        type: string
+                      httpEnable:
+                        type: boolean
+                      httpPort:
+                        description: listen port for http
+                        type: integer
+                      httpsEnable:
+                        type: boolean
+                      httpsPort:
+                        description: listen port for https
+                        type: integer
+                      keyFilename:
+                        description: filename of https key
+                        type: string
+          description: success
+      summary: Set httpserver configuration
+      tags:
+      - systems
+  /system/provision:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+                  schedule:
+                    enable: true
+                    disableAfterSec: 900
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable provisioning function
+                        type: boolean
+                      schedule:
+                        type: object
+                        properties:
+                          enable:
+                            description: schedule to disable provisioning function after a period
+                            type: boolean
+                          disableAfterSec:
+                            description: time (in seconds) of period
+                            type: integer
+          description: success
+      summary: Get provisioning service status
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              enable: true
+              schedule:
+                enable: true
+                disableAfterSec: 900
+            schema:
+              properties:
+                enable:
+                  description: enable provisioning function
+                  type: boolean
+                schedule:
+                  type: object
+                  properties:
+                    enable:
+                      description: schedule to disable provisioning function after a period
+                      type: boolean
+                    disableAfterSec:
+                      description: time (in seconds) of period
+                      type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+                  schedule:
+                    enable: true
+                    disableAfterSec: 900
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable provisioning function
+                        type: boolean
+                      schedule:
+                        type: object
+                        properties:
+                          enable:
+                            description: schedule to disable provisioning function after a period
+                            type: boolean
+                          disableAfterSec:
+                            description: time (in seconds) of period
+                            type: integer
+          description: success
+      summary: Set provisioning service configuration
+      tags:
+      - systems
+  /system/log:
+    get:
+      parameters:
+      - description: Indicate to download log as zip file. Value is always true.
+        in: query
+        name: download
+        schema:
+          type: boolean
+      - description: The target app's log for download
+        in: query
+        name: appName
+        schema:
+          type: string
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  desiredDiskCacheSizeMB: 100
+                  disks:
+                  - device: /dev/root
+                    free: 3961389056
+                    mount: /
+                    name: System
+                    percent: 27.531145236535952
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 1504944128
+                  - device: /dev/mmcblk0p1
+                    free: 1069535232
+                    mount: /host/media/sd-mmcblk0p1
+                    name: SD 1-1
+                    percent: 75.04916265816615
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 4286570496
+                    used: 3217035264
+                  - device: /dev/mmcblk0p2
+                    free: 4286566400
+                    mount: /host/media/mylabel
+                    name: mylabel
+                    percent: 9.555424327728121e-05
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 4286570496
+                    used: 4096
+                  - device: /dev/mmcblk0p3
+                    free: 4286566400
+                    mount: /host/media/sd-mmcblk0p3
+                    name: SD 1-3
+                    percent: 9.555424327728121e-05
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 4286570496
+                    used: 4096
+                  enable: true
+                  enableTimeToLiveSec: false
+                  targetDiskName: System
+                  timeToLiveSec: 86400
+              schema:
+                properties:
+                  data:
+                    properties:
+                      desiredDiskCacheSizeMB:
+                        type: string
+                      disk:
+                        description: refer to API `/device/general`
+                      enable:
+                        type: boolean
+                      enableTimeToLiveSec:
+                        type: boolean
+                      targetDiskName:
+                        type: string
+                      timeToLiveSec:
+                        description: unlimit if value <= 0
+                        type: integer
+            application/zip:
+              schema:
+                format: binary
+                type: string
+          description: success
+      summary: Get configuration or download log
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              desiredDiskCacheSizeMB: 100
+              enable: true
+              enableTimeToLiveSec: false
+              targetDiskName: System
+              timeToLiveSec: 7200
+            schema:
+              properties:
+                desiredDiskCacheSizeMB:
+                  type: string
+                disk:
+                  description: refer to API `/device/general`
+                enable:
+                  type: boolean
+                enableTimeToLiveSec:
+                  type: boolean
+                targetDiskName:
+                  type: string
+                timeToLiveSec:
+                  description: unlimit if value <= 0
+                  type: integer
+              type: object
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  desiredDiskCacheSizeMB: 100
+                  disks:
+                  - device: /dev/root
+                    free: 3961389056
+                    mount: /
+                    name: System
+                    percent: 27.531145236535952
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 1504944128
+                  - device: /dev/mmcblk0p1
+                    free: 1069535232
+                    mount: /host/media/sd-mmcblk0p1
+                    name: SD 1-1
+                    percent: 75.04916265816615
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 4286570496
+                    used: 3217035264
+                  - device: /dev/mmcblk0p2
+                    free: 4286566400
+                    mount: /host/media/mylabel
+                    name: mylabel
+                    percent: 9.555424327728121e-05
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 4286570496
+                    used: 4096
+                  - device: /dev/mmcblk0p3
+                    free: 4286566400
+                    mount: /host/media/sd-mmcblk0p3
+                    name: SD 1-3
+                    percent: 9.555424327728121e-05
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 4286570496
+                    used: 4096
+                  enable: true
+                  enableTimeToLiveSec: false
+                  targetDiskName: System
+                  timeToLiveSec: 86400
+              schema:
+                properties:
+                  data:
+                    properties:
+                      desiredDiskCacheSizeMB:
+                        type: string
+                      disk:
+                        description: refer to API `/device/general`
+                      enable:
+                        type: boolean
+                      enableTimeToLiveSec:
+                        type: boolean
+                      targetDiskName:
+                        type: string
+                      timeToLiveSec:
+                        description: unlimit if value <= 0
+                        type: integer
+            application/zip:
+              schema:
+                format: binary
+                type: string
+          description: success
+      summary: Set log configuration
+      tags:
+      - systems
+  /system/reboot:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  at:
+                    day: "1"
+                    dayOfWeek: '*'
+                    hour: "12"
+                    minute: "0"
+                    month: "1"
+                  enableScheduler: true
+                  lastBootAt: "2019-01-01T12:00:00Z"
+                  nextTriggerAt: "2019-01-01T12:00:00Z"
+              schema:
+                properties:
+                  data:
+                    properties:
+                      at:
+                        properties:
+                          day:
+                            type: string
+                          dayOfWeek:
+                            type: string
+                          hour:
+                            type: string
+                          minute:
+                            type: string
+                          month:
+                            type: string
+                      enableScheduler:
+                        type: boolean
+                      lastBootAt:
+                        format: date-time
+                        type: string
+                      nextTriggerAt:
+                        format: date-time
+                        type: string
+          description: success
+      summary: Get reboot configuration
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          application/json:
+            examples:
+              now:
+                summary: now
+                value:
+                  now: true
+              scheduler:
+                summary: reboot every hours
+                value:
+                  at:
+                    day: "1"
+                    dayOfWeek: '*'
+                    hour: "12"
+                    minute: "0"
+                    month: "1"
+                  enableScheduler: true
+            schema:
+              properties:
+                at:
+                  description: the format can be a fixed string "now", datetime in
+                    RFC3339, or crontab (https://linux.die.net/man/5/crontab)
+                  type: string
+                enableScheduler:
+                  type: boolean
+                now:
+                  description: reboot immediately
+                  type: boolean
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  at:
+                    day: "1"
+                    dayOfWeek: '*'
+                    hour: "12"
+                    minute: "0"
+                    month: "1"
+                  enableScheduler: true
+                  lastBootAt: "2019-01-01T12:00:00Z"
+                  nextTriggerAt: "2019-01-01T12:00:00Z"
+              schema:
+                properties:
+                  data:
+                    properties:
+                      at:
+                        properties:
+                          day:
+                            type: string
+                          dayOfWeek:
+                            type: string
+                          hour:
+                            type: string
+                          minute:
+                            type: string
+                          month:
+                            type: string
+                      enableScheduler:
+                        type: boolean
+                      lastBootAt:
+                        format: date-time
+                        type: string
+                      nextTriggerAt:
+                        format: date-time
+                        type: string
+          description: success
+      summary: Reboot system
+      tags:
+      - systems
+  /system/reset-default:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  factory:
+                    isSupported: true
+                    scopes:
+                    - all
+                  system:
+                    isSupported: true
+                    scopes:
+                    - all
+                    - account
+                    - appdata
+                    - discovery
+                    - eventlog
+                    - httpserver
+                    - job
+                    - journald
+                    - keep-network-setting
+                    - provision
+                    - reboot
+                    - sshserver
+                    - serialconsole
+                    - upgrade
+              schema:
+                properties:
+                  data:
+                    properties:
+                      fileName:
+                        type: string
+                      fileSize:
+                        type: integer
+          description: success
+      summary: get reset system capabilities
+      tags:
+      - systems
+    put:
+      parameters:
+      - in: query
+        name: mode
+        schema:
+          default: system
+          enum:
+          - factory
+          - system
+          type: string
+      - description: If true, do reset immediately, else wait 3 seconds
+        in: query
+        name: sync
+        schema:
+          default: false
+          type: boolean
+      - description: reset scope
+        in: query
+        name: scopes
+        schema:
+          items:
+            enum:
+            - all
+            - account
+            - appdata
+            - discovery
+            - eventlog
+            - httpserver
+            - job
+            - journald
+            - keep-network-setting
+            - provision
+            - reboot
+            - sshserver
+            - serialconsole
+            - upgrade
+            type: string
+          type: array
+      responses:
+        200:
+          description: success
+        400:
+          description: |
+            1. unsupported mode
+            2. status is not ready
+            3. invalid scopes
+      summary: reset system to default configuration
+      tags:
+      - systems
+  /system/serialconsole:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable serial console
+                        type: boolean
+          description: success
+      summary: Get serial console status
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              enable: true
+            schema:
+              properties:
+                enable:
+                  description: enable serial console
+                  type: boolean
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable serial console
+                        type: boolean
+          description: success
+      summary: Set serial console configuration
+      tags:
+      - systems
+  /system/services:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  cloudConnectivity:
+                  - available: true
+                    enable: true
+                    id: cloud
+                  network:
+                  - available: true
+                    enable: true
+                    id: wifi
+                  - available: true
+                    enable: true
+                    id: cellular
+                  - available: true
+                    enable: true
+                    id: lan1
+                  - available: true
+                    enable: true
+                    id: lan2
+                  - available: false
+                    enable: false
+                    id: dhcpserver1
+                  - available: true
+                    enable: false
+                    id: dhcpserver2
+                  protocol:
+                  - available: true
+                    enable: true
+                    id: modbusmaster
+                  - available: true
+                    enable: true
+                    id: eipscanner
+                  - available: true
+                    enable: true
+                    id: opcuaserver
+                  provisionService:
+                  - available: true
+                    enable: true
+                    id: provision
+                  - available: true
+                    enable: true
+                    id: provisionschedule
+                  service:
+                  - available: true
+                    enable: false
+                    id: httpservice
+                  - available: true
+                    enable: true
+                    id: httpsservice
+                  - available: true
+                    enable: true
+                    id: ntp
+                  - available: true
+                    enable: true
+                    id: sshserver
+                  - available: true
+                    enable: true
+                    id: localconsole
+                  - available: true
+                    enable: false
+                    id: sdcard
+                  - available: true
+                    enable: true
+                    id: syslog
+                  - available: true
+                    enable: true
+                    id: eventlog
+                  - available: true
+                    enable: false
+                    id: internetcheckalive
+              schema:
+                properties:
+                  data:
+                    properties:
+                      network:
+                        items:
+                          properties:
+                            available:
+                              description: service available
+                              type: boolean
+                            enable:
+                              description: service status
+                              type: boolean
+                            id:
+                              description: service name
+                              type: string
+                        type: array
+          description: success
+      summary: Get system services
+      tags:
+      - systems
+  /system/services/{id}/disable:
+    parameters:
+    - description: service name
+      in: path
+      name: id
+      required: true
+      schema:
+        enum:
+        - dhcpserver1
+        - dhcpserver2
+        - httpservice
+        - httpsservice
+        - sshserver
+        - localconsole
+        - lan1
+        - lan2
+        - cloud
+        - modbusmaster
+        - eipscanner
+        - opcuaserver
+        - sdcard
+        - ntp
+        - eventlog
+        - syslog
+        - wifi
+        - cellular
+        - provision
+        - provisionschedule
+        - internetcheckalive
+        type: string
+    put:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: false
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: service status
+                        type: boolean
+          description: success
+      summary: Disable system service
+      tags:
+      - systems
+  /system/services/{id}/enable:
+    parameters:
+    - description: service name
+      in: path
+      name: id
+      required: true
+      schema:
+        enum:
+        - dhcpserver1
+        - dhcpserver2
+        - httpservice
+        - httpsservice
+        - sshserver
+        - localconsole
+        - lan1
+        - lan2
+        - cloud
+        - modbusmaster
+        - eipscanner
+        - opcuaserver
+        - sdcard
+        - ntp
+        - eventlog
+        - syslog
+        - wifi
+        - cellular
+        - provision
+        - provisionschedule
+        - internetcheckalive
+        type: string
+    put:
+      description: |
+        enable system services including Web GUI `edge-web`,
+        DHCP Server `dhcpserverX`, Discovery `discovery`,
+        HTTP service `httpservice` and so on.
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: service status
+                        type: boolean
+          description: success
+      summary: Enable system service
+      tags:
+      - systems
+  /system/sshserver:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+                  port: 22
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable SSH
+                        type: boolean
+                      port:
+                        description: port to listen
+                        type: integer
+          description: success
+      summary: Get SSH configuration
+      tags:
+      - systems
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              enable: true
+              port: 22
+            schema:
+              properties:
+                enable:
+                  description: enable SSH
+                  type: boolean
+                port:
+                  description: port to listen
+                  type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  enable: true
+                  port: 22
+              schema:
+                properties:
+                  data:
+                    properties:
+                      enable:
+                        description: enable SSH
+                        type: boolean
+                      port:
+                        description: port to listen
+                        type: integer
+          description: success
+      summary: Set SSH configuration
+      tags:
+      - systems
+  /system/upgrade:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  allowOverCellular: true
+                  caName: ca.crt
+                  certFileName: client.crt
+                  disks:
+                  - device: /dev/root
+                    free: 2856562688
+                    mount: /
+                    name: System
+                    percent: 47.74261663447114
+                    protect: 838860800
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 2609770496
+                  - device: /dev/mmcblk0p1
+                    free: 7423197184
+                    mount: /media/sd-mmcblk0p1
+                    name: SD1-1
+                    percent: 6.752996575342466
+                    protect: 0
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 7960788992
+                    used: 537591808
+                  enableClientAuth: false
+                  enableSnapshot: false
+                  isSnapshotSupported: true
+                  keyFileName: client.key
+                  retryCount: 3
+                  retryInterval: 5
+                  targetDiskName: SD1-1
+              schema:
+                properties:
+                  data:
+                    properties:
+                      allowOverCellular:
+                        description: allow upgrade over the cellular
+                        type: boolean
+                      disks:
+                        description: disk list
+                        items:
+                          type: object
+                      enableClientAuth:
+                        description: use cert and key as X.509 client authentication
+                        type: boolean
+                      enableSnapshot:
+                        description: do snapshot during upgrade. If the device doesn’t
+                          support snapshot feature (isSnapshotSupported), the request
+                          will be rejected with an error.
+                        type: boolean
+                      isSnapshotSupported:
+                        description: whether supports snapshot
+                        type: boolean
+                      retryCount:
+                        description: maximum re-try count to download upgrade package.
+                          0 means unlimited.
+                        type: integer
+                      retryInterval:
+                        description: re-try interval in seconds to download upgrade
+                          package.
+                        type: integer
+                      targetDiskName:
+                        description: disk partition name to store upgrade file
+                        type: string
+          description: success
+      summary: Get upgrade configuration
+      tags:
+      - upgrade
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                allowOverCellular:
+                  description: allow upgrade over the cellular
+                  type: boolean
+                disks:
+                  description: disk list
+                  items:
+                    type: object
+                enableClientAuth:
+                  description: use cert and key as X.509 client authentication
+                  type: boolean
+                enableSnapshot:
+                  description: do snapshot during upgrade. If the device doesn’t support
+                    snapshot feature (isSnapshotSupported), the request will be rejected
+                    with an error.
+                  type: boolean
+                isSnapshotSupported:
+                  description: whether supports snapshot
+                  type: boolean
+                retryCount:
+                  description: maximum re-try count to download upgrade package. 0
+                    means unlimited.
+                  type: integer
+                retryInterval:
+                  description: re-try interval in seconds to download upgrade package.
+                  type: integer
+                targetDiskName:
+                  description: disk partition name to store upgrade file
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  allowOverCellular: true
+                  caName: ca.crt
+                  certFileName: client.crt
+                  disks:
+                  - device: /dev/root
+                    free: 2856562688
+                    mount: /
+                    name: System
+                    percent: 47.74261663447114
+                    protect: 838860800
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 2609770496
+                  - device: /dev/mmcblk0p1
+                    free: 7423197184
+                    mount: /media/sd-mmcblk0p1
+                    name: SD1-1
+                    percent: 6.752996575342466
+                    protect: 0
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 7960788992
+                    used: 537591808
+                  enableClientAuth: false
+                  enableSnapshot: false
+                  isSnapshotSupported: true
+                  keyFileName: client.key
+                  retryCount: 3
+                  retryInterval: 5
+                  targetDiskName: SD1-1
+              schema:
+                properties:
+                  data:
+                    properties:
+                      allowOverCellular:
+                        description: allow upgrade over the cellular
+                        type: boolean
+                      disks:
+                        description: disk list
+                        items:
+                          type: object
+                      enableClientAuth:
+                        description: use cert and key as X.509 client authentication
+                        type: boolean
+                      enableSnapshot:
+                        description: do snapshot during upgrade. If the device doesn’t
+                          support snapshot feature (isSnapshotSupported), the request
+                          will be rejected with an error.
+                        type: boolean
+                      isSnapshotSupported:
+                        description: whether supports snapshot
+                        type: boolean
+                      retryCount:
+                        description: maximum re-try count to download upgrade package.
+                          0 means unlimited.
+                        type: integer
+                      retryInterval:
+                        description: re-try interval in seconds to download upgrade
+                          package.
+                        type: integer
+                      targetDiskName:
+                        description: disk partition name to store upgrade file
+                        type: string
+          description: success
+      summary: Set upgrade configuration partially
+      tags:
+      - upgrade
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              allowOverCellular: true
+              ca: xxxxxx
+              caFilename: ca.crt
+              cert: xxxxxxx
+              certFilename: a.crt
+              enableClientAuth: true
+              enableSnapshot: true
+              key: xxxxx
+              keyFilename: a.key
+              retryCount: 3
+              retryInterval: 0
+              targetDiskName: System
+            schema:
+              properties:
+                allowOverCellular:
+                  description: allow upgrade over the cellular
+                  type: boolean
+                ca:
+                  description: CA content
+                  type: string
+                caFilename:
+                  description: filename of CA
+                  type: string
+                cert:
+                  description: certificate content
+                  type: string
+                certFilename:
+                  description: filename of client authentication certificate
+                  type: string
+                disks:
+                  description: disk list
+                  items:
+                    type: object
+                enableClientAuth:
+                  description: use cert and key as X.509 client authentication
+                  type: boolean
+                enableSnapshot:
+                  description: do snapshot during upgrade. If the device doesn’t support
+                    snapshot feature (isSnapshotSupported), the request will be rejected
+                    with an error.
+                  type: boolean
+                isSnapshotSupported:
+                  description: whether supports snapshot
+                  type: boolean
+                key:
+                  description: key content
+                  type: string
+                keyFilename:
+                  description: filename of client authentication key
+                  type: string
+                retryCount:
+                  description: maximum re-try count to download upgrade package. 0
+                    means unlimited.
+                  type: integer
+                retryInterval:
+                  description: re-try interval in seconds to download upgrade package.
+                  type: integer
+                targetDiskName:
+                  description: partition to store upgrade file
+                  type: string
+          multipart/form-data:
+            encoding:
+              certFile:
+                explode: false
+                style: form
+            example:
+              allowOverCellular: true
+              caFile: file
+              certFile: file
+              enableClientAuth: true
+              enableSnapshot: true
+              keyFile: file
+              retryCount: 3
+              retryInterval: 0
+              targetDiskName: System
+            schema:
+              properties:
+                allowOverCellular:
+                  description: allow upgrade over the cellular
+                  type: boolean
+                caFile:
+                  description: CA content
+                  format: binary
+                  type: string
+                certFile:
+                  description: certificate content
+                  format: binary
+                  type: string
+                disks:
+                  description: disk list
+                  items:
+                    type: object
+                enableClientAuth:
+                  description: use cert and key as X.509 client authentication
+                  type: boolean
+                enableSnapshot:
+                  description: do snapshot during upgrade. If the device doesn’t support
+                    snapshot feature (isSnapshotSupported), the request will be rejected
+                    with an error.
+                  type: boolean
+                isSnapshotSupported:
+                  description: whether supports snapshot
+                  type: boolean
+                keyFile:
+                  description: key content
+                  format: binary
+                  type: string
+                retryCount:
+                  description: maximum re-try count to download upgrade package. 0
+                    means unlimited.
+                  type: integer
+                retryInterval:
+                  description: re-try interval in seconds to download upgrade package.
+                  type: integer
+                targetDiskName:
+                  description: partition to store upgrade file
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  allowOverCellular: true
+                  caName: ca.crt
+                  certFileName: client.crt
+                  disks:
+                  - device: /dev/root
+                    free: 2856562688
+                    mount: /
+                    name: System
+                    percent: 47.74261663447114
+                    protect: 838860800
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 5731123200
+                    used: 2609770496
+                  - device: /dev/mmcblk0p1
+                    free: 7423197184
+                    mount: /media/sd-mmcblk0p1
+                    name: SD1-1
+                    percent: 6.752996575342466
+                    protect: 0
+                    tags:
+                      free: systemDiskFree
+                      percent: systemDiskPercent
+                      used: systemDiskUsed
+                    total: 7960788992
+                    used: 537591808
+                  enableClientAuth: false
+                  enableSnapshot: false
+                  isSnapshotSupported: true
+                  keyFileName: client.key
+                  retryCount: 3
+                  retryInterval: 5
+                  targetDiskName: SD1-1
+              schema:
+                properties:
+                  data:
+                    properties:
+                      allowOverCellular:
+                        description: allow upgrade over the cellular
+                        type: boolean
+                      disks:
+                        description: disk list
+                        items:
+                          type: object
+                      enableClientAuth:
+                        description: use cert and key as X.509 client authentication
+                        type: boolean
+                      enableSnapshot:
+                        description: do snapshot during upgrade. If the device doesn’t
+                          support snapshot feature (isSnapshotSupported), the request
+                          will be rejected with an error.
+                        type: boolean
+                      isSnapshotSupported:
+                        description: whether supports snapshot
+                        type: boolean
+                      retryCount:
+                        description: maximum re-try count to download upgrade package.
+                          0 means unlimited.
+                        type: integer
+                      retryInterval:
+                        description: re-try interval in seconds to download upgrade
+                          package.
+                        type: integer
+                      targetDiskName:
+                        description: disk partition name to store upgrade file
+                        type: string
+          description: success
+      summary: Set upgrade configuration
+      tags:
+      - upgrade
+  /upgrades:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 2
+                data:
+                - completedAt: null
+                  completedTask: 0
+                  createdAt: "2020-02-24T10:59:11.63206964+08:00"
+                  id: 1
+                  isDeleted: false
+                  lastState: ""
+                  owner: system
+                  parameter:
+                    at: null
+                    deleteFileAfterInstallComplete: true
+                    download: true
+                    id: null
+                    install: false
+                    snapshot: true
+                    url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1106/update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                  pendingAt: null
+                  startedAt: null
+                  state: created
+                  tasks:
+                  - completedAt: null
+                    id: 1
+                    name: update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                    progress: 0
+                    startedAt: null
+                    state: created
+                    totalSize: 213375528
+                    type: download
+                  totalTask: 1
+                  triggerdAt: null
+                - completedAt: null
+                  completedTask: 0
+                  createdAt: "2020-02-24T10:59:14.67798968+08:00"
+                  id: 2
+                  isDeleted: false
+                  lastState: ""
+                  owner: system
+                  parameter:
+                    at: null
+                    deleteFileAfterInstallComplete: true
+                    download: true
+                    id: null
+                    install: false
+                    snapshot: true
+                    url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1106/update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                  pendingAt: null
+                  startedAt: null
+                  state: created
+                  tasks:
+                  - completedAt: null
+                    id: 2
+                    name: update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                    progress: 0
+                    startedAt: null
+                    state: created
+                    totalSize: 213375528
+                    type: download
+                  totalTask: 1
+                  triggerdAt: null
+              schema:
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    properties:
+                      completedAt:
+                        format: date-time
+                        type: string
+                      completedTask:
+                        type: integer
+                      createdAt:
+                        format: date-time
+                        type: string
+                      errorMessage:
+                        description: appear when state is failed
+                        type: string
+                      id:
+                        type: integer
+                      isDeleted:
+                        description: is download file deleted?
+                        type: boolean
+                      lastState:
+                        description: When suspended, lastState is the last active
+                          state
+                        type: string
+                      owner:
+                        description: User whom creating this job
+                        type: string
+                      parameter:
+                        properties:
+                          at:
+                            description: Run the job periodically
+                            properties:
+                              day:
+                                type: string
+                              dayOfWeek:
+                                type: string
+                              hour:
+                                type: string
+                              minute:
+                                type: string
+                              month:
+                                type: string
+                          deleteFileAfterInstallComplete:
+                            description: Delete installation file after upgrade completed
+                              (default:true)
+                            type: boolean
+                          download:
+                            description: Indicate to request download
+                            type: boolean
+                          file:
+                            description: (form-data) file for Debian package
+                            type: string
+                          id:
+                            description: Upgrade ID
+                            type: integer
+                          install:
+                            description: Indicate to request install
+                            type: boolean
+                          snapshot:
+                            description: Do snapshot when installation. If not set,
+                              it will apply by default configuration of `/system/upgrade`.
+                            type: boolean
+                          url:
+                            description: URL to download
+                            type: string
+                      pendingAt:
+                        format: date-time
+                        type: string
+                      startedAt:
+                        format: date-time
+                        type: string
+                      state:
+                        enum:
+                        - created
+                        - pending
+                        - running
+                        - succeed
+                        - failed
+                        - canceling
+                        - canceled
+                        - suppending
+                        - suppended
+                        - resuming
+                        type: string
+                      tasks:
+                        items:
+                          properties:
+                            completedAt:
+                              format: date-time
+                              type: string
+                            id:
+                              type: integer
+                            name:
+                              description: task name
+                              type: string
+                            progress:
+                              description: Progress in percentage
+                              maximum: 100
+                              minimum: 0
+                              type: integer
+                            speed:
+                              description: download speed in KBps
+                              type: integer
+                            startedAt:
+                              format: date-time
+                              type: string
+                            state:
+                              enum:
+                              - created
+                              - pending
+                              - running
+                              - succeed
+                              - failed
+                              - canceling
+                              - canceled
+                              - suppending
+                              - suppended
+                              - resuming
+                              type: string
+                            totalSize:
+                              description: file size in bytes
+                              type: integer
+                            type:
+                              enum:
+                              - download
+                              - install
+                              type: string
+                      totalTask:
+                        type: integer
+                      triggerAt:
+                        description: null if not set
+                        format: date-time
+                        type: string
+          description: success
+      summary: Retrieve all upgrade jobs
+      tags:
+      - upgrade
+    post:
+      requestBody:
+        content:
+          application/json:
+            examples:
+              downloadAndInstall:
+                summary: download and install immediately
+                value:
+                  deleteFileAfterInstallComplete: true
+                  install: true
+                  url: https://mxswdc2.s3-ap-northeast-1.amazonaws.com/v3/edge/builds/edge-core-update/release/iotedge/v1.1.0/275/package_1.1.0-275-uc-8112a-me_armhf.yaml
+              downloadOnly:
+                summary: download only
+                value:
+                  install: false
+                  url: https://mxswdc2.s3-ap-northeast-1.amazonaws.com/v3/edge/builds/edge-core-update/release/iotedge/v1.1.0/275/package_1.1.0-275-uc-8112a-me_armhf.yaml
+              installAtSpecifiedTime:
+                summary: start to install at specified time
+                value:
+                  at:
+                    day: '*'
+                    dayOfWeek: '*'
+                    hour: "13"
+                    minute: "0"
+                    month: '*'
+                  id: 1
+              installOnly:
+                summary: install by upgrade ID
+                value:
+                  id: 1
+            schema:
+              properties:
+                at:
+                  description: Run the job periodically
+                  properties:
+                    day:
+                      type: string
+                    dayOfWeek:
+                      type: string
+                    hour:
+                      type: string
+                    minute:
+                      type: string
+                    month:
+                      type: string
+                deleteFileAfterInstallComplete:
+                  description: Delete installation file after upgrade completed (default:true)
+                  type: boolean
+                download:
+                  description: Indicate to request download
+                  type: boolean
+                file:
+                  description: (form-data) file for Debian package
+                  type: string
+                id:
+                  description: Upgrade ID
+                  type: integer
+                install:
+                  description: Indicate to request install
+                  type: boolean
+                snapshot:
+                  description: Do snapshot when installation. If not set, it will
+                    apply by default configuration of `/system/upgrade`.
+                  type: boolean
+                url:
+                  description: URL to download
+                  type: string
+          multipart/form-data:
+            schema:
+              properties:
+                at:
+                  description: Run the job periodically
+                  properties:
+                    day:
+                      type: string
+                    dayOfWeek:
+                      type: string
+                    hour:
+                      type: string
+                    minute:
+                      type: string
+                    month:
+                      type: string
+                deleteFileAfterInstallComplete:
+                  description: Delete installation file after upgrade completed (default:true)
+                  type: boolean
+                download:
+                  description: Indicate to request download
+                  type: boolean
+                file:
+                  description: (form-data) file for Debian package
+                  type: string
+                id:
+                  description: Upgrade ID
+                  type: integer
+                install:
+                  description: Indicate to request install
+                  type: boolean
+                snapshot:
+                  description: Do snapshot when installation. If not set, it will
+                    apply by default configuration of `/system/upgrade`.
+                  type: boolean
+                url:
+                  description: URL to download
+                  type: string
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  completedAt: null
+                  completedTask: 0
+                  createdAt: "2020-02-24T10:57:38.28929348+08:00"
+                  id: 12
+                  isDeleted: false
+                  lastState: ""
+                  owner: system
+                  parameter:
+                    at: null
+                    deleteFileAfterInstallComplete: true
+                    download: true
+                    id: null
+                    install: false
+                    snapshot: true
+                    url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1106/update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                  pendingAt: null
+                  startedAt: null
+                  state: created
+                  tasks:
+                  - completedAt: null
+                    id: 57
+                    name: update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                    progress: 0
+                    startedAt: null
+                    state: created
+                    totalSize: 213375528
+                    type: download
+                  totalTask: 1
+                  triggerdAt: null
+          description: success
+        400:
+          description: unsupported file format
+      summary: Create upgrade job
+      tags:
+      - upgrade
+  /upgrades/{id}:
+    delete:
+      responses:
+        204:
+          description: success
+        400:
+          description: file had been deleted
+        404:
+          description: job not found
+      summary: Delete upgrade job
+      tags:
+      - upgrade
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              examples:
+                canceled:
+                  summary: canceled job
+                  value:
+                    data:
+                      completedAt: "2020-02-24T10:54:27.16629856+08:00"
+                      completedTask: 0
+                      createdAt: "2020-02-24T10:51:17.57571124+08:00"
+                      id: 9
+                      isDeleted: false
+                      lastState: running
+                      owner: system
+                      parameter:
+                        at: null
+                        deleteFileAfterInstallComplete: true
+                        download: true
+                        id: null
+                        install: false
+                        snapshot: true
+                        url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1106/update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                      pendingAt: "2020-02-24T10:51:23.4746076+08:00"
+                      startedAt: "2020-02-24T10:51:23.50617604+08:00"
+                      state: canceled
+                      tasks:
+                      - completedAt: "2020-02-24T10:54:27.05335256+08:00"
+                        id: 54
+                        name: update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                        progress: 2
+                        speed: 3670
+                        startedAt: "2020-02-24T10:51:23.57414428+08:00"
+                        state: canceled
+                        totalSize: 213375528
+                        type: download
+                      totalTask: 1
+                      triggerdAt: null
+                completed:
+                  summary: completed installation
+                  value:
+                    data:
+                      completedAt: "2020-02-18T16:40:20.3056944+08:00"
+                      completedTask: 12
+                      createdAt: "2020-02-18T16:21:13.64273504+08:00"
+                      id: 6
+                      isDeleted: true
+                      lastState: ""
+                      owner: system
+                      parameter:
+                        at: null
+                        deleteFileAfterInstallComplete: true
+                        download: true
+                        id: null
+                        install: true
+                        snapshot: false
+                        url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1076/update_2.0.0-1076-uc-8112a-me-iotedge_armhf.deb
+                      pendingAt: "2020-02-18T16:23:42.3504006+08:00"
+                      startedAt: "2020-02-18T16:23:42.3849478+08:00"
+                      state: succeed
+                      tasks:
+                      - completedAt: "2020-02-18T16:26:44.6263696+08:00"
+                        id: 38
+                        name: update_2.0.0-1076-uc-8112a-me-iotedge_armhf.deb
+                        progress: 100
+                        speed: 1215
+                        startedAt: "2020-02-18T16:23:42.96726164+08:00"
+                        state: succeed
+                        totalSize: 214501856
+                        type: download
+                      - completedAt: "2020-02-18T16:28:24.18937284+08:00"
+                        id: 39
+                        name: system-agent
+                        progress: 100
+                        startedAt: "2020-02-18T16:28:14.46062504+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:28:33.6286498+08:00"
+                        id: 40
+                        name: moby
+                        progress: 100
+                        startedAt: "2020-02-18T16:28:24.21569+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:29:32.1599818+08:00"
+                        id: 41
+                        name: iotedge
+                        progress: 100
+                        startedAt: "2020-02-18T16:28:33.77385288+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:30:30.087283+08:00"
+                        id: 42
+                        name: appman
+                        progress: 100
+                        startedAt: "2020-02-18T16:29:32.19470184+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:33:02.24707172+08:00"
+                        id: 43
+                        name: tagservice
+                        progress: 100
+                        startedAt: "2020-02-18T16:30:30.10365956+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:33:03.41367912+08:00"
+                        id: 44
+                        name: edge-web
+                        progress: 100
+                        startedAt: "2020-02-18T16:33:02.26589584+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:35:32.08494868+08:00"
+                        id: 45
+                        name: device
+                        progress: 100
+                        startedAt: "2020-02-18T16:33:03.4314002+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:36:42.0024222+08:00"
+                        id: 46
+                        name: modbusmaster
+                        progress: 100
+                        startedAt: "2020-02-18T16:35:32.10108564+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:39:54.1495638+08:00"
+                        id: 47
+                        name: cloud
+                        progress: 100
+                        startedAt: "2020-02-18T16:36:42.03298536+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:39:56.68418872+08:00"
+                        id: 48
+                        name: device-configuration
+                        progress: 100
+                        startedAt: "2020-02-18T16:39:54.17269196+08:00"
+                        state: succeed
+                        type: install
+                      - completedAt: "2020-02-18T16:40:18.75193924+08:00"
+                        id: 49
+                        name: complete-installation
+                        progress: 100
+                        startedAt: "2020-02-18T16:40:15.5685226+08:00"
+                        state: succeed
+                        type: install
+                      totalTask: 12
+                      triggerdAt: null
+                running:
+                  summary: running installation
+                  value:
+                    data:
+                      completedAt: null
+                      completedTask: 0
+                      createdAt: "2020-02-24T10:51:17.57571124+08:00"
+                      id: 9
+                      isDeleted: false
+                      lastState: ""
+                      owner: system
+                      parameter:
+                        at: null
+                        deleteFileAfterInstallComplete: true
+                        download: true
+                        id: null
+                        install: false
+                        snapshot: true
+                        url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1106/update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                      pendingAt: "2020-02-24T10:51:23.4746076+08:00"
+                      startedAt: "2020-02-24T10:51:23.50617604+08:00"
+                      state: running
+                      tasks:
+                      - completedAt: null
+                        id: 54
+                        name: update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                        progress: 0
+                        startedAt: "2020-02-24T10:51:23.57414428+08:00"
+                        state: running
+                        totalSize: 213375528
+                        type: download
+                      totalTask: 1
+                      triggerdAt: null
+              schema:
+                properties:
+                  data:
+                    properties:
+                      completedAt:
+                        format: date-time
+                        type: string
+                      completedTask:
+                        type: integer
+                      createdAt:
+                        format: date-time
+                        type: string
+                      errorMessage:
+                        description: appear when state is failed
+                        type: string
+                      id:
+                        type: integer
+                      isDeleted:
+                        description: is download file deleted?
+                        type: boolean
+                      lastState:
+                        description: When suspended, lastState is the last active
+                          state
+                        type: string
+                      owner:
+                        description: User whom creating this job
+                        type: string
+                      parameter:
+                        properties:
+                          at:
+                            description: Run the job periodically
+                            properties:
+                              day:
+                                type: string
+                              dayOfWeek:
+                                type: string
+                              hour:
+                                type: string
+                              minute:
+                                type: string
+                              month:
+                                type: string
+                          deleteFileAfterInstallComplete:
+                            description: Delete installation file after upgrade completed
+                              (default:true)
+                            type: boolean
+                          download:
+                            description: Indicate to request download
+                            type: boolean
+                          file:
+                            description: (form-data) file for Debian package
+                            type: string
+                          id:
+                            description: Upgrade ID
+                            type: integer
+                          install:
+                            description: Indicate to request install
+                            type: boolean
+                          snapshot:
+                            description: Do snapshot when installation. If not set,
+                              it will apply by default configuration of `/system/upgrade`.
+                            type: boolean
+                          url:
+                            description: URL to download
+                            type: string
+                      pendingAt:
+                        format: date-time
+                        type: string
+                      startedAt:
+                        format: date-time
+                        type: string
+                      state:
+                        enum:
+                        - created
+                        - pending
+                        - running
+                        - succeed
+                        - failed
+                        - canceling
+                        - canceled
+                        - suppending
+                        - suppended
+                        - resuming
+                        type: string
+                      tasks:
+                        items:
+                          properties:
+                            completedAt:
+                              format: date-time
+                              type: string
+                            id:
+                              type: integer
+                            name:
+                              description: task name
+                              type: string
+                            progress:
+                              description: Progress in percentage
+                              maximum: 100
+                              minimum: 0
+                              type: integer
+                            speed:
+                              description: download speed in KBps
+                              type: integer
+                            startedAt:
+                              format: date-time
+                              type: string
+                            state:
+                              enum:
+                              - created
+                              - pending
+                              - running
+                              - succeed
+                              - failed
+                              - canceling
+                              - canceled
+                              - suppending
+                              - suppended
+                              - resuming
+                              type: string
+                            totalSize:
+                              description: file size in bytes
+                              type: integer
+                            type:
+                              enum:
+                              - download
+                              - install
+                              type: string
+                      totalTask:
+                        type: integer
+                      triggerAt:
+                        description: null if not set
+                        format: date-time
+                        type: string
+          description: success
+      summary: Find upgrade job by ID
+      tags:
+      - upgrade
+    parameters:
+    - description: ID of upgrade job
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+  /upgrades/{id}/{action}:
+    put:
+      parameters:
+      - description: id of upgrade pack
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: id of upgrade pack
+        in: path
+        name: action
+        required: true
+        schema:
+          enum:
+          - start
+          - cancel
+          - suspend
+          - resume
+          type: string
+      - description: Delete upgrade file after upgrade completed (default:true)
+        in: path
+        name: deleteFileAfterInstallComplete
+        required: true
+        schema:
+          type: boolean
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  completedAt: "2020-02-24T11:00:28.75763008+08:00"
+                  completedTask: 0
+                  createdAt: "2020-02-24T10:59:11.63206964+08:00"
+                  id: 1
+                  isDeleted: false
+                  lastState: running
+                  owner: system
+                  parameter:
+                    at: null
+                    deleteFileAfterInstallComplete: true
+                    download: true
+                    id: null
+                    install: false
+                    snapshot: true
+                    url: http://10.144.48.106:10080/moxaics/v3/edge/builds/edge-core-update/develop/1106/update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                  pendingAt: "2020-02-24T11:00:12.61542208+08:00"
+                  startedAt: "2020-02-24T11:00:12.63342556+08:00"
+                  state: canceled
+                  tasks:
+                  - completedAt: "2020-02-24T11:00:28.72362264+08:00"
+                    id: 1
+                    name: update_2.0.0-1106-uc-8112a-me-iotedge_armhf.deb
+                    progress: 0
+                    startedAt: "2020-02-24T11:00:12.78006724+08:00"
+                    state: canceled
+                    totalSize: 213375528
+                    type: download
+                  totalTask: 1
+                  triggerdAt: null
+          description: success
+        400:
+          description: state is not allowed to change
+      summary: Operate the upgrade
+      tags:
+      - upgrade
+  /users:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                count: 1
+                data:
+                - changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 1
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: admin
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    $ref: '#/components/schemas/Users'
+                type: object
+          description: success
+      summary: Query users
+      tags:
+      - users
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              expiredAfter: "2023-01-31T16:00:00.000Z"
+              isActive: true
+              name: myuser
+              password: moxa1234
+              roles:
+              - id: 1
+            schema:
+              properties:
+                email:
+                  type: string
+                expiredAfter:
+                  format: date-time
+                  type: string
+                isActive:
+                  type: boolean
+                name:
+                  type: string
+                password:
+                  description: at least 6 characters
+                  type: string
+                roles:
+                  items:
+                    description: ID of role
+                    type: integer
+              required:
+              - name
+              - password
+              - roles
+              - isActive
+              - expiredAfter
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+      summary: Add user
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      parameters:
+      - description: ID of user
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        204:
+          description: success
+      summary: Delete user by ID
+      tags:
+      - users
+    get:
+      parameters:
+      - description: ID of user
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+        400:
+          description: bad request
+        403:
+          description: user without Administrator role can not access this API
+      summary: Query user by ID
+      tags:
+      - users
+    put:
+      parameters:
+      - description: ID of user
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            example:
+              email: aa@aaa.aaa
+              expiredAfter: null
+              isActive: true
+              roles:
+              - id: 1
+            schema:
+              properties:
+                email:
+                  type: string
+                expiredAfter:
+                  format: date-time
+                  type: string
+                isActive:
+                  type: boolean
+                roles:
+                  items:
+                    type: integer
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+        400:
+          description: bad request
+        403:
+          description: user without Administrator role can not access this API
+      summary: Update user by ID
+      tags:
+      - users
+  /users/{id}/password:
+    put:
+      parameters:
+      - description: ID of user
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            example:
+              newPassword: "123456"
+            schema:
+              properties:
+                newPassword:
+                  type: string
+                oldPassword:
+                  description: user with admin role do not need pass oldPassword
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+        400:
+          description: invalid new password
+          content:
+            application/json:
+              examples:
+                new-err:
+                  summary: Invalid new password
+                  value:
+                    error:
+                      code: 400
+                      message: New password should be different from default password.
+                cur-err:
+                  summary: Invalid current password
+                  value:
+                    error:
+                      code: 400
+                      message: Invalid current password.
+        401:
+          description: current password is not correct
+        403:
+          description: user without Administrator role can not access this API
+      summary: Update user's password by ID
+      tags:
+      - users
+  /users/me:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  remindToChangePassword: null
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+      summary: Query who I am
+      tags:
+      - users
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              email: aa@aaa.aaa
+              expiredAfter: "2023-01-31T16:00:00.000Z"
+              isActive: true
+              roles:
+              - id: 1
+            schema:
+              properties:
+                email:
+                  type: string
+                expiredAfter:
+                  type: string
+                isActive:
+                  type: boolean
+                roles:
+                  items:
+                    type: integer
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+      summary: Update current user's information
+      tags:
+      - users
+  /users/me/password:
+    put:
+      requestBody:
+        content:
+          application/json:
+            example:
+              newPassword: "123456"
+              oldPassword: moxa1234
+            schema:
+              properties:
+                newPassword:
+                  type: string
+                oldPassword:
+                  description: user with admin role do not need pass oldPassword
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  changedPasswordAt: null
+                  createdAt: "2019-09-24T05:52:28.912234779Z"
+                  email: null
+                  expiredAfter: null
+                  id: 3
+                  isActive: true
+                  loginAt: "0001-01-01T00:00:00Z"
+                  name: myuser
+                  permissions:
+                  - SYS_MAINTENANCE_RW
+                  - SYS_USER_RW
+                  roles:
+                  - id: 1
+                    name: Administrator
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+          description: success
+        400:
+          description: invalid new password
+          content:
+            application/json:
+              examples:
+                new-err:
+                  summary: Invalid new password
+                  value:
+                    error:
+                      code: 400
+                      message: New password should be different from default password.
+                cur-err:
+                  summary: Invalid current password
+                  value:
+                    error:
+                      code: 400
+                      message: Invalid current password.
+        401:
+          description: current password is not correct
+        403:
+          description: user without Administrator role can not access this API
+      summary: Update current user's password
+      tags:
+      - users
+security:
+- bearerAuth: []
+servers:
+- url: http://127.0.0.1/api/v1
+tags:
+- name: systems
+- name: users
+- name: authentication
+- name: event
+- name: apps
+- name: job
+- name: upgrade

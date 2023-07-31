@@ -1,0 +1,308 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.0.0'
+  title: 'Serial Configuration APIs'
+  description: 'Serial Configuration APIs'
+
+components:
+  schemas:
+    SearchResult:
+      title: Search result
+      properties:
+        type:
+          type: string
+          description: Device type
+          example: nport
+        ip:
+          type: string
+          description: Device IP address
+          example: 10.144.48.146
+        mac:
+          type: string
+          description: Device MAC address
+          example: "00:90:e8:5f:c8:2c"
+        modelName:
+          type: string
+          description: Device model name
+          example: 5150A
+        apId:
+          type: string
+          description: NPort only
+          example: "0x80005400"
+        hwId:
+          type: string
+          description: NPort only
+          example: "0x5401"
+    NetworkInformation:
+      title: Network information
+      properties:
+        config:
+          type: string
+          description: One of static, dhcp, dhcp/bootp, bootp or pppoe
+        ip:
+          type: string
+        netmask:
+          type: string
+        gateway:
+          type: string
+    NPortInformation:
+      title: NPort basic information
+      properties:
+        channels:
+          type: object
+          properties:
+            ai:
+              type: integer
+            ao:
+              type: integer
+            di:
+              type: integer
+    NportDeviceInformation:
+      title: NPort device information
+      properties:
+        channels:
+          type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+            type:
+              type: string
+            modelName:
+              type: string
+            serverName:
+              type: string
+            ip:
+              type: string
+            mac:
+              type: string
+            detail:
+              type: string
+            username:
+              type: string
+            password:
+              type: string
+            test:
+              type: string
+            syncAt:
+              type: string
+    NportDeleteDevice:
+      title: Result of delete NPort device information
+      properties:
+        channels:
+          type: object
+          properties:
+            count:
+              type: integer
+  parameters:
+    ipParam:
+      in: query
+      name: ip
+      required: true
+      schema:
+        type: string
+      description: Device IP
+    macParam:
+      in: query
+      name: mac
+      required: true
+      schema:
+        type: string
+      description: MAC address of NPort.
+    apidParam:
+      in: query
+      name: apid
+      required: true
+      schema:
+        type: string
+      description: apId of NPort.
+    hwidParam:
+      in: query
+      name: hwid
+      required: true
+      schema:
+        type: string
+      description: hwId of NPort.
+    idParam:
+      in: query
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Device id
+paths:
+  /device/nport/network:
+    post:
+      description: Set NPort static IP
+      tags: ["device", "nport"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NetworkInformation'
+            example:
+              ip: 10.144.48.146
+              netmask: 255.255.252.0
+              gateway: 10.144.51.254
+      responses:
+        200:
+          description: NPort network configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkInformation'
+              example:
+                config: static
+                ip: 10.144.48.146
+                netmask: 255.255.252.0
+                gateway: 10.144.51.254
+  /device/nport/info:
+    get:
+      description: Get NPort basic information
+      tags: ["device", "nport"]
+      parameters:
+        - $ref: '#/components/parameters/ipParam'
+        - $ref: '#/components/parameters/apidParam'
+        - $ref: '#/components/parameters/hwidParam'
+        - $ref: '#/components/parameters/macParam'
+      responses:
+        200:
+          description: NPort basic information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NPortInformation'
+              example:
+                data:
+                  - id: 0
+                    mode: 1
+                    filter: 100
+                    counter:
+                      count: 123
+                      trigger: 0
+                      currentEnable: 1
+  /device/nport/devices/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    get:
+      description: Get nport interface configuration by ID from DB.
+      tags: ["device", "nport"]
+      responses:
+        200:
+          description: nport interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NportDeviceInformation'
+              example:
+                data:
+                  type: nport
+                  id: 1
+                  createdAt: '2020-02-25T00:08:54.97510268+08:00'
+                  modelName: 5150A
+                  serverName: 127.0.0.1
+                  ip: 10.144.48.146
+                  mac: "00:90:e8:5f:c8:2c"
+                  username: "moxa"
+                  password: "moxa"
+                  syncAt: '2020-02-25T00:08:54.97510268+08:00'
+                  test: "test" 
+    delete: 
+      description: Delete nport interface configuration by ID.
+      tags: ["device", "nport"]
+      responses:
+        204:
+          description: action done, but no content
+  /device/nport/devices/{id}/sync:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    put:
+      description: Sync device detail info
+      tags: ["device", "nport"]
+      responses:
+        200:
+          description: nport interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NportDeviceInformation'
+              example:
+                data:
+                  type: nport
+                  id: 1
+                  createdAt: '2020-02-25T00:08:54.97510268+08:00'
+                  modelName: 5150A
+                  serverName: 127.0.0.1
+                  ip: 10.144.48.146
+                  mac: "00:90:e8:5f:c8:2c"
+                  username: "moxa"
+                  password: "moxa"
+                  syncAt: '2020-02-25T00:08:54.97510268+08:00'
+                  test: "test" 
+  /device/nport/devices/{id}/auth:
+    parameters:
+      - $ref: '#/components/parameters/idParam'
+    put:
+      description: Update username and password to device
+      tags: ["device", "nport"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NportDeviceInformation'
+            example:
+              type: nport
+              id: 1
+              createdAt: '2020-02-25T00:08:54.97510268+08:00'
+              modelName: 5150A
+              serverName: 127.0.0.1
+              ip: 10.144.48.146
+              mac: "00:90:e8:5f:c8:2c"
+              username: "moxa"
+              password: "moxa"
+              syncAt: '2020-02-25T00:08:54.97510268+08:00'
+              test: "test" 
+      responses:
+        200:
+          description: nport interface configuration
+  /device/nport/devices:
+    get:
+      description: Get all of nport interface configuration from DB.
+      tags: ["device", "nport"]
+      responses:
+        200:
+          description: all of nport interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NportDeviceInformation'
+              example:
+                data:
+                  - type: nport
+                    id: 1
+                    createdAt: '2020-02-25T00:08:54.97510268+08:00'
+                    modelName: 5150A
+                    serverName: 127.0.0.1
+                    ip: 10.144.48.146
+                    mac: "00:90:e8:5f:c8:2c"
+                    username: "moxa"
+                    password: "moxa"
+                    syncAt: '2020-02-25T00:08:54.97510268+08:00'
+                    test: "test"
+                    count: 1
+    delete:
+      description: Delete all of nport interface configuration.
+      tags: ["device", "nport"]
+      responses:
+        200:
+          description: counts for all of nport interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NportDeleteDevice'
+              example:
+                count: 0
