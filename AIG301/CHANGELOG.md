@@ -46,6 +46,3 @@ The functionality and changes below were added in AIG-301 V1.5.
     | Device | Cellular | `PATCH /device/cellulars` | `preferedNetwork`: selected cellular network type.<br />`[ auto, 4g, 3g ]` |
     | Device | Cellular | `GET /device/cellulars/{id}` | `preferedNetwork`: selected cellular network type.<br />`[ auto, 4g, 3g ]` |
     | Device | Cellular | `PATCH /device/cellulars/{id}` | `preferedNetwork`: selected cellular network type.<br />`[ auto, 4g, 3g ]` |
-
-
-/api/v1/{cloud}/messages
