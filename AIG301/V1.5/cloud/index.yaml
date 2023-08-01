@@ -1279,6 +1279,7 @@ components:
         minPublishInterval: 0
         samplingMode: allValues
         customSamplingRate: false
+        format: ''
         tags:
           modbus:
             myDevice1:

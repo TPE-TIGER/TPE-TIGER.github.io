@@ -403,53 +403,54 @@ paths:
                     stopBits: 1
                     flowControl: none
                 count: 2
-    delete:
-      description: Remove serial configuration of UPort from TPE management
-      tags: ["device", "serials"]
-      parameters:
-        - in: query
-          name: model
-          description: UPort model name
-          required: true
-          schema:
-            type: string
-          example: MOXA_UPort_1250I
-      responses:
-        200:
-          description: All serial configuration
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AllSerialInformation'
-              example:
-                data:
-                  - type: serials
-                    id: 1
-                    mode: rs232
-                    source: system
-                    sourceModelName: ""
-                    plugIn: true
-                    displayName: COM1
-                    device: /dev/ttyM0
-                    baudRate: 9600
-                    parity: none
-                    dataBits: 8
-                    stopBits: 1
-                    flowControl: hardware
-                  - type: serials
-                    id: 2
-                    mode: rs4852w
-                    source: system
-                    sourceModelName: ""
-                    plugIn: true
-                    displayName: COM2
-                    device: /dev/ttyM1
-                    baudRate: 19200
-                    parity: none
-                    dataBits: 8
-                    stopBits: 1
-                    flowControl: none
-                count: 2
+    # do not show on index.yaml to explain for customer
+    #delete:
+    #  description: Remove serial configuration of UPort from TPE management
+    #  tags: ["device", "serials"]
+    #  parameters:
+    #    - in: query
+    #      name: model
+    #      description: UPort model name
+    #      required: true
+    #      schema:
+    #        type: string
+    #      example: MOXA_UPort_1250I
+    #  responses:
+    #    200:
+    #      description: All serial configuration
+    #      content:
+    #        application/json:
+    #          schema:
+    #            $ref: '#/components/schemas/AllSerialInformation'
+    #          example:
+    #            data:
+    #              - type: serials
+    #                id: 1
+    #                mode: rs232
+    #                source: system
+    #                sourceModelName: ""
+    #                plugIn: true
+    #                displayName: COM1
+    #                device: /dev/ttyM0
+    #                baudRate: 9600
+    #                parity: none
+    #                dataBits: 8
+    #                stopBits: 1
+    #                flowControl: hardware
+    #              - type: serials
+    #                id: 2
+    #                mode: rs4852w
+    #                source: system
+    #                sourceModelName: ""
+    #                plugIn: true
+    #                displayName: COM2
+    #                device: /dev/ttyM1
+    #                baudRate: 19200
+    #                parity: none
+    #                dataBits: 8
+    #                stopBits: 1
+    #                flowControl: none
+    #            count: 2
   /device/serials/{id}:
     parameters:
       - name: id
