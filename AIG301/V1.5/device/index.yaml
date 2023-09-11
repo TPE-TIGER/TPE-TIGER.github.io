@@ -11,15 +11,13 @@ x-tagGroups:
       - network
       - ethernets
       - serials
-      # - nport
+      - io
       - cellulars
       - gps
       - dhcpservers
       - wifi
       - firewall
       - systemtags
-      # - leds
-      # - operate
       - platform
 info:
   version: '2.3.0'
@@ -62,6 +60,14 @@ paths:
     $ref: './module.d/serials.yaml#/paths/~1device~1serials'
   /device/serials/{id}:
     $ref: './module.d/serials.yaml#/paths/~1device~1serials~1{id}'
+  /device/io/do:
+    $ref: './module.d/io.yaml#/paths/~1device~1io~1do'
+  /device/io/do/{id}:
+    $ref: './module.d/io.yaml#/paths/~1device~1io~1do~1{channel}'
+  /device/io/di:
+    $ref: './module.d/io.yaml#/paths/~1device~1io~1di'
+  /device/io/di/{id}:
+    $ref: './module.d/io.yaml#/paths/~1device~1io~1di~1{channel}'
   /device/cellulars:
     $ref: './module.d/cellular.yaml#/paths/~1device~1cellulars'
   /device/cellulars/{id}:
@@ -90,9 +96,5 @@ paths:
     $ref: './module.d/systemtags.yaml#/paths/~1tags~1monitor~1system~1storage'
   /tags/monitor/system/network:
     $ref: './module.d/systemtags.yaml#/paths/~1tags~1monitor~1system~1network'
-  # /device/leds:
-  #   $ref: './module.d/leds.yaml#/paths/~1device~1leds'
   /device/platform/device-tags:
     $ref: './module.d/platform.yaml#/paths/~1device~1platform~1device-tags'
-  # /device/operate/direct-read-tag:
-  #   $ref: './module.d/platform.yaml#/paths/~1device~1operate~1direct-read-tag'
