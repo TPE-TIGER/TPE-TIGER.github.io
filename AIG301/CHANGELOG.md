@@ -14,6 +14,19 @@ The functionality and changes below were added in AIG-301 V1.5.
     |  ----  |  ----  | --- | ---- |
     | Device | IO | `PATCH /device/io/di/{channel}` | Patch to set DI by channel |
     | Device | IO | `PATCH /device/io/do/{channel}` | Patch to set DO by channel |
+#### OpenVPN (Cloud)
+- Added support for retrieving AIG OpenVPN Client settings and value.
+    |  Category  |  Name | Endpoints | Changes |
+    |  ----  |  ----  | --- | ---- |
+    | CLOUD | OpenVPN | `GET /openvpn` | Get OpenVPN client setting |
+    | CLOUD | OpenVPN | `GET /openvpn/profile` | Export current OpenVPN client profile file (get smaple config by qurey string) |
+    | CLOUD | OpenVPN | `GET /openvpn/log` | Export an OpenVPN client logs file |
+- Added support for updating AIG OpenVPN Client settings and value.
+    |  Category  |  Name | Endpoints | Changes |
+    |  ----  |  ----  | --- | ---- |
+    | CLOUD | OpenVPN | `PUT /openvpn` | Enable/Disable OpenVPN client with current profile file |
+    | CLOUD | OpenVPN | `PATCH /openvpn/profile` | Import an OpenVPN client profile file |
+    | CLOUD | OpenVPN | `DELETE /openvpn/profile` | Delete current OpenVPN client profile file |
 
 ### Changed
 - Some fields for message group have changed in the following endpoints. 

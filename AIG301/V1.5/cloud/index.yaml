@@ -175,6 +175,16 @@ components:
           size: 4096
           sizeIdleTimer:
             enable: false
+    DLMSetting:
+      value:
+        data:
+          enable: true
+          profile: 'bW94YQ=='
+    GeneralSetting:
+      value:
+        data:
+          enable: true
+          profile: 'client.ovpn'
   schemas:
     Serviceinformation:
       title: Northbound service information
@@ -1569,6 +1579,76 @@ components:
             lastD2CUploadTime: May 31, 2022, 14:04:50
             lastConnectFailTime: May 31, 2022, 14:05:01
             lastConnectedTime: May 29, 2022, 01:51:33
+    DLMOvpnSettings:
+      type: object
+      required:
+        - enable
+        - profile
+      properties:
+        type:
+          type: string
+          readOnly: true
+          example: openvpn
+        enable:
+          type: boolean
+          example: true
+        status:
+          type: boolean
+          readOnly: true
+          example: true
+        profile:
+          type: string
+          format: base64
+          example: 'bW94YQ=='
+        network:
+          $ref: '#/components/schemas/OvpnNetwork'
+    OvpnSettings:
+      type: object
+      required:
+        - enable
+        - profile
+      properties:
+        type:
+          type: string
+          readOnly: true
+          example: openvpn
+        enable:
+          type: boolean
+          example: true
+        status:
+          type: boolean
+          readOnly: true
+          example: true
+        ready:
+          type: boolean
+          readOnly: true
+          example: true
+        profile:
+          type: string
+          example: 'client.ovpn'
+        network:
+          $ref: '#/components/schemas/OvpnNetwork'
+    OvpnNetwork:
+      type: object
+      properties:
+        remoteIp:
+          type: string
+          format: ipaddress
+          readOnly: true
+          example: 10.144.48.22
+        localIp:
+          type: string
+          readOnly: true
+          example: 10.8.0.1
+        netmask:
+          type: string
+          readOnly: true
+          example: 255.255.255.0
+        gateway:
+          type: string
+          readOnly: true
+          example: 10.8.1.254
+
 
 security:
   - bearerAuth: []
@@ -3574,6 +3654,129 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SparkplugMessagePolicy'
+  /openvpn:
+    get:
+      tags:
+        - openvpn
+      operationId: getOvpnSettings
+      description: |
+        Get OpenVpn client setting
+      responses:
+        '200':
+          description: get openvpn settings
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OvpnSettings'
+    put:
+      tags:
+        - openvpn
+      description: |
+        enable OpenVpn client with current profile file
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enable:
+                    type: boolean
+                    example: true
+      responses:
+        '200':
+          description: enable openvpn client
+        '400':
+          description: 'invalid input, object invalid'
+
+  /openvpn/profile:
+    post:
+      tags:
+        - openvpn
+      operationId: getOvpnConfig
+      description: |
+        Import an OpenVpn client profile file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  example: 'client.ovpn'
+      responses:
+        '200':
+          description: Import the client configuration file ok
+    get:
+      tags:
+        - openvpn
+      operationId: exportOvpnConfig
+      description: |
+        Export current OpenVpn client profile file (get smaple config by qurey string)
+      parameters:
+      - in: query
+        name: name
+        description: sample
+        schema:
+          type: string
+          example: "sample"
+      responses:
+        '200':
+          description: Export the openvpn service settings ok
+          content:
+            multipart/form-data:
+              schema:
+                type: string
+                format: binary
+                example: 'client.ovpn'
+        '400':
+          description: 'invalid input, object invalid'
+    delete:
+      tags:
+        - openvpn
+      description: |
+        Delete Target OpenVpn client profile file
+      responses:
+        '200':
+          description: set openvpn service settings ok
+        '400':
+          description: 'invalid input, object invalid'
+  /openvpn/log:
+    get:
+      tags:
+        - openvpn
+      description: |
+        Export an OpenVpn client logs file
+      responses:
+        '200':
+          description: Export the openvpn log ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: 'invalid input, object invalid'
+  # /openvpn/dlm:
+  #  patch:
+  #    tags:
+  #      - DLM
+  #    description: |
+  #      Patch DLM OpenVpn client setting
+  #    requestBody:
+  #      content:
+  #        application/json:
+  #          schema:
+  #            $ref: '#/components/schemas/DLMOvpnSettings'
+  #    responses:
+  #      '200':
+  #        description: set openvpn service settings ok
+  #      '400':
+  #        description: 'invalid input, object invalid'
+
 #  /dlm:
 #    get:
 #      description: Get DLM configuration.
