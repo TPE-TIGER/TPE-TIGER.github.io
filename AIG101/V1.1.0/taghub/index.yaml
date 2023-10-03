@@ -1,0 +1,237 @@
+openapi: 3.0.0
+tags:
+  - name: access
+info:
+  description: TagService and TagHub API
+  version: "2.0.0"
+  title: Tag APIs
+servers:
+  - url: 'http://127.0.0.1/api/v1'
+security:
+  - bearerAuth: []
+paths:
+  /tags/access/{provider}/{source}/{tag}:
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: source
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: tag
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - access
+      summary: Direct read method by tag
+      description: 'Only ''r'', ''rw'' access type can work.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tags-access-response'
+        '400':
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tags-access-error'
+    put:
+      tags:
+        - access
+      summary: Direct write method by tag
+      description: 'Only ''w'', ''rw'' access type can work.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tags-access'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tags-access-error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    tags-access:
+      type: object
+      properties:
+        dataType:
+          type: string
+          enum:
+            - uint8
+            - uint16
+            - uint32
+            - uint64
+            - int8
+            - int16
+            - int32
+            - int64
+            - float
+            - double
+            - string
+            - boolean
+            - raw
+          example: int16
+        dataValue:
+          type: object
+          example: 1
+    tags-access-response:
+      type: object
+      properties:
+        prvdName:
+          type: string
+          example: modbus_tcp_master
+        srcName:
+          type: string
+          example: ioLogik
+        tagName:
+          type: string
+          example: di0
+        timestamp:
+          type: string
+          example: '1560322153374'
+        dataType:
+          type: string
+          example: uint16
+        dataValue:
+          type: object
+          example: 1
+    tags-access-error:
+      type: object
+      properties:
+        message:
+          type: string
+  examples:
+    tags-monitor:
+      value:
+        data:
+          prvdName: modbus_tcp_master
+          srcName: ioLogik-E1210
+          tagName: di0
+          dataType: uint16
+          dataValue: 1
+          dataUnit: mA
+          ts: 1541409957933
+    systemTagList:
+      value:
+        data:
+          - prvdName: system
+            srcName: cpu
+            tagName: usage
+            dataType: int32
+            dataUnit: '%'
+            access: r
+    modbusmasterTagList:
+      value:
+        data:
+          - prvdName: modbus_tcp_master
+            srcName: ioLogik
+            tagName: di0
+            dataType: raw
+            dataSize: 20
+            dataUnit: 'mA'
+            access: r
+    virtualTagList:
+      value:
+        data:
+          - prvdName: user
+            srcName: define
+            tagName: tag
+            dataType: int32
+            dataUnit: '%'
+            access: r
+    virtual-tag-int64:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: int64_t
+        dataType: int64
+        dataUnit: "unit"
+        access: r
+    virtual-tag-uint64:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: uint64_t
+        dataType: uint64
+        dataUnit: "unit"
+        access: r
+    virtual-tag-float:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: float_t
+        dataType: float
+        dataUnit: "unit"
+        access: r
+    virtual-tag-double:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: double_t
+        dataType: double
+        dataUnit: "unit"
+        access: r
+    virtual-tag-string:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: string_t
+        dataType: string
+        dataSize: 20
+        dataUnit: "unit"
+        access: r
+    virtual-tag-raw:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: raw_t
+        dataType: raw
+        dataSize: 20
+        dataUnit: "unit"
+        access: r
+    virtual-tag-write:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: write
+        dataType: int64
+        dataUnit: "unit"
+        access: w
+    virtual-tag-rw:
+      value:
+        prvdName: virtual
+        srcName: user
+        tagName: read_write
+        dataType: int64
+        dataUnit: "unit"
+        access: rw
+    virtual-tag-response:
+      value:
+        data:
+          prvdName: virtual
+          srcName: user
+          tagName: int64_t
+          dataType: int64
+          dataUnit: "unit"
+          access: r
