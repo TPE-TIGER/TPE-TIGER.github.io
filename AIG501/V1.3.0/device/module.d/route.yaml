@@ -1,0 +1,234 @@
+openapi: 3.0.0
+info:
+  version: '1.1.0'
+  title: 'Default Route Configuration APIs'
+  description: |
+    Release Date: 2019/10/02
+    Default Route Configuration APIs
+
+components:
+  schemas:
+    RouteInformation:
+      title: Device route configuration
+      properties:
+        default:
+          type: string
+          description: default route display name.
+          readOnly: true
+        priorityList:
+          type: array
+          items:
+            type: string
+            pattern: '[A-Za-z0-9_-]+'
+            minLength: 2
+            maxLength: 15
+    WANInformation:
+      title: Current WAN information
+      properties:
+        name:
+          type: string
+          description: Interface name.
+        displayName:
+          type: string
+          description: Interface display name.
+        ip:
+          type: string
+          description: IP address for the Ethernet interface.
+        netmask:
+          type: string
+          description: Interface netmask.
+        gateway:
+          type: string
+          description: Gateway is a router or a proxy server that routes between networks.
+        dns:
+          type: array
+          description: |
+            The Domain Name System (DNS) is a hierarchical distributed naming
+            system for computers, services, or any resource connected to the
+            Internet or a private network.
+          items:
+            type: string
+    InternetCheckAlive_PostRsp:
+      title: Response of internet check alive
+      properties:
+        status:
+          type: string
+          description: status of internet check alive
+          enum:
+          - "NotConnected"
+          - "NoInternetAccess"
+          - "ConnectedToInternet"
+    InternetCheckAlive_GetRsp:
+      title: Response configuration of internet check alive
+      properties:
+        enable:
+          type: boolean
+          description: enable/disable internet check alive service
+        target:
+          type: string
+          description: target for internet check alive
+        interval:
+          type: integer
+          description: interval in seconds for internet check alive
+        timeout:
+          type: integer
+          description: each check timeout in seconds for internet check alive
+        retry:
+          type: integer
+          description: retry times for internet check alive
+    InternetCheckAlive_PatchReq:
+      title: Response configuration of internet check alive
+      properties:
+        enable:
+          type: boolean
+          description: enable/disable internet check alive service
+        target:
+          type: string
+          description: target for internet check alive
+          minLength: 1
+          maxLength: 255
+        interval:
+          type: integer
+          description: interval in seconds for internet check alive
+          minimum: 10
+          maximum: 3600
+        timeout:
+          type: integer
+          description: each check timeout in seconds for internet check alive
+          minimum: 1
+          maximum: 60
+        retry:
+          type: integer
+          description: retry times for internet check alive
+          minimum: 1
+          maximum: 10
+
+paths:
+  /device/route:
+    get:
+      description: Get device route configuration.
+      tags: ["device", "route"]
+      responses:
+        200:
+          description: Device route configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteInformation'
+              example:
+                data:
+                  type: route
+                  default: LAN1
+                  priorityList:
+                    - LAN1
+                    - Cellular1
+                    - LAN2
+    patch:
+      tags: ["device", "route"]
+      description: Update device route configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteInformation'
+            example:
+              priorityList:
+                - LAN2
+                - Cellular1
+                - LAN1
+      responses:
+        200:
+          description: Device route configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteInformation'
+              example:
+                data:
+                  type: route
+                  default: LAN2
+                  priorityList:
+                    - LAN2
+                    - Cellular1
+                    - LAN1
+  /device/network/wan:
+    get:
+      description: Get device route configuration of wan.
+      tags: ["device", "network", "wan"]
+      responses:
+        200:
+          description: Device route configuration of wan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WANInformation'
+              example:
+                data:
+                  name: eth0
+                  displayName: LAN1
+                  ip: 192.168.3.127
+                  netmask: 255.255.255.0
+                  gateway: 192.168.3.254
+                  dns:
+                  - 192.168.3.1
+  /device/network/wan/check:
+    post:
+      description: Do internt check alive
+      tags: ["device", "network", "wan"]
+      responses:
+        200:
+          description: Status of internet check alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternetCheckAlive_PostRsp'
+              example:
+                data:
+                  status: "ConnectedToInternet"
+    get:
+      description: Get configuration of internet check alive
+      tags: ["device", "network", "wan"]
+      responses:
+        200:
+          description: Configuration of internet check alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternetCheckAlive_GetRsp'
+              example:
+                data:
+                  enable: true
+                  target: "www.google.com"
+                  interval: 60
+                  timeout: 5
+                  retry: 3
+    patch:
+      description: Update configuration of internet check alive
+      tags: ["device", "network", "wan"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternetCheckAlive_PatchReq'
+            example:
+              enable: true
+              target: "www.moxa.com"
+              interval: 120
+              timeout: 10
+              retry: 5
+      responses:
+        200:
+          description: Configuration of internet check alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternetCheckAlive_GetRsp'
+              example:
+                data:
+                  enable: true
+                  target: "www.moxa.com"
+                  interval: 120
+                  timeout: 10
+                  retry: 5

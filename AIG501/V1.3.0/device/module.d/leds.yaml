@@ -1,0 +1,303 @@
+openapi: 3.0.0
+info:
+  version: 1.0.1
+  title: LED Configuration APIs
+  description: |
+    Release Date: 2020/09/17
+    LED Configuration API
+components:
+  schemas:
+    GetLedStatusEntry:
+      title:  GET LED Status
+      description: |
+        execute actions to control LEDs.
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedActionEntry'
+        count:
+          type: integer
+
+    LedStatusEntry:
+      title:  LED Status
+      description: |
+        execute actions to control LEDs.
+      type: array
+      items:
+        $ref: '#/components/schemas/LedActionEntry'
+
+    LedCapabilities:
+      title: LED Capabilities
+      type: object
+      required:
+        - led
+        - mode
+        - timeoutMode
+      readOnly: true
+      properties:
+        data:
+          type: object
+          readOnly: true
+          properties:
+            led:
+              type: array
+              description: |
+                List all LEDs could be controlled.
+              readOnly: true
+              items:
+                type: string
+                enum:
+                  - SIGNAL1-1
+                  - SIGNAL1-2
+                  - SIGNAL1-3
+                  - PROGRAMMABLE1-1
+            mode:
+              type: array
+              description: |
+                List all mode that LED could be controlled. <br>
+                on:turn target LED on, off:turn target LED off, blink:blink the target LED, ignore: release LED control for system default.
+              readOnly: true
+              items:
+                type: string
+                enum:
+                  - on
+                  - off
+                  - blink
+                  - ignore
+            timeoutMode:
+              type: array
+              description: |
+                List all timeout mode that LED could be controlled. <br>
+                on:turn target LED on, off:turn target LED off, blink:blink the target LED, ignore: release LED control for system default, noAction: do nothing, only support when timer = 0.
+              readOnly: true
+              items:
+                type: string
+                enum:
+                  - on
+                  - off
+                  - blink
+                  - ignore
+                  - noAction
+    LedActionEntry:
+      title: LED actions Entry
+      type: object
+      required:
+        - mode
+        - timer
+        - timeoutMode
+      properties:
+        mode:
+          type: string
+          description: |
+            LED work mode, only `mode` in `capabilities` could be set.  <br>
+            on:turn target LED on, off:turn targert LED off, blink:blink the target LED, ignore: release LED control for system default.
+          enum:
+              - on
+              - off
+              - blink
+              - ignore
+        timer:
+          type: integer
+          description: |
+            Set a countdown timer (seconds). <br>
+            When countdown to 0, trigger timeoutActions. if set 0, timer is disable.
+          minimum: 0
+          maximum: 3600
+        timeoutMode:
+          type: string
+          description: |
+            When timeout happened, LED will work in `timeoutMode`. <br>
+            only `timeoutMode` in `capabilities` could be set. on:turn target LED on, off:turn targert LED off,
+            blink:blink the target LED, ignore: release LED control for system default, noAction: do nothing, only support when timer = 0.
+          enum:
+              - on
+              - off
+              - blink
+              - ignore
+              - noAction
+        leftTime:
+          readOnly: true
+          type: number
+          description: |
+            timer left time (seconds).
+          minimum: 0
+          maximum: 3600
+
+paths:
+  /device/leds:
+    get:
+      description: |
+        Get LED Status.
+      tags:
+        - device
+        - leds
+      responses:
+        '200':
+          description: |
+            LEDs Status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLedStatusEntry'
+              examples:
+                Get LEDs status and all LEDs controlled by system default :
+                  value:
+                    count: 0
+                    data: {}
+
+                Get LED status after turn on PROGRAMMABLE1-1:
+                  value:
+                    count: 1
+                    data:
+                      PROGRAMMABLE1-1:
+                        mode: on
+                        timer:  600
+                        timeoutMode:  blink
+                        leftTime: 300
+
+                Get LED status after turn on PROGRAMMABLE1-1 without timer:
+                  value:
+                    count: 0
+                    data:
+                      PROGRAMMABLE1-1:
+                        mode: on
+                        timer:  0
+                        timeoutMode:  noAction
+                        leftTime: 0
+    put:
+      description: |
+        Set LEDs actions.
+      tags:
+        - device
+        - leds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LedStatusEntry'
+            examples:
+              Set one LED on:
+                  description: |
+                    Turn on PROGRAMMABLE1-1.
+                  value:
+                    PROGRAMMABLE1-1:
+                      mode: on
+                      timer:  600
+                      timeoutMode:  blink
+              Set one LED on, one LED turn off and controlled by system default:
+                description:  |
+                  Turn on PROGRAMMABLE1-1 after turn off SIGNAL1-1 and release control for system default.
+                value:
+                  SIGNAL1-1:
+                    mode: off
+                    timer:  1
+                    timeoutMode: ignore
+                  PROGRAMMABLE1-1:
+                    mode: on
+                    timer:  600
+                    timeoutMode: blink
+
+              Set one LEDs on without timer:
+                description: |
+                  Turn on SIGNAL1-1 without timer.
+                value:
+                  SIGNAL1-1:
+                    mode: on
+                    timer:  0
+                    timeoutMode: noAction
+
+              Set all LEDs controlled  by system default:
+                description: |
+                  Do not control SIGNAL1-1.
+                value:
+                  SIGNAL1-1:
+                    mode: ignore
+                    timer:  0
+                    timeoutMode: noAction
+      responses:
+        200:
+          description: |
+            LED actions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedStatusEntry'
+              examples:
+                Set one LED on:
+                    description: |
+                      Turn on PROGRAMMABLE1-1.
+                    value:
+                      PROGRAMMABLE1-1:
+                        mode: on
+                        timer:  600
+                        timeoutMode:  blink
+                Set one LED on, one LED turn off and controlled by system default:
+                  description: |
+                    Turn on PROGRAMMABLE1-1 after turn off SIGNAL1-1 and release control for system default.
+                  value:
+                    SIGNAL1-1:
+                      mode: off
+                      timer:  1
+                      timeoutMode: ignore
+                    PROGRAMMABLE1-1:
+                      mode: on
+                      timer:  600
+                      timeoutMode: blink
+
+                Set one LEDs on without timer:
+                  description: |
+                    Turn on SIGNAL1-1 without timer.
+                  value:
+                    SIGNAL1-1:
+                      mode: on
+                      timer:  0
+                      timeoutMode: noAction
+
+                Set all LEDs controlled  by system default:
+                  description: |
+                    Do not control SIGNAL1-1.
+                  value:
+                    SIGNAL1-1:
+                      mode: ignore
+                      timer:  0
+                      timeoutMode: noAction
+        404:
+          description:  |
+            LED actions
+
+  /device/leds/capabilities:
+    get:
+      description: |
+        Get LED capabilities
+      tags: ["device", "leds"]
+      responses:
+        200:
+          description: |
+            LED capabilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedCapabilities'
+              examples:
+                Device 1:
+                  value:
+                    data:
+                      led:
+                      - SIGNAL1-1
+                      - SIGNAL1-2
+                      - SIGNAL1-3
+                      - PROGRAMMABLE1-1
+                      mode:
+                      - on
+                      - off
+                      - blink
+                      - ignore
+                      timeoutMode:
+                      - on
+                      - off
+                      - blink
+                      - ignore
+                      - noAction
