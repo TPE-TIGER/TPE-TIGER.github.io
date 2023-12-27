@@ -1,0 +1,530 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.0.0'
+  title: 'Serial Configuration APIs'
+  description: 'Serial Configuration APIs'
+
+components:
+  schemas:
+    AllSerialInformation:
+      title: All serial interfaces configuration
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SerialItem'
+        count:
+          type: integer
+          description: Array length.
+          example: 1
+    SerialInformation:
+      title: Serial interface configuration
+      properties:
+        data:
+          $ref: '#/components/schemas/SerialItem'
+    SerialConfiguration:
+      title: Serial setting.
+      properties:
+        id:
+          type: integer
+          description: Interface id.
+          example: 1
+        device:
+          type: string
+          description: Device path.
+          readOnly: true
+        mode:
+          type: string
+          description: Serial interface mode.
+          enum:
+            - rs232
+            - rs422
+            - rs4852w
+            - rs4854w
+          example: rs232
+        displayName:
+          type: string
+          description: Serial port display name.
+          readOnly: true
+          example: 'COM1'
+        baudRate:
+          type: integer
+          description: baud rate
+          example: 9600
+        parity:
+          type: string
+          description: parity
+          example: none
+        dataBits:
+          type: integer
+          description: data bits
+          example: 8
+        stopBits:
+          type: number
+          description: stop bits
+          example: 1
+        flowControl:
+          type: string
+          description: flow control
+          example: software
+    SerialItem:
+      title: Serial Information
+      properties:
+        type:
+          type: string
+          description: Interface type.
+          example: serials
+          readOnly: true
+        id:
+          type: integer
+          description: Interface id.
+          example: 1
+          readOnly: true
+        source:
+          type: string
+          description: Serial port soruce type.
+          enum:
+            - system
+            - UPort
+        sourceModelName:
+          type: string
+          description: UPort model name.
+        plugIn:
+          type: boolean
+          description: UPort is plugged or not.
+        device:
+          type: string
+          description: Device path.
+          readOnly: true
+        mode:
+          type: string
+          description: Serial interface mode.
+          enum:
+            - rs232
+            - rs422
+            - rs4852w
+            - rs4854w
+          example: rs232
+        displayName:
+          type: string
+          description: Serial port display name.
+          readOnly: true
+          example: 'P1'
+        baudRate:
+          type: integer
+          description: baud rate
+          example: 9600
+        parity:
+          type: string
+          description: parity
+          example: none
+        dataBits:
+          type: integer
+          description: data bits
+          example: 8
+        stopBits:
+          type: number
+          description: stop bits
+          example: 1
+        flowControl:
+          type: string
+          description: flow control
+          example: software
+        capabilities:
+          $ref: '#/components/schemas/Capability'
+    Capability:
+      title: Serial hardware capability
+      properties:
+        mode:
+          type: array
+          description: list supported modes.
+          items:
+            type: string
+          example: ["rs232", "rs422", "rs4852w", "rs4854w"]
+          readOnly: true
+        baudRate:
+          type: object
+          properties:
+            special:
+              type: boolean
+              description: support moxa special baud rate
+              default: false
+            range:
+              type: array
+              description: list supported baud rate.
+              items:
+                type: integer
+              example: [300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+              readOnly: true
+        parities:
+          type: array
+          description: list supported parities.
+          items:
+            type: string
+          example: ["none", "odd", "even", "space", "mark"]
+          readOnly: true
+        dataBits:
+          type: array
+          description: list supported data bits.
+          items:
+            type: integer
+          example: [5, 6, 7, 8]
+          readOnly: true
+        stopBits:
+          type: array
+          description: list supported stop bits.
+          items:
+            type: number
+          example: [1, 2, 1.5]
+          readOnly: true
+        flowControl:
+          type: array
+          description: list supported flow controls.
+          items:
+            type: string
+          example: ["none", "hardware", "software"]
+          readOnly: true
+    SearchResult:
+      title: Search result
+      properties:
+        type:
+          type: string
+          description: Device type
+          example: nport
+        ip:
+          type: string
+          description: Device IP address
+          example: 10.144.48.146
+        mac:
+          type: string
+          description: Device MAC address
+          example: "00:90:e8:5f:c8:2c"
+        modelName:
+          type: string
+          description: Device model name
+          example: 5150A
+        apId:
+          type: string
+          description: NPort only
+          example: "0x80005400"
+        hwId:
+          type: string
+          description: NPort only
+          example: "0x5401"
+    NetworkInformation:
+      title: Network information
+      properties:
+        config:
+          type: string
+          description: One of static, dhcp, dhcp/bootp, bootp or pppoe
+        ip:
+          type: string
+        netmask:
+          type: string
+        gateway:
+          type: string
+    NPortInformation:
+      title: NPort basic information
+      properties:
+        channels:
+          type: object
+          properties:
+            ai:
+              type: integer
+            ao:
+              type: integer
+            di:
+              type: integer
+  parameters:
+    ipParam:
+      in: query
+      name: ip
+      required: true
+      schema:
+        type: string
+      description: Device IP
+    macParam:
+      in: query
+      name: mac
+      required: true
+      schema:
+        type: string
+      description: MAC address of NPort.
+    apidParam:
+      in: query
+      name: apid
+      required: true
+      schema:
+        type: string
+      description: apId of NPort.
+    hwidParam:
+      in: query
+      name: hwid
+      required: true
+      schema:
+        type: string
+      description: hwId of NPort.
+paths:
+  /device/serials:
+    get:
+      description: Get serial interfaces configuration.
+      tags: ["device", "serials"]
+      responses:
+        200:
+          description: All serial configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSerialInformation'
+              example:
+                data:
+                  - type: serials
+                    id: 1
+                    mode: rs232
+                    displayName: COM1
+                    source: system
+                    sourceModelName: ""
+                    plugIn: true
+                    device: /dev/ttyM0
+                    baudRate: 9600
+                    parity: none
+                    dataBits: 8
+                    stopBits: 1
+                    flowControl: hardware
+                    capabilities:
+                      mode: ["rs232", "rs422", "rs4852w", "rs4854w"]
+                      baudRate:
+                        special: false
+                        range: [300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+                      parities: ["none", "odd", "even", "space", "mark"]
+                      dataBits: [5, 6, 7, 8]
+                      stopBits: [1, 2, 1.5]
+                      flowControl: ["none", "hardware"]
+                  - type: serials
+                    id: 2
+                    mode: rs422
+                    displayName: COM2
+                    source: system
+                    sourceModelName: ""
+                    plugIn: true
+                    device: /dev/ttyM1
+                    baudRate: 115200
+                    parity: none
+                    dataBits: 8
+                    stopBits: 1
+                    flowControl: hardware
+                    capabilities:
+                      mode: ["rs232", "rs422", "rs4852w", "rs4854w"]
+                      baudRate:
+                        special: false
+                        range: [300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+                      parities: ["none", "odd", "even", "space", "mark"]
+                      dataBits: [5, 6, 7, 8]
+                      stopBits: [1, 2, 1.5]
+                      flowControl: ["none", "hardware"]
+                  - type: serials
+                    id: 3
+                    mode: rs422
+                    displayName: COM3
+                    source: UPort
+                    sourceModelName: "MOXA_UPort_1110"
+                    plugIn: true
+                    device: /dev/ttyUSB7
+                    baudRate: 115200
+                    parity: none
+                    dataBits: 8
+                    stopBits: 1
+                    flowControl: hardware
+                    capabilities:
+                      mode: ["rs232", "rs422", "rs4852w", "rs4854w"]
+                      baudRate:
+                        special: false
+                        range: [300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+                      parities: ["none", "odd", "even", "space", "mark"]
+                      dataBits: [5, 6, 7, 8]
+                      stopBits: [1, 2, 1.5]
+                      flowControl: ["none", "hardware"]
+                count: 3
+    patch:
+      description: Update serial interfaces configuration.
+      tags: ["device", "serials"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/SerialConfiguration'
+            example:
+              - id: 1
+                mode: rs232
+              - id: 2
+                mode: rs4852w
+                baudRate: 19200
+                parity: none
+                dataBits: 8
+                stopBits: 1
+                flowControl: none
+      responses:
+        200:
+          description: All serial configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSerialInformation'
+              example:
+                data:
+                  - type: serials
+                    id: 1
+                    mode: rs232
+                    source: system
+                    sourceModelName: ""
+                    plugIn: true
+                    displayName: COM1
+                    device: /dev/ttyM0
+                    baudRate: 9600
+                    parity: none
+                    dataBits: 8
+                    stopBits: 1
+                    flowControl: hardware
+                  - type: serials
+                    id: 2
+                    mode: rs4852w
+                    source: system
+                    sourceModelName: ""
+                    plugIn: true
+                    displayName: COM2
+                    device: /dev/ttyM1
+                    baudRate: 19200
+                    parity: none
+                    dataBits: 8
+                    stopBits: 1
+                    flowControl: none
+                count: 2
+    # do not show on index.yaml to explain for customer
+    #delete:
+    #  description: Remove serial configuration of UPort from TPE management
+    #  tags: ["device", "serials"]
+    #  parameters:
+    #    - in: query
+    #      name: model
+    #      description: UPort model name
+    #      required: true
+    #      schema:
+    #        type: string
+    #      example: MOXA_UPort_1250I
+    #  responses:
+    #    200:
+    #      description: All serial configuration
+    #      content:
+    #        application/json:
+    #          schema:
+    #            $ref: '#/components/schemas/AllSerialInformation'
+    #          example:
+    #            data:
+    #              - type: serials
+    #                id: 1
+    #                mode: rs232
+    #                source: system
+    #                sourceModelName: ""
+    #                plugIn: true
+    #                displayName: COM1
+    #                device: /dev/ttyM0
+    #                baudRate: 9600
+    #                parity: none
+    #                dataBits: 8
+    #                stopBits: 1
+    #                flowControl: hardware
+    #              - type: serials
+    #                id: 2
+    #                mode: rs4852w
+    #                source: system
+    #                sourceModelName: ""
+    #                plugIn: true
+    #                displayName: COM2
+    #                device: /dev/ttyM1
+    #                baudRate: 19200
+    #                parity: none
+    #                dataBits: 8
+    #                stopBits: 1
+    #                flowControl: none
+    #            count: 2
+  /device/serials/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Serial interface id.
+        schema:
+          type: integer
+        required: true
+        example: 1
+    get:
+      description: Get serial interface configuration.
+      tags: ["device", "serials"]
+      responses:
+        200:
+          description: Serial interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SerialInformation'
+              example:
+                data:
+                  type: serials
+                  id: 1
+                  mode: rs232
+                  source: system
+                  sourceModelName: ""
+                  plugIn: true
+                  displayName: COM1
+                  device: /dev/ttyM0
+                  baudRate: 9600
+                  parity: none
+                  dataBits: 8
+                  stopBits: 1
+                  flowControl: hardware
+                  capabilities:
+                      mode: ["rs232", "rs422", "rs4852w", "rs4854w"]
+                      baudRate:
+                        special: false
+                        range: [300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+                      parities: ["none", "odd", "even", "space", "mark"]
+                      dataBits: [5, 6, 7, 8]
+                      stopBits: [1, 2, 1.5]
+                      flowControl: ["none", "hardware"]
+    patch:
+      description: Update serial interface configuration.
+      tags: ["device", "serials"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerialConfiguration'
+            example:
+              mode: rs422
+              flowControl: software
+      responses:
+        200:
+          description: Serial interface configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SerialInformation'
+              example:
+                data:
+                  type: serial
+                  id: 1
+                  mode: rs422
+                  source: system
+                  sourceModelName: ""
+                  plugIn: true
+                  displayName: COM1
+                  device: /dev/ttyM0
+                  baudRate: 115200
+                  parity: none
+                  dataBits: 8
+                  stopBits: 1
+                  flowControl: software

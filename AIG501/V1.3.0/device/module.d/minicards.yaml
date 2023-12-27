@@ -1,0 +1,158 @@
+openapi: 3.0.0
+
+info:
+  version: "1.0.0"
+  title: 'MiniCard Configuration APIs'
+  description: 'MiniCard Configuration APIs'
+
+components:
+  schemas:
+    AllMinicardItems:
+      title: All minicard interface configuration
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinicardItem'
+        count:
+          type: integer
+    SingleMinicardItem:
+      title: Single minicard interface configuration
+      properties:
+        data:
+          $ref: '#/components/schemas/MinicardItem'
+    MinicardItem:
+      title: Minicard interface configuration
+      required:
+        - id
+        - enable
+      properties:
+        id:
+          type: integer
+          description: Identifier of a Minicard interface
+          minimum: 1
+        type:
+          type: string
+          description: Interface type
+          readOnly: true
+        enable:
+          type: boolean
+          description: Power on (`true`) or off (`false`) Minicard interface
+  examples:
+    AllMinicardItems:
+      value:
+        data:
+          - id: 1
+            type: minicards
+            enable: true
+          - id: 2
+            type: minicards
+            enable: true
+        count: 2
+    SingleMinicardItem:
+      value:
+        data:
+          id: 1
+          type: minicards
+          enable: true
+    MinicardItem:
+      value:
+        id: 1
+        enable: true
+    MinicardItems:
+      value:
+        - id: 1
+          enable: true
+        - id: 2
+          enable: true
+
+paths:
+  /device/minicards:
+    get:
+      description: |
+        Get all minicard interface configuration
+      tags: ["device", "minicards"]
+      responses:
+        '200':
+          description: All minicard interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllMinicardItems'
+              examples:
+                AllMinicardItems:
+                  $ref: '#/components/examples/AllMinicardItems'
+    patch:
+      description: |
+        Patch minicard interface configuration
+      tags: ["device", "minicards"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MinicardItem'
+            examples:
+              AllMinicardItems:
+                $ref: '#/components/examples/MinicardItems'
+      responses:
+        '200':
+          description: All minicard interface configuration
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AllMinicardItems'
+              examples:
+                AllMinicardItems:
+                  $ref: '#/components/examples/AllMinicardItems'
+  /device/minicards/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Minicard interface id
+        required: true
+        schema:
+          type: integer
+    get:
+      description: |
+        Get minicard interface configuration
+      tags: ["device", "minicards"]
+      responses:
+        '200':
+          description: Minicard interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleMinicardItem'
+              examples:
+                SingleMinicardItem:
+                  $ref: '#/components/examples/SingleMinicardItem'
+    patch:
+      description: |
+        Patch minicard interface configuration
+      tags: ["device", "minicards"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MinicardItem'
+            examples:
+              SingleMinicardItem:
+                $ref: '#/components/examples/MinicardItem'
+      responses:
+        '200':
+          description: Minicard interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleMinicardItem'
+              examples:
+                SingleMinicardItem:
+                  $ref: '#/components/examples/SingleMinicardItem'

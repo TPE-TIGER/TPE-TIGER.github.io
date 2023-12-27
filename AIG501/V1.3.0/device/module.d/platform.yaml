@@ -1,0 +1,249 @@
+
+openapi: 3.0.0
+info:
+  title: "Tag list of device app"
+  description: 'Tag list API usage'
+  version: 0.0.1
+
+servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/mo74/mx-eip/0.3.4
+
+
+security:
+  - bearerAuth: []
+
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    platformTags:
+      description: scanner tag list for platform
+      type: array
+      items:
+        $ref: '#/components/schemas/platformTag'
+
+    platformTag:
+      description: scanner tag information for platform
+      type: object
+      properties:
+        prvdName:
+          description: provider name for full tag name used
+          type: string
+        srcName:
+          description: source name for full tag name used
+          type: string
+        tagName:
+          description: Tag name for full tag name used
+          type: string
+        dataType:
+          description: Data type of tag
+          type: string
+          enum:
+          - boolean
+          - int8
+          - int16
+          - int32
+          - int64
+          - uint8
+          - uint16
+          - uint32
+          - uint64
+          - float
+          - double
+          - raw
+          default: raw
+        access:
+          description: |
+            Tag access for publish or subscribe
+            * 'r' - Read data from device, T->O
+            * 'w' - Write data to device, O->T
+          type: string
+          enum:
+            - r
+            - w
+          default: r
+        dataSize:
+          description: Data size of tag(bytes), only used when dataType is "raw"
+          type: integer
+        dataUnit:
+          description: Real unit description of tag (Ex ms, s, A, mA, etc...)
+          type: string
+      example:
+        prvdName: "system"
+        srcName: "device1"
+        tagName: "voltage"
+        dataType: "int32"
+        access: "w"
+        dataUnit: "%"
+
+    error:
+      required:
+        - message
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+
+  responses:
+    Success:
+      description: Success
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+    UnexpectedError:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+
+
+paths:
+  /device/operate/direct-read-tag:
+    put:
+      summary: directly read the data of a tag
+      tags: ["device", "operate"]
+      # tags:
+      #   - operate
+      requestBody:
+        description: Tag information.
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                prvdName:
+                  type: string
+                  description: Provider name.
+                srcName:
+                  type: string
+                  description: Source name.
+                tagName:
+                  type: string
+                  description: Tag name.
+            examples:
+              trigger_master_device_tag:
+                value:
+                  prvdName: "system"
+                  srcName: "storage"
+                  tagName: "systemDiskPercent"
+
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  prvdName:
+                    type: string
+                    description: Provider name.
+                  srcName:
+                    type: string
+                    description: Source name.
+                  tagName:
+                    type: string
+                    description: Tag name.
+                  timestamp:
+                    type: number
+                    description: Slave response time (us).
+                  dataType:
+                    type: string
+                    description: Tag type.
+                    enum:
+                      - raw
+                      - boolean
+                      - int8
+                      - int16
+                      - int32
+                      - int64
+                      - uint8
+                      - uint16
+                      - uint32
+                      - uint64
+                      - float
+                      - double
+                  dataValue:
+                    oneOf:
+                      - type: string
+                      - type: number
+                    description: Tag value.
+
+              examples:
+                read_system_disk_free_tag:
+                  value:
+                    prvdName: "system"
+                    srcName: "storage"
+                    tagName: "systemDiskFree"
+                    timestamp: 1600334040
+                    dataType: "uint64"
+                    dataValue: 12468695040
+                read_system_disk_used_tag:
+                  value:
+                    prvdName: "system"
+                    srcName: "storage"
+                    tagName: "systemDiskUsed"
+                    timestamp: 1600334040
+                    dataType: "uint64"
+                    dataValue: 2137628672
+                read_system_disk_percent_tag:
+                  value:
+                    prvdName: "system"
+                    srcName: "storage"
+                    tagName: "systemDiskPercent"
+                    timestamp: 1600334040
+                    dataType: "double"
+                    dataValue: 14.634953422563171
+
+        400:
+          description: Invalid parameters.
+
+        500:
+          description: Internal server error.
+
+
+  /device/platform/device-tags:
+    get:
+      summary: Get tag list of device app
+      tags: ["device", "platform"]
+      # tags:
+      # - platform
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/platformTags'
+              example:
+                data:
+                  - prvdName: "system"
+                    srcName: "storage"
+                    tagName: "systemDiskFree"
+                    dataType: "uint64"
+                    access: "r"
+                    dataUnit: ""
+                  - prvdName: "system"
+                    srcName: "storage"
+                    tagName: "systemDiskPercent"
+                    dataType: "double"
+                    access: "r"
+                    dataUnit: ""
+        400:
+          $ref: '#/components/responses/UnexpectedError'

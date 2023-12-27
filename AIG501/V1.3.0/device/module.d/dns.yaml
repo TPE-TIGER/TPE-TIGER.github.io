@@ -1,0 +1,35 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.0.0'
+  title: 'DNS Information API'
+  description: 'DNS Information API'
+
+components:
+  schemas:
+    DnsInformation:
+      title: Current DNS information
+      properties:
+        data:
+          type: array
+          readOnly: true
+          items:
+            type: string
+
+paths:
+  /device/dns:
+    get:
+      description: Get device's current DNS settings.
+      tags: ["device", "dns"]
+      responses:
+        200:
+          description: Device DNS settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DnsInformation'
+              example:
+                data:
+                  - 10.128.8.8
+                  - 8.8.8.8
+
