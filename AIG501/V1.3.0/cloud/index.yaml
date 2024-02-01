@@ -911,6 +911,12 @@ components:
               type: string
               minLength: 1
               maxLength: 1024
+            identityCertContent:
+              description: for source:dps,method:x509, certificate content
+              type: string
+            identityPkContent:
+              description: for source:dps,method:x509, private key content
+              type: string
             registrationId:
               description: |
                 Use only lowercase alphanumeric and dash ('-') characters. For example, symm-key-device-007
@@ -2764,8 +2770,10 @@ paths:
                     globalEndpoint: 'https://global.azure-devices-provisioning.net'
                     scopeId: '[SCOPE ID]'
                     registrationId: ''
-                    identityCert: '[CERT FILE CONTENT]'
-                    identityPk: '[KEY CONTENT]'
+                    identityCert: '[CERT FILE NAME]'
+                    identityPk: '[KEY NAME]'
+                    identityCertContent: '[CERT FILE CONTENT]'
+                    identityPkContent: '[KEY CONTENT]'
               downstreamCerts-default:
                 value:
                   downstreamCerts:
