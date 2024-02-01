@@ -1796,7 +1796,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/CloudRuntimeListInformation'
   /mqtt/check:
-    put:
+    get:
       description: Execute MQTT runtime diagnostic
       tags: ["mqtt"]
       responses:
@@ -2162,7 +2162,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/CloudRuntimeInformation'
   /azure-device/check:
-    put:
+    get:
       description: Execute azure device runtime diagnostic
       tags: ["azure_device"]
       responses:
@@ -2469,7 +2469,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/CloudRuntimeInformation'
   /aws/check:
-    put:
+    get:
       description: Execute AWS runtime diagnostic
       tags: ["aws"]
       responses:
