@@ -1,0 +1,453 @@
+openapi: "3.0.0"
+
+info:
+  title: Backup Logging
+  version: 0.0.1
+
+servers:
+  - url: http://127.0.0.1:59001/api/v1
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+  schemas:
+    LoggerConfiguration:
+      title: logger configuration
+      properties:
+        enable:
+          type: boolean
+          default: false
+        targetDiskName:
+          type: string
+        targetFolderName:
+          type: string
+        desiredDiskCacheSizeMB:
+          type: integer
+          minimum: 1024
+          maximum: 10240
+        tags:
+          type: object
+          properties:
+            moduleName:
+              type: object
+              properties:
+                sourceName:
+                  type: array
+                  items:
+                    description: tag name
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+        pollingIntervalSec:
+          type: integer
+          description: "unit:second"
+          default: 0
+          minLength: 0
+          maxLength: 86400
+        splitRule:
+          type: string
+          description: "Rule for splitting log files"
+          enum:
+            - byTime
+            - bySize
+        splitIntervalMin:
+          type: integer
+          description: "Interval for splitting log files in minutes (applicable if splitRule is byTime)"
+          minimum: 10
+          maximum: 1440
+        splitSizeMB:
+          type: integer
+          description: "Size limit for splitting log files in MB (applicable if splitRule is bySize)"
+          minimum: 1
+          maximum: 100
+        disks:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                readOnly: true
+              mount:
+                type: string
+                readOnly: true
+              device:
+                type: string
+                readOnly: true
+              total:
+                type: integer
+                readOnly: true
+              used:
+                type: integer
+                readOnly: true
+              free:
+                type: integer
+                readOnly: true
+      example:
+        enable: true
+        targetDiskName: SD1-1
+        targetFolderName: Modbus TCP Slave
+        desiredDiskCacheSizeMB: 1024
+        tags:
+          system:
+            status:
+              - cpuUsage
+              - memoryUsage
+        pollingIntervalSec: 5
+        splitRule: bySize
+        splitIntervalMin: 60
+        splitSizeMB: 10
+        disks:
+          - name: SD1-1
+            mount: /media/sd-mmcblk0p1
+            device: /dev/mmcblk0p1
+            total: 15397736448
+            used: 5237403648
+            free: 9360953344
+
+    LogUploadSettings:
+      title: Log Upload Settings
+      type: object
+      required:
+        - enable
+        - security
+        - domain
+        - port
+        - auth
+        - uploadPath
+        - interval
+      properties:
+        enable:
+          type: boolean
+          description: Enable/disable Log Upload, default is false
+          default: false
+        security:
+          type: boolean
+          description: Whether to use SFTP (if true) or FTP (if false)
+        domain:
+          type: string
+          description: Server IP address
+        port:
+          type: integer
+          description: Port number, default is 21 for FTP and 22 for SFTP
+        auth:
+          type: object
+          required:
+            - username
+            - mode
+          properties:
+            username:
+              type: string
+              description: Username for authentication
+            password:
+              type: string
+              description: Password for authentication (required if mode is 'byPassword')
+            privateKey:
+              type: string
+              description: Private key for authentication (required if mode is 'byUploadKey')
+            mode:
+              type: string
+              description: Authentication mode
+              enum:
+                - byPassword
+                - bySystemKey
+                - byUploadKey
+              example: byPassword
+        uploadPath:
+          type: string
+          description: Upload file path
+        intervalMin:
+          type: integer
+          description: Upload interval in minutes, default is 10, range 10-1440
+          default: 10
+          minimum: 10
+          maximum: 1440
+
+    LogUploadResponse:
+      title: Log Upload Response
+      type: object
+      properties:
+        data:
+          type: object
+          description: Log Upload Response Data
+          properties:
+            settings:
+              type: object
+              $ref: "#/components/schemas/LogUploadSettings"
+            lastSuccessfulTime:
+              type: string
+              description: Upload Log last-successful-time
+            lastSuccessfulFileName:
+              type: string
+              description: Upload Log last-successful-file-name
+            uploadStatus:
+              type: string
+              description: Upload Log status
+
+
+    ConnectionTestRequest:
+      title: Connection Test Request
+      type: object
+      required:
+        - security
+        - domain
+        - port
+        - auth
+      properties:
+        security:
+          type: boolean
+          description: Whether to use SFTP (if true) or FTP (if false)
+        domain:
+          type: string
+          description: Server IP address
+        port:
+          type: integer
+          description: Port number, default is 21 for FTP and 22 for SFTP
+        auth:
+          type: object
+          required:
+            - username
+            - useKey
+          properties:
+            username:
+              type: string
+              description: Username for authentication
+            password:
+              type: string
+              description: Password for authentication
+            privateKey:
+              type: string
+              description: Private key for authentication (required if mode is 'byUploadKey')
+            mode:
+              type: string
+              description: Authentication mode
+
+    ConnectionTestResponse:
+      title: Connection Test Response
+      type: object
+      properties:
+        data:
+          type: object
+          description: Log Upload Response Data
+          properties:
+            success:
+              type: boolean
+              description: Whether the connection test was successful
+            message:
+              type: string
+              description: Additional message regarding the test result
+
+  examples:
+    logUploadResponse:
+      summary: Example of a log upload response
+      value:
+        data:
+          settings:
+            enable: true
+            security: true
+            domain: "192.168.1.1"
+            port: 22
+            auth:
+              username: "user"
+              password: "password"
+              useKey: true
+            uploadPath: "/logs/upload"
+            intervalMin: 10
+          lastSuccessfulTime: "2024-01-01T10:00:00Z"
+          lastSuccessfulFileName: "2024-01-01T10:00:00.csv"
+    connectionTestResponse:
+      summary: Example of a successful connection test response
+      value:
+        data:
+          success: true
+          message: "Connection test was successful"
+
+paths:
+  /logger:
+    get:
+      description: Get current logger configuration.
+      responses:
+        200:
+          description: logger configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: "#/components/schemas/LoggerConfiguration"
+      tags:
+        - logger
+
+  /logger/cache/apply:
+    post:
+      description: Apply, copy cache config to current and active it.
+      responses:
+        200:
+          description: Apply logger cache config success
+      tags:
+        - logger
+
+  /logger/cache/reset:
+    post:
+      description: Reset, copy current config to cache.
+      responses:
+        200:
+          description: Reset logger cache config success
+      tags:
+        - logger
+
+  /logger/cache:
+    get:
+      description: Get logger cache config
+      responses:
+        200:
+          description: logger configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: "#/components/schemas/LoggerConfiguration"
+      tags:
+        - logger
+
+    patch:
+      description: Update logger cache config.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoggerConfiguration"
+      responses:
+        200:
+          description: Set logger cache config success
+        400:
+          description: logger config in payload is not valid
+      tags:
+        - logger
+
+  /logger/files:
+    get:
+      description: Get stored csv files list
+      responses:
+        200:
+          description: Stored csv files list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 2022-05-14T212405.csv
+                      - 2022-05-14T212812.csv
+      tags:
+        - logger
+  /logger/export:
+    parameters:
+      - name: name
+        description: The file name to be exported
+        in: query
+        required: true
+        schema:
+          type: string
+    get:
+      description: Export stored csv file
+      responses:
+        200:
+          description: Successful response of csv file
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+      tags:
+        - logger
+  /logger/ftp:
+    get:
+      description: Get current SFTP/FTP Log Upload settings and last successful upload time
+      responses:
+        200:
+          description: Current Log Upload settings and last successful upload time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogUploadResponse"
+      tags:
+        - logger
+  /logger/ftp/settings:
+    patch:
+      description: Configure SFTP/FTP Log Upload settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogUploadSettings"
+      responses:
+        200:
+          description: Successfully updated the log upload settings
+        400:
+          description: Invalid settings provided
+      tags:
+        - logger
+
+  /logger/ftp/regen-key-pair:
+    post:
+      description: Trigger the regeneration of the SFTP key pair and return the public key file
+      responses:
+        200:
+          description: Successfully triggered the regeneration of the SFTP key pair and returned the public key file
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+                description: The regenerated public key file
+          headers:
+            Content-Disposition:
+              description: Indicates that the response should be downloaded as a file
+              schema:
+                type: string
+                example: attachment; filename="public_key.pem"
+        500:
+          description: Failed to trigger the regeneration of the SFTP key pair
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Failed to regenerate key pair"
+      tags:
+        - logger
+  /logger/ftp/test-connection:
+    post:
+      description: Test connection to the server using FTP/SFTP settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectionTestRequest"
+      responses:
+        200:
+          description: Connection test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionTestResponse"
+      tags:
+        - logger
+

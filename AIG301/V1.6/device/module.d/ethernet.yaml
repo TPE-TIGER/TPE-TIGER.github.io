@@ -1,0 +1,328 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.0.0'
+  title: 'Ethernet Configuration APIs'
+  description: 'Ethernet Configuration APIs'
+
+servers:
+  - url: http://127.0.0.1:59001/api/v1
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+  schemas:
+    AllEthernetInformation:
+      title: All ethernet interfaces configuration
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EthernetItem'
+        count:
+          type: integer
+          description: Array length.
+          example: 1
+    EthernetDhcp:
+      title: Ethernet setting for dynamic ip.
+      required:
+      - enable
+      - enableDhcp
+      - wan
+      properties:
+        id:
+          type: integer
+          description: Identifier of an Ethernet interface.
+          minimum: 1
+        enable:
+          type: boolean
+          description: Set interface UP.
+        enableDhcp:
+          type: boolean
+          description: Enable (`true`) the dhcp client.
+        wan:
+          type: boolean
+          description: Define the interface type is WAN (`true`) or LAN (`false`)
+    EthernetStaticIP:
+      title: Ethernet setting for static ip.
+      required:
+      - enable
+      - ip
+      - netmask
+      - enableDhcp
+      - wan
+      properties:
+        id:
+          type: integer
+          description: Identifier of an Ethernet interface.
+          minimum: 1
+        enable:
+          type: boolean
+          description: Set interface UP.
+        ip:
+          type: string
+          description: IP address for the Ethernet interface.
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        netmask:
+          type: string
+          description: Interface netmask.
+          pattern: ^(?:(?:254|252|248|240|224|192|128)\.0\.0\.0|255\.(?:254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(?:254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(?:254|252|248|240|224|192|128|0))$
+        gateway:
+          type: string
+          description: Gateway is a router or a proxy server that routes between networks.
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        dns:
+          type: array
+          description: |
+            The Domain Name System (DNS) is a hierarchical distributed naming
+            system for computers, services, or any resource connected to the
+            Internet or a private network.
+          items:
+            type: string
+            pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        enableDhcp:
+          type: boolean
+          description: Using the static IP (`false`).
+        wan:
+          type: boolean
+          description: Define the interface type is WAN (`true`) or LAN (`false`)
+    EthernetInformation:
+      title: Ethernet interface configuration
+      properties:
+        data:
+          $ref: '#/components/schemas/EthernetItem'
+    EthernetItem:
+      title: Ethernet configuration
+      properties:
+        type:
+          type: string
+          description: Interface type.
+          readOnly: true
+          example: 'ethernets'
+        id:
+          type: integer
+          description: Interface id.
+          example: 1
+          readOnly: true
+        displayName:
+          type: string
+          description: Interface display name.
+          readOnly: true
+          example: 'LAN1'
+        name:
+          type: string
+          description: Interface name.
+          readOnly: true
+          example: 'eth0'
+        wan:
+          type: boolean
+          description: Enable/disable wan.
+          example: true
+        enable:
+          type: boolean
+          description: Enable/disable the interface.(enable=true doesn’t mean the interface is trying to connect if the interface belongs to Wi-Fi Client which the TCP/IP layer 2 behavior controlled by the other endpoints.)
+          example: true
+        status:
+          type: string
+          description: Interface current status.
+          readOnly: true
+          enum:
+          - connected
+          - disconnected
+          example: connected
+        enableDhcp:
+          type: boolean
+          description: Enable/disable dhcp.
+          example: true
+        ip:
+          type: string
+          description: Interface ip.
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+          example: '192.168.3.100'
+        netmask:
+          type: string
+          description: Interface netmask.
+          pattern: ^(254|252|248|240|224|192|128)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)
+          example: '255.255.255.0'
+        subnet:
+          type: string
+          description: Interface subnet.
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+          readOnly: true
+          example: '192.168.3.0'
+        broadcast:
+          type: string
+          description: Interface broadcast.
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+          readOnly: true
+          example: '192.168.3.255'
+        gateway:
+          type: string
+          description: Interface gateway.
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+          example: '192.168.3.254'
+        dns:
+          type: array
+          description: Interface dns.
+          items:
+            type: string
+            pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+            example: ["10.128.8.5","10.128.8.8"]
+        mac:
+          type: string
+          description: Interface mac.
+          readOnly: true
+          example: '00:90:e8:70:a9:74'
+
+paths:
+  /device/ethernets:
+    get:
+      description: Get ethernet interfaces configuration.
+      tags: ["device", "ethernets"]
+      responses:
+        200:
+          description: All ethernet interfaces configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllEthernetInformation'
+              example:
+                data:
+                  - type: 'ethernets'
+                    id: 1
+                    displayName: 'LAN1'
+                    name: 'eth0'
+                    wan: true
+                    enable: true
+                    status: 'connected'
+                    enableDhcp: false
+                    ip: '192.168.3.100'
+                    netmask: '255.255.255.0'
+                    subnet: '192.168.3.0'
+                    broadcast: '192.168.3.255'
+                    gateway: '192.168.3.254'
+                    dns:
+                      - '8.8.8.8'
+                      - '4.4.4.4'
+                    mac: '00:90:e8:12:34:56'
+                count: 1
+  /device/ethernets/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Ethernet interface id.
+        schema:
+          type: integer
+        required: true
+        example: 1
+    get:
+      description: Get ethernet interface configuration.
+      tags: ["device", "ethernets"]
+      responses:
+        200:
+          description: Ethernet interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EthernetInformation'
+              example:
+                data:
+                  type: 'ethernets'
+                  id: 1
+                  displayName: 'LAN1'
+                  name: 'eth0'
+                  wan: true
+                  enable: true
+                  status: 'connected'
+                  enableDhcp: false
+                  ip: '192.168.3.100'
+                  netmask: '255.255.255.0'
+                  subnet: '192.168.3.0'
+                  broadcast: '192.168.3.255'
+                  gateway: '192.168.3.254'
+                  dns:
+                    - '8.8.8.8'
+                    - '4.4.4.4'
+                  mac: '00:90:e8:12:34:56'
+    patch:
+      description: Update ethernet interface configuration.
+      tags: ["device", "ethernets"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/EthernetDhcp'
+                - $ref: '#/components/schemas/EthernetStaticIP'
+            examples:
+              dhcp:
+                value:
+                  enable: true
+                  enableDhcp: true
+                  wan: true
+              static:
+                value:
+                  enable: true
+                  ip: '192.168.4.100'
+                  netmask: '255.255.255.0'
+                  gateway: '192.168.4.254'
+                  dns:
+                    - '1.1.1.1'
+                    - '2.2.2.2'
+                  enableDhcp: false
+                  wan: true
+      responses:
+        200:
+          description: Ethernet interface configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EthernetInformation'
+              examples:
+                dhcp:
+                  value:
+                    data:
+                      type: 'ethernets'
+                      id: 1
+                      displayName: 'LAN1'
+                      name: 'eth0'
+                      wan: true
+                      enable: true
+                      status: 'connected'
+                      enableDhcp: true
+                      ip: '192.168.3.100'
+                      netmask: '255.255.255.0'
+                      subnet: '192.168.3.0'
+                      broadcast: '192.168.3.255'
+                      gateway: '192.168.3.254'
+                      dns:
+                        - '8.8.8.8'
+                        - '4.4.4.4'
+                      mac: '00:90:e8:12:34:56'
+                static:
+                  value:
+                    data:
+                      type: 'ethernets'
+                      id: 1
+                      displayName: 'LAN1'
+                      name: 'eth0'
+                      wan: true
+                      enable: true
+                      status: 'connected'
+                      enableDhcp: false
+                      ip: '192.168.4.100'
+                      netmask: '255.255.255.0'
+                      subnet: '192.168.4.0'
+                      broadcast: '192.168.4.255'
+                      gateway: '192.168.4.254'
+                      dns:
+                        - '1.1.1.1'
+                        - '2.2.2.2'
+                      mac: '00:90:e8:12:34:56'

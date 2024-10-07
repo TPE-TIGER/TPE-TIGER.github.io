@@ -1,0 +1,151 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.0.0'
+  title: 'GPS Configuration APIs'
+  description: 'GPS Configuration APIs'
+
+components:
+  schemas:
+    GpsInformation:
+      title: GPS interface configuration
+      properties:
+        data:
+          $ref: '#/components/schemas/GpsItem'
+    GpsItem:
+      title: GPS Information
+      properties:
+        type:
+          type: string
+          description: Interface type.
+          example: gps
+          readOnly: true
+        interface:
+          type: string
+          description: Device path.
+          readOnly: true
+          example: /dev/ttyM0
+        mode:
+          type: string
+          description: gps mode.
+          enum:
+            - manual
+            - auto
+          example: manual
+        location:
+          $ref: '#/components/schemas/GpsLocation'
+        capabilities:
+          $ref: '#/components/schemas/Capability'
+    GpsSetMode:
+      title: Set GPS manual mode.
+      required:
+      - mode
+      - interface
+      properties:
+        mode:
+          type: string
+          description: GPS mode setting. Could be one of `auto` or `manual`
+          example: manual
+        interface:
+          type: string
+          description: GPS interface setting from capability. The field is required for `auto` mode.
+          example: /dev/ttyM0
+        location:
+          $ref: '#/components/schemas/GpsLocation'
+    GpsLocation:
+      type: object
+      description: Location information, with `latitude` and `longitude` data.
+      required:
+      - lat
+      - lng
+      properties:
+        lat:
+          type: number
+          format: float
+          description: latitude. The field is required for `manual` mode.
+          default: 0
+          example: 23.5
+        lng:
+          type: number
+          format: float
+          description: longitude. The field is required for `manual` mode.
+          default: 0
+          example: 121.2
+    Capability:
+      title: Gps capability
+      properties:
+        interface:
+          type: array
+          description: list supported gps interfaces.
+          items:
+            type: string
+          example: ["/dev/ttyUSB0", "/dev/ttyUSB1"]
+          readOnly: true
+paths:
+  /device/gps:
+    get:
+      description: Get gps configuration.
+      tags: ["device", "gps"]
+      responses:
+        200:
+          description: gps configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GpsInformation'
+              example:
+                data:
+                  type: gps
+                  mode: manual
+                  interface: ""
+                  location:
+                    lat: 23.5
+                    lng: 121.2
+                  capabilities:
+                    interface: ["/dev/ttyUSB0", "/dev/ttyUSB1"]
+    patch:
+      description: Patch gps configuration.
+      tags: ["device", "gps"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GpsSetMode'
+            examples:
+              set manual mode with lat/lng value:
+                value:
+                  mode: manual
+                  location:
+                    lat: 23.5
+                    lng: 121.2
+              set auto mode with interface:
+                value:
+                  mode: auto
+                  interface: "/dev/ttyUSB0"
+      responses:
+        200:
+          description: All gps configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GpsInformation'
+              examples:
+                manual:
+                  value:
+                    data:
+                      type: gps
+                      mode: manual
+                      interface: ""
+                      location:
+                        lat: 23.5
+                        lng: 121.2
+                auto:
+                  value:
+                    data:
+                      type: gps
+                      mode: auto
+                      interface: /dev/ttyUSB0
+                      location:
+                        lat: 0
+                        lng: 0

@@ -1,0 +1,1209 @@
+openapi: 3.0.0
+info:
+  version: "1.3.0"
+  title: 'Wifi Configuration APIs'
+  description: |
+    Release Date: 2020/07/10
+    Wi-Fi Configuration APIs
+
+components:
+  schemas:
+    AllWifiInformationWithNetworklayer:
+      title: All Wi-Fi interfaces configuration
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/WifiItem'
+              - $ref: '#/components/schemas/Networklayer'
+        count:
+          type: integer
+          description: Array length.
+    WifiInformationWithNetworklayer:
+      title: Wi-Fi interface configuration
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/WifiItem'
+          - $ref: '#/components/schemas/Networklayer'
+    Networklayer:
+      title: For Ui network layer setting entry
+      properties:
+        client:
+          type: object
+          properties:
+            ipSetting:
+              description: IPv4 address setting
+              type: object
+              properties:
+                enableDhcp:
+                  type: boolean
+                  description: Using the static IP (`false`).
+                ip:
+                  type: string
+                  description: IP address for the Ethernet interface.
+                  pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+                netmask:
+                  type: string
+                  description: Interface netmask.
+                  pattern: ^(?:(?:254|252|248|240|224|192|128)\.0\.0\.0|255\.(?:254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(?:254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(?:254|252|248|240|224|192|128|0))$
+                gateway:
+                  type: string
+                  description: Gateway is a router or a proxy server that routes between networks.
+                  pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+                dns:
+                  type: array
+                  description: |
+                    The Domain Name System (DNS) is a hierarchical distributed naming
+                    system for computers, services, or any resource connected to the
+                    Internet or a private network.
+                  items:
+                    type: string
+                    pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+            checkalive:
+              description: Checkalive Settings
+              type: object
+              properties:
+                enable:
+                  type: boolean
+                  description: Enable/disable Wi-Fi connection check-alive by ping.
+                targetHost:
+                  type: string
+                  description: IPv4 address or domain name to ping.
+                  minLength: 2
+                  maxLength: 253
+                  default: 8.8.8.8
+                  example: 8.8.8.8
+                intervalSec:
+                  type: integer
+                  minimum: 10
+                  maximum: 86400
+                  description: Check alive interval.
+                  default: 60
+                  example: 60
+    AllWifiInformation:
+      title: All Wi-Fi interfaces configuration
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WifiItem'
+        count:
+          type: integer
+          description: Array length.
+    AllWifiInformationForPatch:
+      title: All Wi-Fi interfaces configuration
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+            - $ref: '#/components/schemas/WifiItem'
+            - required:
+              - id
+        count:
+          type: integer
+          description: Array length.
+    WifiInformation:
+      title: Wi-Fi interface configuration
+      properties:
+        data:
+          $ref: '#/components/schemas/WifiItem'
+    WifiItem:
+      title: Wifi Information
+      required:
+      - type
+      - enable
+      - mode
+      properties:
+        type:
+          type: string
+          description: Interface type.
+          readOnly: true
+          example: wifi
+        id:
+          type: integer
+          description: Interface id
+        available:
+          type: boolean
+          description: Wi-Fi Interface is available
+          readOnly: true
+        name:
+          type: string
+          description: Interface name
+          readOnly: true
+        displayName:
+          type: string
+          description: Interface display name.
+          readOnly: true
+        mode:
+          type: string
+          description: Given Wi-Fi interface mode. Could be one of `"ap"`, `"client"`
+        capabilities:
+          type: object
+          description: Indicate current capability that module supports
+          readOnly: true
+          properties:
+            mode:
+              type: array
+              items:
+                type: string
+                enum: ["ap","client"]
+            band:
+              type: array
+              items:
+                type: string
+                enum: ["band24","band50"]
+        regions:
+          type: array
+          description: regions information
+          readOnly: true
+          items:
+            type: object
+            properties:
+                name:
+                  type: string
+                  description: region display name
+                countryCode:
+                  type: string
+                  description: region country code to query supported channels
+                band24:
+                  type: array
+                  items:
+                    type: integer
+                band50:
+                  type: array
+                  items:
+                    type: integer
+        enable:
+          type: boolean
+          description: Enable Wi-Fi Networking.
+        status:
+          type: boolean
+          description: Wi-Fi connection status.
+        ap:
+          type: object
+          description: Configuration of Wi-Fi AP mode.
+          required:
+          - mode
+          - ssid
+          - channel
+          - security
+          properties:
+            broadcastSsid:
+              type: boolean
+            band:
+              type: string
+              description: Wi-Fi band mode.
+              enum: ["band24","band50"]
+            ssid:
+              type: string
+              description: SSID of a Wi-Fi AP.
+            channel:
+              type: integer
+            security:
+              type: object
+              required:
+              - mode
+              properties:
+                mode:
+                  type: string
+                  description: Wi-Fi AP security mode
+                  enum: ["wpa2"]
+                encryption:
+                  type: string
+                  description: Wi-Fi AP encryption protocol
+                  enum: ["aes"]
+                password:
+                  type: string
+                  description: ASCII passphrase (8 ~ 63).
+            clients:
+              type: array
+              description: Ap connected clients information
+              readOnly: true
+              items:
+                type: object
+                properties:
+                    Mac:
+                      type: string
+                      description: Mac address
+        client:
+          type: object
+          description: Configuration of Wi-Fi Client mode.
+          properties:
+            connectState:
+              type: string
+              description: Current connect state
+              readOnly: true
+              enum: ["initializing","connecting","connected","authentication failed","disconnect"]
+            currentAp:
+              type: string
+              description: Uuid of current connect Wi-Fi client network
+              readOnly: true
+            priority:
+              type: array
+              items:
+                type: string
+                description: Wi-Fi client networks uuid of priority
+            networks:
+              type: array
+              items:
+                $ref: '#/components/schemas/WifiClientNetworksItem'
+    AllWifiClientNetworksItem:
+      title: Current Wi-Fi list settings
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WifiClientNetworksItem'
+    WifiClientpriority:
+      title:  Wi-Fi client networks list priority
+      properties:
+        data:
+          type: array
+          items:
+            type: string
+            description: Wi-Fi client networks uuid of priority
+    WifiClientNetworksItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+          description: Wi-Fi client network UUID
+        ssid:
+          type: string
+          description: Wi-Fi client network SSID
+          readOnly: true
+        bssid:
+          type: string
+          description: Wi-Fi client network BSSID
+          readOnly: true
+        security:
+          type: object
+          properties:
+            mode:
+              type: string
+              description: Wi-Fi client network security mode
+              enum: ["wpa2-personal","none"]
+            encryption:
+              type: string
+              description: Wi-Fi client network encryption protocol
+              enum: ["aes","tkip"]
+            password:
+              type: string
+              description: ASCII passphrase (8 ~ 63).
+        signal:
+          type: integer
+          description: Wi-Fi client network signal strength(dBm),
+            <br/>0\~\-50:High quality,
+            <br/>\-50\~\-70:Medium quality,
+            <br/>\-70\~\-90:Low quality,
+            <br/>\-90\~\-100:Unusable quality
+          readOnly: true
+        band:
+          type: string
+          description: Wi-Fi client network band mode.
+          readOnly: true
+          enum: ["band24","band50"]
+    NewWifiClientNetworksItem:
+      title: Add  a Wi-Fi client network to networks list
+      type: object
+      required:
+      - ssid
+      - password
+      properties:
+        ssid:
+          type: string
+          description: Wi-Fi client network SSID
+        password:
+          type: string
+          description: Wi-Fi client network password
+    ScanList:
+      title: Wi-Fi client networks results
+      properties:
+        scanlist:
+          type: array
+          items:
+            type: object
+            properties:
+              ssid:
+                type: string
+                description: Wi-Fi client network SSID
+              security:
+                type: object
+                properties:
+                  mode:
+                    type: string
+                    description: Wi-Fi client network security mode
+                    enum: ["wpa2-personal","wpa2-enterprise","wpa-personal","wpa-enterprise","none"]
+                  encryption:
+                    type: string
+                    description: Wi-Fi client network encryption protocol
+                    enum: ["aes","tkip","none"]
+                  support:
+                    type: boolean
+                    description: Current Wi-Fi module support
+              signal:
+                type: integer
+                description: Wi-Fi client network signal strength(dBm),
+                  <br/>0\~\-50:High quality,
+                  <br/>\-50\~\-70:Medium quality,
+                  <br/>\-70\~\-90:Low quality,
+                  <br/>\-90\~\-100:Unusable quality
+              band:
+                type: string
+                description: Wi-Fi client network band mode.
+                enum: ["band24","band50"]
+
+  examples:
+    GetAPMode:
+      value:
+        data:
+          - type: wifi
+            id: 1
+            name: wlan0
+            displayName: Wi-Fi1
+            available: true
+            mode: ap
+            enable: false
+            status: false
+            capabilities:
+              mode: ["ap","client"]
+              band: ["band24", "band50"]
+            regions:
+              - name: North America
+                countryCode: US
+                band24: [1,2,3,4,5,6,7,8,9,10,11]
+                band50: [36,38,40,42,44,46,48,149,153,157,161,165]
+              - name: Europe
+                countryCode: GB
+                band24: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+                band50: [36,38,40,42,44,46,48]
+              - name: Taiwan
+                countryCode: TW
+                band24: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+                band50: [34,36,38,40,42,44,46,48,149,153,157,161,165]
+            ap:
+              band: band24
+              broadcastSsid: true
+              ssid: moxa-test-ap-1
+              security:
+                mode: wpa2-personal
+                encryption: aes
+                password: ""
+              channel: 6
+              region: TW
+              clients: []
+        count: 1
+    GetClientMode:
+      value:
+        data:
+          - type: wifi
+            id: 1
+            name: wlan0
+            displayName: Wi-Fi1
+            available: true
+            mode: client
+            enable: true
+            status: true
+            capabilities:
+              mode: ["ap","client"]
+              band: ["band24", "band50"]
+            client:
+              connectState: connected
+              currentAp: bzLJpU7MR
+              priority:
+                - bzLJpU7MR
+              networks:
+                - uuid: bzLJpU7MR
+                  ssid: moxa-test-ap-1
+                  bssid: 10:c3:7b:c6:47:f8
+                  security:
+                      mode: wpa2-personal
+                      encryption: aes
+                      password: "!2345678"
+                  signal: -17
+                  band: band50
+                - uuid: kcpJpUnMR
+                  ssid: moxa-ap-2
+                  bssid: ""
+                  security:
+                      mode: wpa2-personal
+                      encryption: aes
+                      password: "!2345678"
+                  signal:
+                  band: band24
+        count: 1
+    GetClientModeWithLayer3:
+      value:
+        data:
+        - type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          available: true
+          mode: client
+          enable: true
+          status: true
+          capabilities:
+            mode: ["ap","client"]
+            band: ["band24", "band50"]
+          client:
+            connectState: connected
+            currentAp: bzLJpU7MR
+            priority:
+              - bzLJpU7MR, kcpJpUnMR
+            networks:
+              - uuid: bzLJpU7MR
+                ssid: moxa-test-ap-1
+                bssid: 10:c3:7b:c6:47:f8
+                security:
+                    mode: wpa2-personal
+                    encryption: aes
+                    password: "!2345678"
+                signal: -17
+                band: band50
+              - uuid: kcpJpUnMR
+                ssid: moxa-ap-2
+                bssid: ""
+                security:
+                    mode: wpa2-personal
+                    encryption: aes
+                    password: "!2345678"
+                signal:
+                band: band24
+            ipSetting:
+              enableDhcp: true
+            checkalive:
+              enable: true
+              targetHost: 8.8.8.8
+              intervalSec: 60
+    PatchAPMode:
+      value:
+        - type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          mode: ap
+          enable: true
+          ap:
+            band: band24
+            broadcastSsid: true
+            ssid: moxa-test-ap-1
+            security:
+              mode: personal
+              encryption: aes
+              password: ""
+            channel: 6
+            region: US
+    PatchClientMode:
+      value:
+        - type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          mode: client
+          enable: true
+    PatchResultAPMode:
+      value:
+        data:
+          - type: wifi
+            id: 1
+            name: wlan0
+            displayName: Wi-Fi1
+            mode: ap
+            enable: true
+            ap:
+              band: band24
+              broadcastSsid: true
+              ssid: moxa-test-ap-1
+              security:
+                mode: wpa2
+                encryption: aes
+                password: ""
+              channel: 11
+              region: US
+        count: 1
+    PatchResultClientMode:
+      value:
+        data:
+          - type: wifi
+            id: 1
+            name: wlan0
+            displayName: Wi-Fi1
+            available: true
+            mode: client
+            enable: true
+            status: true
+            capabilities:
+              mode: ["ap","client"]
+              band: ["band24", "band50"]
+            client:
+              connectState: connected
+              currentAp: bzLJpU7MR
+              priority:
+                - bzLJpU7MR
+              networks:
+                - uuid: bzLJpU7MR
+                  ssid: moxa-test-ap-1
+                  bssid: 10:c3:7b:c6:47:f8
+                  security:
+                      mode: wpa2-personal
+                      encryption: aes
+                      password: "!2345678"
+                  signal: -17
+                  band: band50
+                - uuid: kcpJpUnMR
+                  ssid: moxa-ap-2
+                  bssid: ""
+                  security:
+                      mode: wpa2-personal
+                      encryption: aes
+                      password: "!2345678"
+                  signal:
+                  band: band24
+        count: 1
+    GetAPModeByID:
+      value:
+        data:
+          type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          available: true
+          mode: ap
+          enable: false
+          status: false
+          capabilities:
+            mode: ["ap","client"]
+            band: ["band24", "band50"]
+          regions:
+            - name: North America
+              countryCode: US
+              band24: [1,2,3,4,5,6,7,8,9,10,11]
+              band50: [36,38,40,42,44,46,48,149,153,157,161,165]
+            - name: Europe
+              countryCode: GB
+              band24: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+              band50: [36,38,40,42,44,46,48]
+            - name: Taiwan
+              countryCode: TW
+              band24: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+              band50: [34,36,38,40,42,44,46,48,149,153,157,161,165]
+          ap:
+            band: band24
+            broadcastSsid: true
+            ssid: moxa-test-ap-1
+            security:
+              mode: wpa2
+              encryption: aes
+              password: ""
+            channel: 6
+            region: TW
+            clients: []
+    GetClientModeByID:
+      value:
+        data:
+          type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          available: true
+          mode: client
+          enable: true
+          status: true
+          capabilities:
+            mode: ["ap","client"]
+            band: ["band24", "band50"]
+          client:
+            connectState: connected
+            currentAp: bzLJpU7MR
+            priority:
+              - bzLJpU7MR
+            networks:
+              - uuid: bzLJpU7MR
+                ssid: moxa-test-ap-1
+                bssid: 10:c3:7b:c6:47:f8
+                security:
+                    mode: "wpa2"
+                    encryption: aes
+                    password: "!2345678"
+                signal: -17
+                band: band50
+              - uuid: kcpJpUnMR
+                ssid: moxa-ap-2
+                bssid: ""
+                security:
+                    mode: wpa2-personal
+                    encryption: aes
+                    password: "!2345678"
+                signal:
+                band: band24
+    PatchAPModeByID:
+      value:
+        type: wifi
+        id: 1
+        name: wlan0
+        displayName: Wi-Fi1
+        mode: ap
+        enable: true
+        ap:
+          band: band24
+          broadcastSsid: true
+          ssid: moxa-test-ap-1
+          security:
+            mode: wpa2
+            encryption: aes
+            password: ""
+          channel: 6
+          region: US
+    PatchClientModeByID:
+      value:
+        type: wifi
+        id: 1
+        name: wlan0
+        displayName: Wi-Fi1
+        mode: client
+        enable: true
+    PatchClientModeByIDWithLayer3: 
+      value:
+        type: wifi
+        id: 1
+        name: wlan0
+        displayName: Wi-Fi1
+        mode: client
+        enable: true
+        client:
+          ipSetting:
+            enableDhcp: false
+            ip: 192.168.3.40
+            netmask: 255.255.252.0
+            gateway: 192.168.3.1
+            dns:
+              - "1.1.1.1"
+              - "2.2.2.2"
+          checkalive:
+            enable: true
+            targetHost: 8.8.8.8
+            intervalSec:  60
+    PatchResultAPModeByID:
+      value:
+        data:
+          type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          mode: ap
+          enable: true
+          ap:
+            band: band24
+            broadcastSsid: true
+            ssid: moxa-test-ap-1
+            security:
+              mode: wpa2
+              encryption: aes
+              password: ""
+            channel: 11
+            region: US
+    PatchResultClientModeByID:
+      value:
+        data:
+          type: wifi
+          id: 1
+          name: wlan0
+          displayName: Wi-Fi1
+          available: true
+          mode: client
+          enable: true
+          status: true
+          capabilities:
+            mode: ["ap","client"]
+            band: ["band24", "band50"]
+          client:
+            connectState: connected
+            currentAp: bzLJpU7MR
+            priority:
+              - bzLJpU7MR
+            networks:
+              - uuid: bzLJpU7MR
+                ssid: "moxa-test-ap-1"
+                bssid: "10:c3:7b:c6:47:f8"
+                security:
+                    mode: "wpa2-personal"
+                    encryption: "aes"
+                    password: "!2345678"
+                signal: -17
+                band: "band50"
+              - uuid: kcpJpUnMR
+                ssid: moxa-ap-2
+                bssid: ""
+                security:
+                    mode: wpa2-personal
+                    encryption: aes
+                    password: "!2345678"
+                signal:
+                band: band24
+    PatchResultClientModeByIDWithLayer3:
+      value:
+        type: wifi
+        id: 1
+        name: wlan0
+        displayName: Wi-Fi1
+        available: true
+        mode: client
+        enable: true
+        status: true
+        capabilities:
+          mode: ["ap","client"]
+          band: ["band24", "band50"]
+        client:
+          connectState: connected
+          currentAp: bzLJpU7MR
+          priority:
+            - bzLJpU7MR, kcpJpUnMR
+          networks:
+            - uuid: bzLJpU7MR
+              ssid: moxa-test-ap-1
+              bssid: 10:c3:7b:c6:47:f8
+              security:
+                  mode: wpa2-personal
+                  encryption: aes
+                  password: "!2345678"
+              signal: -17
+              band: band50
+            - uuid: kcpJpUnMR
+              ssid: moxa-ap-2
+              bssid: ""
+              security:
+                  mode: wpa2-personal
+                  encryption: aes
+                  password: "!2345678"
+              signal:
+              band: band24
+          ipSetting:
+            enableDhcp: false
+            ip: 192.168.3.40
+            netmask: 255.255.252.0
+            gateway: 192.168.3.1
+            dns:
+              - "1.1.1.1"
+              - "2.2.2.2"
+          checkalive:
+            enable: true
+            targetHost: 8.8.8.8
+            intervalSec: 60
+
+paths:
+  /device/wifi:
+    get:
+      description: Get Wi-Fi interfaces configuration.
+      tags: ["device", "wifi"]
+      responses:
+        200:
+          description: All Wi-Fi interfaces configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllWifiInformation'
+              examples:
+                APMode:
+                  $ref: '#/components/examples/GetAPMode'
+                ClientMode:
+                  $ref: '#/components/examples/GetClientMode'
+
+    patch:
+      description: Update Wi-Fi interface configuration.
+      tags: ["device", "wifi"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/AllWifiInformationForPatch'
+            examples:
+              APMode:
+                $ref: '#/components/examples/PatchAPMode'
+              ClientMode:
+                $ref: '#/components/examples/PatchClientMode'
+      responses:
+        200:
+          description: All Wi-Fi interfaces configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllWifiInformation'
+              examples:
+                APMode:
+                  $ref: '#/components/examples/PatchResultAPMode'
+                ClientMode:
+                  $ref: '#/components/examples/PatchResultClientMode'
+
+  /device/wifi/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Interface id.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: Get Wi-Fi interface configuration.
+      tags: ["device", "wifi"]
+      responses:
+        200:
+          description: Wi-Fi interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiInformation'
+              examples:
+                APMode:
+                  $ref: '#/components/examples/GetAPModeByID'
+                ClientMode:
+                  $ref: '#/components/examples/GetClientModeByID'
+
+    patch:
+      description: Update Wi-Fi interface configuration.
+      tags: ["device", "wifi"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WifiInformation'
+            examples:
+              APMode:
+                $ref: '#/components/examples/PatchAPModeByID'
+              ClientMode:
+                $ref: '#/components/examples/PatchClientModeByID'
+      responses:
+        200:
+          description: Wi-Fi interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiInformation'
+              examples:
+                APMode:
+                  $ref: '#/components/examples/PatchResultAPModeByID'
+                ClientMode:
+                  $ref: '#/components/examples/PatchResultClientModeByID'
+
+  /device/wifi/{id}/client/networks:
+    parameters:
+    - name: id
+      in: path
+      description: Interface id.
+      schema:
+        type: integer
+      required: true
+    get:
+      description: Get Wi-Fi client networks list
+      tags: ["device", "wifi"]
+      responses:
+        200:
+          description: Get Wi-Fi client networks list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllWifiClientNetworksItem'
+              example:
+                data:
+                  - uuid: bzLJpU7MR
+                    ssid: moxa-test-ap-1
+                    bssid: 10:c3:7b:c6:47:f8
+                    security:
+                        mode: wpa2-personal
+                        encryption: aes
+                        password: "!2345678"
+                    signal: -17
+                    band: band50
+    post:
+      description: Post a new Wi-Fi client network to list
+      tags: ["device", "wifi"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewWifiClientNetworksItem'
+            example:
+              ssid: "moxa-ap-2"
+              password: "!2345678"
+      responses:
+        200:
+          description: Post a new Wi-Fi client network to list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllWifiClientNetworksItem'
+              example:
+                data:
+                  - uuid: bzLJpU7MR
+                    ssid: moxa-test-ap-1
+                    bssid: 10:c3:7b:c6:47:f8
+                    security:
+                        mode: wpa2-personal
+                        encryption: aes
+                        password: "!2345678"
+                    signal: -17
+                    band: band50
+                  - uuid: kcpJpUnMR
+                    ssid: moxa-ap-2
+                    bssid: ""
+                    security:
+                        mode: wpa2-personal
+                        encryption: aes
+                        password: "!2345678"
+                    signal:
+                    band: band24
+
+  /device/wifi/{id}/client/networks/{uuid}:
+    parameters:
+    - name: id
+      in: path
+      description: Interface id.
+      schema:
+        type: integer
+      required: true
+    - name: uuid
+      in: path
+      description: uuid of Wifi client network
+      schema:
+        type: string
+      required: true
+    patch:
+      description: Update Wi-Fi client network password
+      tags: ["device", "wifi"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewWifiClientNetworksItem'
+            example:
+              password: "*7654321"
+      responses:
+        200:
+          description: Update Wi-Fi client network password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiClientNetworksItem'
+              example:
+                data:
+                  uuid: kcpJpUnMR
+                  ssid: moxa-test-ap-1
+                  bssid: 10:c3:7b:c6:47:f8
+                  security:
+                    mode: wpa2-personal
+                    encryption: aes
+                    password: "*7654321"
+                  signal: -17
+                  band: band50
+
+    delete:
+      description: Delete Wi-Fi client network
+      tags: ["device", "wifi"]
+      responses:
+        204:
+          description: success
+        400:
+          description: fail to delete
+        404:
+          description: Wifi client network not found
+
+  /device/wifi/{id}/client/priority:
+    parameters:
+    - name: id
+      in: path
+      description: Interface id.
+      schema:
+        type: integer
+      required: true
+    get:
+      description: Get Wi-Fi client networks connect priority, first item has the most highest priority
+      tags: ["device", "wifi"]
+      responses:
+        200:
+          description: Get Wi-Fi client networks connect priority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiClientpriority'
+              example:
+                data:
+                  priority:
+                    - kcpJpUnMR, bzLJpU7MR
+    put:
+      description: Update Wi-Fi client networks connect priority
+      tags: ["device", "wifi"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WifiClientpriority'
+            example:
+              priority:
+                - bzLJpU7MR, kcpJpUnMR
+      responses:
+        200:
+          description: Update Wi-Fi client networks priority successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiClientpriority'
+              example:
+                data:
+                  priority:
+                    - bzLJpU7MR, kcpJpUnMR
+
+  /device/wifi/{id}/client/scan:
+    parameters:
+      - name: id
+        in: path
+        description: Interface id.
+        schema:
+          type: integer
+        required: true
+      - name: event
+        in: query
+        description: 'Get runtime scan, ex: {[{ssid: moxa-test-ap-1, security:{mode: wpa2-personal, encryption: aes, support: true}, signal: -17, band: band50},{...}]}'
+        schema:
+          type: boolean
+    get:
+      description: Get Wi-Fi client networks scan results
+      tags: ["device", "wifi"]
+      responses:
+        200:
+          description: Get Wi-Fi client networks results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanList'
+              example:
+                data:
+                  - ssid: moxa-test-ap-1
+                    security:
+                        mode: wpa2-personal
+                        encryption: aes
+                        support: true
+                    signal: -17
+                    band: band50
+                  - ssid: D-k
+                    security:
+                        mode: none
+                        encryption: none
+                        support: true
+                    signal: -43
+                    band: band24
+                  - ssid: TP-k
+                    security:
+                        mode: wpa2-enterprise
+                        encryption: aes
+                        support: false
+                    signal: -58
+                    band: band50
+                  - ssid: ASOS
+                    security:
+                        mode: wpa-personal
+                        encryption: aes
+                        support: false
+                    signal: -69
+                    band: band24
+                  - ssid: Wow
+                    security:
+                        mode: wpa2-personal
+                        encryption: tkip
+                        support: true
+                    signal: -72
+                    band: band24
+                  - ssid: Mom
+                    security:
+                        mode: wpa-personal
+                        encryption: tkip
+                        support: false
+                    signal: -75
+                    band: band24
+        405:
+          description: Wi-Fi interface mode isn't in client mode
+
+  /device/_/wifi:
+    parameters:
+      - in: query
+        description: 'Get runtime status, ex: [{id: 1 ,client: {currentAp: "bzLJpU7MR", connectState: "connected", networks: [...]}}, {id:2,...}]'
+        name: event
+        schema:
+          type: boolean
+    get:
+      description: Get Wi-Fi interfaces configuration.
+      tags: ["device", "wifi"]
+      responses:
+        200:
+          description: All Wi-Fi interfaces configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllWifiInformationWithNetworklayer'
+              examples:
+                APMode:
+                  $ref: '#/components/examples/GetAPMode'
+                ClientMode:
+                  $ref: '#/components/examples/GetClientModeWithLayer3'    
+
+  /device/_/wifi/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Interface id.
+        schema:
+          type: integer
+        required: true
+    patch:
+      description: Update Wi-Fi interface configuration.
+      tags: ["device", "wifi"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WifiInformationWithNetworklayer'
+            examples:
+              APMode:
+                $ref: '#/components/examples/PatchAPModeByID'
+              ClientMode:
+                $ref: '#/components/examples/PatchClientModeByIDWithLayer3'
+      responses:
+        200:
+          description: Wi-Fi interface configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiInformationWithNetworklayer'
+              examples:
+                APMode:
+                  $ref: '#/components/examples/PatchResultAPModeByID' 
+                ClientMode:
+                  $ref: '#/components/examples/PatchResultClientModeByIDWithLayer3'
+  /device/wifi/{id}/debugMode:
+    parameters:
+      - name: id
+        in: path
+        description: Interface id.
+        schema:
+          type: integer
+        required: true
+      - in: query
+        description: 'Enable debug mode to get more Wi-Fi modules detail in log'
+        name: enable
+        schema:
+          type: boolean
+    put: 
+      description: Set Wi-Fi debug mode enable or disable.
+      tags: ["device", "wifi"]
+      responses:
+          200:
+            description: enable wifi debug mode 
+          400:
+            description: need bool type
+

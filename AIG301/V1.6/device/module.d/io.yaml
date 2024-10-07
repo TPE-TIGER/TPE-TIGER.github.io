@@ -1,0 +1,272 @@
+openapi: '3.0.0'
+
+servers:
+  - url: http://127.0.0.1:59001/api/v1
+
+security:
+  - bearerAuth: []
+  
+info:
+  version: '0.0.13'
+  title: 'IOs configuration APIs'
+  description: 'The IOs API for the AIG-301 project'
+
+tags:
+  - name: IO
+    description: Managed AIG-301 IO devices operation api
+    
+paths:
+  /device/io/do:
+    get:
+      tags: ["IO"]
+      description: Get information of all managed DOs
+      operationId: GetDO
+      responses:
+        '200':
+          description: All the devices
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DOconfig'
+              examples:
+                data :
+                  $ref: '#/components/examples/getDOconfigDefaultExample'
+  /device/io/di:                
+    get:
+      tags: ["IO"]
+      description: Get information of all managed DIs
+      operationId: GetDIs
+      responses:
+        '200':
+          description: All the devices
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DIconfig'
+              examples:
+                data :
+                  $ref: '#/components/examples/getDIconfigDefaultExample'
+  /device/io/di/{channel}:
+    parameters:
+      - name: channel
+        in: path
+        description: managed DI of IO channel start from 1, and mode can't be modified
+        required: true
+        schema:
+          type: integer
+        example: 1
+    patch:
+      tags: ["IO"]
+      description: Patch to set DI by channel
+      operationId: PatchDIbyChannel
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              properties: 
+                di:
+                  $ref: '#/components/schemas/PatchDIconfig'
+            examples:
+              fulldi: 
+                $ref: '#/components/examples/fulldiSetExample'
+              autoSampling:
+                $ref: '#/components/examples/patchAutoSampling'
+              pollingIntervalSec:
+                $ref: '#/components/examples/patchpollingIntervalSec'
+      responses:
+        '200':
+          description: DI information.
+          content:
+            application/json:
+              schema:
+                properties: 
+                  di:
+                    $ref: '#/components/schemas/DIconfig'
+              examples:
+                di:
+                  $ref: '#/components/examples/diconfigDefaultExample'
+  /device/io/do/{channel}:
+    parameters:
+      - name: channel
+        in: path
+        description: managed DO of IO channel start from 1, and mode can't be modified
+        required: true
+        schema:
+          type: integer
+        example: 1
+    patch:
+      tags: ["IO"]
+      description: Patch to set DO by channel
+      operationId: PatchDObyChannel
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              properties: 
+                do:  
+                  $ref: '#/components/schemas/PatchDOconfig'
+            examples:
+              fulldo:
+                $ref: '#/components/examples/fulldoSetExample'
+              status:
+                $ref: '#/components/examples/patchStatus'
+              initStatus:
+                $ref: '#/components/examples/patchInitStatus'
+      responses:
+        '200':
+          description: DO information.
+          content:
+            application/json:
+              schema:
+                properties: 
+                  do:  
+                    $ref: '#/components/schemas/DOconfig'
+              examples:
+                do: 
+                  $ref: '#/components/examples/doconfigDefaultExample'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    DIconfig:
+      title: DI configuration informations
+      properties:
+        autoSampling: 
+          type: boolean
+        pollingIntervalSec:
+          type: integer
+        mode:
+          type: string
+        channel:
+          type: integer
+        status:
+          type: string
+        id:
+          type: integer
+    PatchDIconfig:
+      title: Patch DI configuration
+      properties:
+        autoSampling: 
+          type: boolean
+        pollingIntervalSec:
+          type: integer
+        mode:
+          type: string
+    DOconfig:
+      title: DO configuration informations
+      properties:
+        mode:
+          type: string
+        channel:
+          type: integer
+        status:
+          type: string
+        initStatus:
+          type: string
+        id:
+          type: integer
+    PatchDOconfig:
+      title: Patch DO configuration
+      properties:
+        mode:
+          type: string
+        status:
+          type: string
+        initStatus:
+          type: string
+              
+  examples:
+    getDOconfigDefaultExample:
+      summary: example of get default DO configuration
+      value:
+        count: 2
+        data: 
+          - id: 1
+            mode: DO
+            channel: 1
+            status: OFF
+            initStatus: OFF
+          - id: 2
+            mode: DO
+            channel: 2
+            status: OFF
+            initStatus: OFF
+    getDIconfigDefaultExample:
+      summary: example of get default DI configuration
+      value:
+        count: 2
+        data: 
+          - id: 1
+            autoSampling: false
+            pollingIntervalSec: 10
+            mode: DI
+            channel: 1
+            status: OFF
+          - id: 2
+            autoSampling: false
+            pollingIntervalSec: 10
+            mode: DI
+            channel: 2
+            status: OFF
+    diconfigDefaultExample:
+      summary: example of DI patch response
+      value:
+        autoSampling: false
+        pollingIntervalSec: 10
+        mode: DI
+        channel: 1
+        status: OFF
+        id: 1
+    doconfigDefaultExample:
+      summary: example of DO patch response
+      value:
+        mode: DO
+        channel: 1
+        status: OFF
+        initStatus: OFF
+        id: 1
+    fulldiSetExample:
+      summary: example of full DI configuration
+      value:
+        autoSampling: false
+        pollingIntervalSec: 10
+        mode: DI
+    fulldoSetExample:
+      summary: example of full DO configuration
+      value:
+        mode: DO
+        status: OFF
+        initStatus: OFF
+    patchAutoSampling:
+      summary: example of patch auto sampling
+      value:
+        autoSampling: true
+    patchpollingIntervalSec:
+      summary: example of patch polling interval second
+      value:
+        pollingIntervalSec: 20
+    patchStatus:
+      summary: example of patch status 
+      value:
+        status : ON
+    patchInitStatus:
+      summary: example of patch initStatus
+      value:
+        initStatus : ON

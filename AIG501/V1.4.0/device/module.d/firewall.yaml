@@ -1,0 +1,623 @@
+openapi: '3.0.0'
+
+info:
+  version: '2.0.0'
+  title: 'Firewall Configuration APIs'
+  description: |
+    Release Data: 2021/08/22
+    Firewall Configuration APIs
+
+components:
+  schemas:
+    Inbound:
+      title: Firewall inbound configuration
+      required:
+        - name
+        - protocol
+        - action
+      properties:
+        id:
+          type: integer
+          description: Inbound rule id
+        name:
+          type: string
+          description: rule name
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          description: rule description
+          minLength: 1
+          maxLength: 255
+        priority:
+          type: integer
+          description:  |
+             Inbound rule priority. 1-500 are system reserved priority rule, api access is not allowed. 501-1000 is for inbound forward rule, and 1001-1500 is for inbound filter rule. Auto-increasement will apply when api payload doesn't specify the priority
+          default: 501
+          minimum: 501
+        gatewayPort:
+          type: string
+          description: |
+            Public port in device firewall inbound. It stand for packet destination port of filter, or external port of portforward. Support:
+              * 502
+              * empty string
+          default: ''
+        protocol:
+          type: string
+          description: |
+             Rule handles the specified protocol
+          enum:
+            - any
+            - tcp
+            - udp
+            - icmp
+          default: 'any'
+        sourceIp:
+          type: string
+          description: |
+            Packet soruce IP. Support:
+              * 192.168.0.1
+              * 192.168.0.1/24
+              * empty string
+          default: ''
+        sourcePort:
+          type: string
+          description: |
+            Packet soruce port. Support:
+              * 502
+              * 502-505
+              * empty string
+          default: ''
+        destinationIp:
+          type: string
+          description: |
+            Packet destination IP. In forward case, it stand for internal child device ip(or private ip). Support:
+              * 192.168.0.1
+              * 192.168.0.1/24
+              * empty string
+          default: ''
+        destinationPort:
+           type: string
+           description: Required in forward case only. e.g. internal child device port.
+           default: ''
+        action:
+          type: string
+          description: |
+            TPE device outbound policy deny all by default.
+             * Set packet action as `allow` for whitelist. Gateway Port is necessary for TCP and UDP protocol to allow specific port
+             * Set packet action as `forward` for accessing internal service or child device. Gateway Port, Destination IP, and Destionation Port are necessary
+          enum:
+            - allow
+            - forward
+    Outbound:
+      title: Firewall outbound configuration
+      required:
+        - name
+        - protocol
+        - action
+      properties:
+        id:
+          type: integer
+          description: Outbound rule id
+        name:
+          type: string
+          description: rule name
+        description:
+          type: string
+          description: Rule description      
+        action:
+          type: string
+          description: |
+              TPE device outbound policy allow all by default. Set packet action as `deny` for blacklist
+               * Destination Port is necessary for TCP and UDP protocol to deny specific port
+          enum:
+            - deny
+        priority:
+          type: integer
+          description:  |
+             Outbound rule priority. 1-500 are system reserved priority rule, api access is not allowed. 2001+ is for outbound filter rule. Auto-increasement will apply when api payload doesn't specify the priority
+          default: 2001
+          minimum: 2001
+        destinationPort:
+          type: string
+          description: |
+             Packet destination port. Support:
+              * 502
+              * empty string
+          default: ''
+        protocol:
+          type: string
+          description: |
+             Rule handles the specified protocol
+          enum:
+            - any
+            - tcp
+            - udp
+            - icmp
+          default: 'any'
+        sourceIp:
+          type: string
+          description: |
+            Packet soruce IP. Support:
+              * 192.168.0.1
+              * 192.168.0.1/24
+              * empty string
+          default: ''
+        sourcePort:
+          type: string
+          description: |
+            Packet soruce port. Support:
+              * 502
+              * 502-505
+              * empty string
+          default: ''
+        destinationIp:
+          type: string
+          description: |
+            Packet destination IP. Support:
+              * 192.168.0.1
+          default: ''
+
+paths:
+  /device/firewall/inbounds:
+    get:
+      description: Get device firewall inbound status overview.
+      tags: ["device", "firewall", "inbounds"]
+      responses:
+        200:
+          description: firewall inbound configuration.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inbound'
+              examples:
+                Enable SSH:
+                  value:
+                    data:
+                      - id: 1
+                        name: "Port_SSH"
+                        description: "ssh port"
+                        priority: 1000
+                        gatewayPort: "22"
+                        protocol: "tcp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                        action: "allow"
+                    count: 1
+                Enable SSH and Ping:
+                  value:
+                    data:
+                      - id: 1
+                        name: "Port_SSH"
+                        description: "ssh port"
+                        priority: 1000
+                        gatewayPort: "22"
+                        protocol: "tcp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                        action: "allow"
+                      - id: 2
+                        name: "Port_ICMP"
+                        description: "icmp port for ping"
+                        priority: 1001
+                        gatewayPort: ""
+                        protocol: "icmp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                        action: "allow"
+                    count: 2
+                Enable SSH, and Port Forward:
+                  value:
+                    data:
+                      - id: 1
+                        name: "Port_SSH"
+                        description: "ssh port"
+                        priority: 1000
+                        gatewayPort: "22"
+                        protocol: "tcp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                        action: "allow"
+                      - id: 2
+                        name: "Port_8080"
+                        description: "8080 port for forward"
+                        priority: 500
+                        gatewayPort: "8080"
+                        protocol: "any"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: "192.168.4.123"
+                        destinationPort: "8080"
+                        action: "forward"
+                    count: 2
+    post:
+      description: Add a device firewall inbound configuration
+      tags: ["device", "firewall", "inbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Inbound'
+            examples:
+              Enable SSH:
+               value:
+                - name: "Port_ssh"
+                  description: "Ssh port"
+                  priority: 1001
+                  gatewayPort: "22"
+                  protocol: "tcp"
+                  action: "allow"
+              Enable 8881 port forward:
+               value:
+                - name: "Port_8881"
+                  description: "8881 port forward"
+                  priority: 501
+                  gatewayPort: "8881"
+                  destinationIp: "192.168.4.123"
+                  destinationPort: "8881"
+                  protocol: "tcp"
+                  action: "forward"
+      responses:
+        200:
+          description: Add inbound configuration result with rule id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inbound'
+              examples:
+                Enable SSH:
+                  value:
+                    data:
+                      id: 83
+                      name: "Port_SSH"
+                      description: "ssh port"
+                      priority: 1001
+                      gatewayPort: "22"
+                      protocol: "tcp"
+                      sourceIp: ""
+                      sourcePort: ""
+                      destinationIp: ""
+                      action: "allow"
+                Enable 8881 port forward:
+                  value:
+                    data:
+                      id: 84
+                      name: "Port_8881"
+                      description: "8881 port forward"
+                      priority: 501
+                      gatewayPort: "8881"
+                      destinationIp: "192.168.4.123"
+                      destinationPort: "8881"
+                      protocol: "tcp"
+                      action: "forward"
+        400:
+          description: Add inbound configuration failed
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: integer
+                    description: error code
+                  message:
+                    type: string
+                    description: error message
+              examples:
+                Duplicated rule:
+                  value:
+                    code: 10001
+                    message: Inbound filter rule exist already
+    put:
+      description: Update a device firewall inbound configuration
+      tags: ["device", "firewall", "inbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Inbound'
+            examples:
+              Update HTTPS:
+               value:
+                - id: 15
+                  name: "Port_https"
+                  description: "https port"
+                  priority: 1002
+                  gatewayPort: "8443"
+                  protocol: "tcp"
+                  action: "allow"
+      responses:
+        200:
+          description: Update inbound configuration result
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inbound'
+              examples:
+                Enable SSH:
+                  value:
+                    data:
+                      - id: 15
+                        name: "Port_HTTPS"
+                        description: "https port"
+                        priority: 1002
+                        gatewayPort: "8443"
+                        protocol: "tcp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                        action: "allow"
+    patch:
+      description: Patch device firewall inbound configuration
+      tags: ["device", "firewall", "inbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Inbound'
+            examples:
+              Partial Edit SSH Port:
+                value:
+                  - id: 83
+                    gatewayPort: "8022"
+      responses:
+        200:
+          description: Patch result
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inbound'
+              examples:
+                Partial Edit SSH Port:
+                  value:
+                    data:
+                      - id: 83
+                        name: "Port_SSH"
+                        description: "ssh port"
+                        priority: 1001
+                        gatewayPort: "8022"
+                        protocol: "tcp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                        action: "allow"
+    delete:
+      description: Delete device firewall inbound configuration
+      tags: ["device", "firewall", "inbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+            examples:
+             Delete ID 83,84:
+                value:
+                  - 83
+                  - 84
+      responses:
+        200:
+          description: Delete succeed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+              examples:
+                Delete ID 10:
+                  value:
+                    data:
+                      - 83
+                      - 84
+
+  /device/firewall/outbounds:
+    get:
+      description: Get device firewall outbound status overview
+      tags: ["device", "firewall", "outbounds"]
+      responses:
+        200:
+          description: firewall outbound configuration
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Outbound'
+              examples:
+                Deny Port 123:
+                  value:
+                    data:
+                      - id: 1
+                        name: "Port_123"
+                        description: "deny outbound 123 port"
+                        priority: 2001
+                        destinationPort: "123"
+                        protocol: "tcp"
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIP: ""
+                        action: "deny"
+                    count: 1
+                
+    post:
+      description: Add a device firewall outbound configuration
+      tags: ["device", "firewall", "outbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Outbound'
+            examples:
+              Deny 8443 Port:
+               value:
+                - name: "Port_8443"
+                  description: "deny 8443 port"
+                  priority: 2002
+                  protocol: "tcp"
+                  action: "deny"
+                  destinationPort: "8443"
+                                  
+      responses:
+        200:
+          description: Add outbound configuration result with rule id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inbound'
+              examples:
+                Deny 8443 Port:
+                  value:
+                    data:
+                      - id: 88
+                        name: "Port_8443"
+                        description: "deny 8443 port"
+                        priority: 2002
+                        protocol: "tcp"
+                        action: "deny"
+                        destinationPort: "8443"                        
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                                        
+    put:
+      description: Update a device firewall outbound configuration
+      tags: ["device", "firewall", "outbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Outbound'
+            examples:
+              Update Deny 8443 Port :
+               value:
+                - id: 88
+                  name: "Port_8449"
+                  description: "deny 8449 port"
+                  priority: 2002
+                  protocol: "tcp"
+                  action: "deny"
+                  destinationPort: "8449"                  
+      responses:
+        200:
+          description: Update outbound configuration result
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Outbound'
+              examples:
+                Update Deny Port 8443 :
+                  value:
+                    data:
+                      - id: 88
+                        name: "Port_8449"
+                        description: "deny 8449 port"
+                        priority: 2002
+                        action: "deny"
+                        protocol: "tcp"
+                        destinationPort: "8449"                        
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+                       
+    patch:
+      description: Patch device firewall outbound configuration
+      tags: ["device", "firewall", "outbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Outbound'
+            examples:
+              Partial Edit Deny 8449 Port:
+                value:
+                  - id: 88
+                    name: "Port_8442"
+                    description: "deny 8442 port"
+                    destinationPort: "8442"
+      responses:
+        200:
+          description: Patch result
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Outbound'
+              examples:
+                Partial Edit Deny 8443 Port:
+                  value:
+                    data:
+                      - id: 88
+                        name: "Port_8442"
+                        description: "deny 8442 port"
+                        priority: 2002
+                        protocol: "tcp"
+                        action: "deny"
+                        destinationPort: "8022"                       
+                        sourceIp: ""
+                        sourcePort: ""
+                        destinationIp: ""
+
+    delete:
+      description: Delete device firewall outbound configuration
+      tags: ["device", "firewall", "outbounds"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+            examples:
+             Delete ID 88:
+                value:
+                  - 88
+      responses:
+        200:
+          description: Delete succeed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+              examples:
+                Delete ID 88 succeed:
+                  value:
+                    data:
+                      - 88
