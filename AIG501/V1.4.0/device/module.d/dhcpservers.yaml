@@ -1,0 +1,316 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: 'DHCP Server Information API'
+  description: |
+    Release Data: 2019/10/23
+    DHCP Server Information API
+
+components:
+  schemas:
+    AllDhcpServerItems:
+      title: Response of DHCP Servers Configuration
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DhcpServerItem'
+        count:
+          type: integer
+    SingleDhcpServerItem:
+      title: Response of DHCP Server Configuration
+      properties:
+        data:
+          $ref: '#/components/schemas/DhcpServerItem'
+    DhcpServerItem:
+      title: DHCP Server Configuration
+      type: object
+      required:
+        - id
+      properties:
+        type:
+          description: Service type
+          type: string
+          readOnly: true
+        id:
+          description: Identifier of a DHCP Server
+          type: integer
+          minimum: 1
+        status:
+          description: DHCP is enabled (`true`) for the interface or not
+          type: boolean
+          readOnly: true
+        available:
+          description: |
+            DHCP server is available or not (the interface must be "static IP"
+            and/or worked as a WiFi AP), default should be false.
+          type: boolean
+          readOnly: true
+        name:
+          description: Interface name for DHCP Server
+          type: string
+          readOnly: true
+        displayName:
+          description: Display interface name for DHCP Server
+          type: string
+          readOnly: true
+        enable:
+          description: Enable (`true`) or disable (`false`) DHCP Server
+          type: boolean
+        startIp:
+          description: Range IP start
+          type: string
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        endIp:
+          description: Range IP end
+          type: string
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        netmask:
+          description: Netmask of DHCP Server
+          type: string
+          pattern: ^(?:(?:254|252|248|240|224|192|128)\.0\.0\.0|255\.(?:254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(?:254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(?:254|252|248|240|224|192|128|0))$
+        domainNameServers:
+          description: Domain name servers
+          type: array
+          items:
+            type: string
+            pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        domainName:
+          description: Domain name, empty is allowed
+          type: string
+          minLength: 2
+          maxLength: 253
+          pattern: >-
+            (?=^.{2,253}$)(?:^(?!\.|-)[a-zA-Z0-9\-]{0,62}[a-zA-Z0-9])(?:\.(?!\.|\-)[a-zA-Z0-9\-]{0,62}[a-zA-Z0-9])*$
+        leaseTime:
+          description: Lease time of DHCP pool
+          type: integer
+          minimum: 60
+          maximum: 2592000
+  examples:
+    DhcpServerMultipleItemsRsp:
+      value:
+        data:
+          - type: dhcpservers
+            id: 1
+            status: true
+            available: true
+            name: 'eth0'
+            displayName: 'LAN1'
+            enable: true
+            startIp: '192.168.3.100'
+            endIp: '192.168.3.200'
+            netmask: '255.255.255.0'
+            domainNameServers:
+              - 8.8.8.8
+            domainName: 'example.com'
+            leaseTime: 2592000
+          - type: dhcpservers
+            id: 2
+            status: true
+            available: true
+            name: 'eth1'
+            displayName: 'LAN2'
+            enable: true
+            startIp: '192.168.4.100'
+            endIp: '192.168.4.200'
+            netmask: '255.255.255.0'
+            domainNameServers:
+              - 8.8.8.8
+            domainName: 'example.com'
+            leaseTime: 2592000
+        count: 2
+    DhcpServerSingleItemRsp:
+      value:
+        data:
+          - type: dhcpservers
+            id: 1
+            status: true
+            available: true
+            enable: true
+            name: 'eth0'
+            displayName: 'LAN1'
+            startIp: '192.168.3.100'
+            endIp: '192.168.3.200'
+            netmask: '255.255.255.0'
+            domainNameServers:
+              - 8.8.8.8
+            domainName: 'example.com'
+            leaseTime: 2592000
+        count: 1
+    DhcpServerMultipleItemsReq:
+      value:
+        - id: 1
+          enable: true
+          startIp: '192.168.3.100'
+          endIp: '192.168.3.200'
+          netmask: '255.255.255.0'
+          domainNameServers:
+            - 8.8.8.8
+          domainName: 'example.com'
+          leaseTime: 2592000
+        - id: 2
+          enable: true
+          startIp: '192.168.4.100'
+          endIp: '192.168.4.200'
+          netmask: '255.255.255.0'
+          domainNameServers:
+            - 8.8.8.8
+          domainName: 'example.com'
+          leaseTime: 2592000
+    DhcpServerSingleItemReq:
+      value:
+        - id: 1
+          enable: true
+          startIp: '192.168.3.100'
+          endIp: '192.168.3.200'
+          netmask: '255.255.255.0'
+          domainNameServers:
+            - 8.8.8.8
+          domainName: 'example.com'
+          leaseTime: 2592000
+    DhcpServerMultiplePartialItemsReq:
+      value:
+        - id: 1
+          enable: true
+        - id: 2
+          startIp: '192.168.4.100'
+    DhcpServerSinglePartialItemReq:
+      value:
+        - id: 1
+          enable: true
+    DhcpServerItemRsp:
+      value:
+        data:
+          type: dhcpservers
+          id: 1
+          status: true
+          available: true
+          name: 'eth0'
+          displayName: 'LAN1'
+          enable: true
+          startIp: '192.168.3.100'
+          endIp: '192.168.3.200'
+          netmask: '255.255.255.0'
+          domainNameServers:
+            - 8.8.8.8
+          domainName: 'example.com'
+          leaseTime: 2592000
+    DhcpServerItemReq:
+      value:
+        id: 1
+        enable: true
+        startIp: '192.168.3.100'
+        endIp: '192.168.3.200'
+        netmask: '255.255.255.0'
+        domainNameServers:
+          - 8.8.8.8
+        domainName: 'example.com'
+        leaseTime: 2592000
+    DhcpServerPartialItemReq:
+      value:
+        id: 1
+        enable: true
+
+paths:
+  /device/dhcpservers:
+    get:
+      description: |
+        Get all DHCP Server configuration
+      tags: ["device", "dhcpservers"]
+      responses:
+        '200':
+          description: DHCP Servers configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllDhcpServerItems'
+              examples:
+                All DHCP Servers Configuration:
+                  $ref: '#/components/examples/DhcpServerMultipleItemsRsp'
+    patch:
+      description: |
+        Patch DHCP Server configuration
+      tags: ["device", "dhcpservers"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DhcpServerItem'
+            examples:
+              Single DHCP Server Configuration with Full Setting:
+                $ref: '#/components/examples/DhcpServerSingleItemReq'
+              Multiple DHCP Servers Configuration with Full Setting:
+                $ref: '#/components/examples/DhcpServerMultipleItemsReq'
+              Single DHCP Server Configuration with Partial Setting:
+                $ref: '#/components/examples/DhcpServerSinglePartialItemReq'
+              Multiple DHCP Servers Configuration with Partial Setting:
+                $ref: '#/components/examples/DhcpServerMultiplePartialItemsReq'
+      responses:
+        '200':
+          description: DHCP Servers configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllDhcpServerItems'
+              examples:
+                Single DHCP Server Configuration with Full Setting:
+                  $ref: '#/components/examples/DhcpServerSingleItemRsp'
+                Multiple DHCP Servers Configuration with Full Setting:
+                  $ref: '#/components/examples/DhcpServerMultipleItemsRsp'
+                Single DHCP Server Configuration with Partial Setting:
+                  $ref: '#/components/examples/DhcpServerSingleItemRsp'
+                Multiple DHCP Servers Configuration with Partial Setting:
+                  $ref: '#/components/examples/DhcpServerMultipleItemsRsp'
+  /device/dhcpservers/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: DHCP Server ID
+        required: true
+        schema:
+          type: integer
+    get:
+      description: |
+        Get DHCP Server configuration
+      tags: ["device", "dhcpservers"]
+      responses:
+        '200':
+          description: DHCP Server configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleDhcpServerItem'
+              examples:
+                DHCP Server Configuration:
+                  $ref: '#/components/examples/DhcpServerItemRsp'
+    patch:
+      description: |
+        Patch DHCP Server configuration
+      tags: ["device", "dhcpservers"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DhcpServerItem'
+            examples:
+              DHCP Server Configuration with Full Setting:
+                $ref: '#/components/examples/DhcpServerItemReq'
+              DHCP Server Configuration with Partial Setting:
+                $ref: '#/components/examples/DhcpServerPartialItemReq'
+      responses:
+       '200':
+          description: DHCP Server configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleDhcpServerItem'
+              examples:
+                DHCP Server Configuration with Full Setting:
+                  $ref: '#/components/examples/DhcpServerItemRsp'
+                DHCP Server Configuration with Partial Setting:
+                  $ref: '#/components/examples/DhcpServerItemRsp'

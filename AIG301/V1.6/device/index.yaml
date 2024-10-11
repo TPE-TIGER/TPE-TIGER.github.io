@@ -1,0 +1,98 @@
+openapi: '3.0.0'
+
+x-tagGroups:
+  - name: Device Configuration API
+    tags:
+      - general
+      - time
+      - zoneinfo
+      - dns
+      - route
+      - network
+      - ethernets
+      - serials
+      # - nport
+      - cellulars
+      - gps
+      - dhcpservers
+      - wifi
+      - firewall
+      - systemtags
+      # - leds
+      # - operate
+      - platform
+info:
+  version: '2.3.0'
+  title: 'Device Configuration APIs'
+  description: 'Device Configuration APIs'
+
+servers:
+  - url: https://127.0.0.1/api/v1
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /device/general:
+    $ref: './module.d/general.yaml#/paths/~1device~1general'
+  /device/time:
+    $ref: './module.d/time.yaml#/paths/~1device~1time'
+  /device/zoneinfo:
+    $ref: './module.d/time.yaml#/paths/~1device~1zoneinfo'
+  /device/dns:
+    $ref: './module.d/dns.yaml#/paths/~1device~1dns'
+  /device/route:
+    $ref: './module.d/route.yaml#/paths/~1device~1route'
+  /device/network/wan:
+    $ref: './module.d/route.yaml#/paths/~1device~1network~1wan'
+  /device/network/wan/check:
+    $ref: './module.d/route.yaml#/paths/~1device~1network~1wan~1check'
+  /device/ethernets:
+    $ref: './module.d/ethernet.yaml#/paths/~1device~1ethernets'
+  /device/ethernets/{id}:
+    $ref: './module.d/ethernet.yaml#/paths/~1device~1ethernets~1{id}'
+  /device/serials:
+    $ref: './module.d/serials.yaml#/paths/~1device~1serials'
+  /device/serials/{id}:
+    $ref: './module.d/serials.yaml#/paths/~1device~1serials~1{id}'
+  /device/cellulars:
+    $ref: './module.d/cellular.yaml#/paths/~1device~1cellulars'
+  /device/cellulars/{id}:
+    $ref: './module.d/cellular.yaml#/paths/~1device~1cellulars~1{id}'
+  /device/gps:
+    $ref: './module.d/gps.yaml#/paths/~1device~1gps'
+  /device/wifi:
+    $ref: './module.d/wifi.yaml#/paths/~1device~1wifi'
+  /device/wifi/{id}:
+    $ref: './module.d/wifi.yaml#/paths/~1device~1wifi~1{id}'
+  /device/wifi/{id}/client/networks:
+    $ref: './module.d/wifi.yaml#/paths/~1device~1wifi~1{id}~1client~1networks'
+  /device/wifi/{id}/client/networks/{uuid}:
+    $ref: './module.d/wifi.yaml#/paths/~1device~1wifi~1{id}~1client~1networks~1{uuid}'
+  /device/wifi/{id}/client/scan:
+    $ref: './module.d/wifi.yaml#/paths/~1device~1wifi~1{id}~1client~1scan'
+  /device/dhcpservers:
+    $ref: './module.d/dhcpservers.yaml#/paths/~1device~1dhcpservers'
+  /device/dhcpservers/{id}:
+    $ref: './module.d/dhcpservers.yaml#/paths/~1device~1dhcpservers~1{id}'
+  /device/firewall/inbounds:
+    $ref: './module.d/firewall.yaml#/paths/~1device~1firewall~1inbounds'
+  /tags/monitor/system/status:
+    $ref: './module.d/systemtags.yaml#/paths/~1tags~1monitor~1system~1status'
+  /tags/monitor/system/storage:
+    $ref: './module.d/systemtags.yaml#/paths/~1tags~1monitor~1system~1storage'
+  /tags/monitor/system/network:
+    $ref: './module.d/systemtags.yaml#/paths/~1tags~1monitor~1system~1network'
+  # /device/leds:
+  #   $ref: './module.d/leds.yaml#/paths/~1device~1leds'
+  /device/platform/device-tags:
+    $ref: './module.d/platform.yaml#/paths/~1device~1platform~1device-tags'
+  # /device/operate/direct-read-tag:
+  #   $ref: './module.d/platform.yaml#/paths/~1device~1operate~1direct-read-tag'

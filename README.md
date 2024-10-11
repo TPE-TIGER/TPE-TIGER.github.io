@@ -3,6 +3,7 @@
 ## AIG 501 Series
 | Version | Date | REST API  | Changelog | Latest |
 |  ----  | ----  | ----  | ----  | ----  |
+| V1.4| 2024-10 |- [Core](https://TPE-TIGER.github.io/AIG501/V1.4.0/core/#)<br />- [Device](https://TPE-TIGER.github.io/AIG501/V1.4.0/device/#)<br />- [Cloud](https://TPE-TIGER.github.io/AIG501/V1.4.0/cloud/#)<br />- [Taghub](https://TPE-TIGER.github.io/AIG501/V1.4.0/taghub/#)<br />- [Function](https://TPE-TIGER.github.io/AIG501/V1.4.0/function/#)<br />- [ModbusMaster](https://TPE-TIGER.github.io/AIG501/V1.4.0/modbusmaster/#)<br />- [ModbusSlave](https://TPE-TIGER.github.io/AIG501/V1.4.0/modbusslave/#)<br />- [Backup Logger](https://TPE-TIGER.github.io/AIG501/V1.4.0/taggregate/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG501/CHANGELOG.md) | V |
 | V1.3| 2023-12 |- [Core](https://TPE-TIGER.github.io/AIG501/V1.3.0/core/#)<br />- [Device](https://TPE-TIGER.github.io/AIG501/V1.3.0/device/#)<br />- [Cloud](https://TPE-TIGER.github.io/AIG501/V1.3.0/cloud/#)<br />- [Taghub](https://TPE-TIGER.github.io/AIG501/V1.3.0/taghub/#)<br />- [Function](https://TPE-TIGER.github.io/AIG501/V1.3.0/function/#)<br />- [ModbusMaster](https://TPE-TIGER.github.io/AIG501/V1.3.0/modbusmaster/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG501/CHANGELOG.md) | V |
 | Before | | [docs.moxa.online](https://docs.moxa.online/) | | |
 
@@ -14,7 +15,8 @@
 ## AIG 301 Series
 | Version | Date | REST API  | Changelog | Latest |
 |  ----  | ----  | ----  | ----  | ----  |
-| V1.5| 2023-08 |- [Core](https://TPE-TIGER.github.io/AIG301/V1.5/core/#)<br />- [Device](https://TPE-TIGER.github.io/AIG301/V1.5/device/#)<br />- [Cloud](https://TPE-TIGER.github.io/AIG301/V1.5/cloud/#)<br />- [Taghub](https://TPE-TIGER.github.io/AIG301/V1.5/taghub/#)<br />- [Function](https://TPE-TIGER.github.io/AIG301/V1.5/function/#)<br />- [ModbusMaster](https://TPE-TIGER.github.io/AIG301/V1.5/modbusmaster/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG301/CHANGELOG.md) | V |
+| V1.6| 2024-10 |- [Core](https://TPE-TIGER.github.io/AIG301/V1.6/core/#)<br />- [Device](https://TPE-TIGER.github.io/AIG301/V1.6/device/#)<br />- [Cloud](https://TPE-TIGER.github.io/AIG301/V1.6/cloud/#)<br />- [Taghub](https://TPE-TIGER.github.io/AIG301/V1.6/taghub/#)<br />- [Function](https://TPE-TIGER.github.io/AIG301/V1.6/function/#)<br />- [ModbusMaster](https://TPE-TIGER.github.io/AIG301/V1.6/modbusmaster/#)<br />- [ModbusSlave](https://TPE-TIGER.github.io/AIG301/V1.6/modbusslave/#)<br />- [Backup Logger](https://TPE-TIGER.github.io/AIG301/V1.6/taggregate/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG301/CHANGELOG.md) | V |
+| V1.5| 2023-08 |- [Core](https://TPE-TIGER.github.io/AIG301/V1.5/core/#)<br />- [Device](https://TPE-TIGER.github.io/AIG301/V1.5/device/#)<br />- [Cloud](https://TPE-TIGER.github.io/AIG301/V1.5/cloud/#)<br />- [Taghub](https://TPE-TIGER.github.io/AIG301/V1.5/taghub/#)<br />- [Function](https://TPE-TIGER.github.io/AIG301/V1.5/function/#)<br />- [ModbusMaster](https://TPE-TIGER.github.io/AIG301/V1.5/modbusmaster/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG301/CHANGELOG.md)
 | Before | | [docs.moxa.online](https://docs.moxa.online/) | | |
 
 ## AIG 101 Series
@@ -22,3 +24,4 @@
 |  ----  | ----  | ----  | ----  | ----  |
 | V1.1.0| 2023-10 |- [Taghub](https://TPE-TIGER.github.io/AIG101/V1.1.0/taghub/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG101/CHANGELOG.md) | V |
 | Before | | [docs.moxa.online](https://docs.moxa.online/) | | |
+

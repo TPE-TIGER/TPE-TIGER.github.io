@@ -1,0 +1,158 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.0.0'
+  title: 'Network Statistics Configuration APIs'
+  description: |
+    Release Data: 2020/07/13
+    Network Statistics Configuration API
+
+components:
+  schemas:
+    StatisticItem:
+      title: Network Statistic Information
+      type: object
+      properties:
+        name:
+          description: Network interface name
+          type: string
+          minLength: 2
+          maxLength: 15
+          pattern: ^[a-zA-Z0-9\-]{2,15}$
+        displayName:
+          description: Network interface display name
+          type: string
+          minLength: 2
+          maxLength: 15
+          pattern: ^[a-zA-Z0-9\-]{2,15}$
+        lastResetTime:
+          description: |
+            Unix timestamps in milliseconds for last network statistic record reset time,
+            currently use system bootup time
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        total:
+          description: Total transmit and receive date in bytes
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        transmit:
+          description: Transmit data in bytes
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        receive:
+          description: Receive data in bytes
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        timestamp:
+          description: Unix timestamps in milliseconds
+          type: integer
+          format: int64
+        tags:
+          description: |
+            Tags name for network usage,
+            (ex. for LAN1 `lan1NetworkUsage` as LAN1 total usage)
+          type: array
+          items:
+            type: string
+
+
+paths:
+  /device/_/network/statistics:
+    get:
+      description: Get network Statistics
+      tags: ["device", "networkstatistics"]
+      responses:
+        200:
+          description: Network Statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StatisticItem"
+                  count:
+                    type: integer
+              examples:
+                LAN1 Network Statistics:
+                  value:
+                    data:
+                    - name: 'eth0'
+                      displayName: 'LAN1'
+                      lastResetTime: 1587547673000
+                      total: 64842809
+                      transmit: 4107946
+                      receive: 60734927
+                      timestamp: 1590135784573
+                      tags:
+                      - 'lan1NetworkUsage'
+                      - 'lan1NetworkTx'
+                      - 'lan1NetworkRx'
+                LAN1 and Cellular1 Statistics:
+                  value:
+                    data:
+                    - name: 'eth0'
+                      displayName: 'LAN1'
+                      lastResetTime: 1587547673000
+                      total: 64842809
+                      transmit: 4107946
+                      receive: 60734927
+                      timestamp: 1590135784573
+                      tags:
+                      - 'lan1NetworkUsage'
+                      - 'lan1NetworkTx'
+                      - 'lan1NetworkRx'
+                    - name: 'eth2'
+                      displayName: 'Cellular1'
+                      lastResetTime: 1587547673000
+                      total: 1600947689
+                      transmit: 19362831
+                      receive: 1581584858
+                      timestamp: 1590135784573
+                      tags:
+                      - 'cellular1NetworkUsage'
+                      - 'cellular1NetworkTx'
+                      - 'cellular1NetworkRx'
+                    count: 2
+  /device/_/network/statistics/{iface}:
+    parameters:
+    - name: iface
+      in: path
+      description: Network interface name
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 15
+        pattern: ^[a-zA-Z0-9\-]{2,15}$
+      required: true
+    get:
+      description: Get network Statistics
+      tags: ["device", "networkstatistics"]
+      responses:
+        200:
+          description: Network Statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatisticItem"
+              examples:
+                LAN1 Network Statistics:
+                  value:
+                    data:
+                      name: 'eth0'
+                      displayName: 'LAN1'
+                      lastResetTime: 1587547673000
+                      total: 64842809
+                      transmit: 4107946
+                      receive: 60734927
+                      timestamp: 1590135784573
+                      tags:
+                      - 'lan1NetworkUsage'
+                      - 'lan1NetworkTx'
+                      - 'lan1NetworkRx'

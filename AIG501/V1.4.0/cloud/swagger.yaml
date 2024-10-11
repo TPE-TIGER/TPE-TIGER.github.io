@@ -1,0 +1,3879 @@
+openapi: 3.0.0
+info:
+  version: 2.4.0
+  title: 'ThingsPro Cloud APIs'
+  description: 'ThingsPro Cloud APIs'
+
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+  examples:
+    byInterval-allValues:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: false
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    byInterval-latestValues:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: false
+        minPublishInterval: 0
+        samplingMode: latestValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    byInterval-allChangedValues:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: true
+        minPublishInterval: 0
+        samplingMode: allChangedValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    byInterval-latestChangedValues:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: true
+        minPublishInterval: 0
+        samplingMode: latestChangedValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    byInterval-custom:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: true
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: true
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 51
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    immediately-onchange:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: true
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: immediately
+    bySize-enable-idle-timer:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: true
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: bySize
+          size: 4096
+          sizeIdleTimer:
+            enable: true
+            time: 60
+    bySize-disable-idle-timer:
+      value:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: true
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: bySize
+          size: 4096
+          sizeIdleTimer:
+            enable: false
+  schemas:
+    Serviceinformation:
+      title: Northbound service information
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        path:
+          type: string
+        enable:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - OK
+          - Warning
+          - Disable
+          readOnly: true
+      example:
+        name: azure-device
+        displayName: Azure IoT Device
+        path: /api/v1/azure-device
+        enable: true
+        status: Warning
+    MQTTConfiguration:
+      title: MQTT client configuration
+      required:
+      - server
+      - port
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        enable:
+          type: boolean
+          default: false
+        status:
+          type: string
+          enum:
+            - disconnect
+            - connecting
+            - connectFailure
+            - connected
+          readOnly: true
+        protocolVersion:
+          type: string
+          description: MQTT protocol version
+          default: 3.1.1
+          enum: 
+          - 3.1
+          - 3.1.1
+        server:
+          type: string
+          description: MQTT server(broker) ip or url
+        port:
+          type: integer
+        keepAliveSec:
+          type: integer
+          default: 60
+          minimum: 10
+          maximum: 65536
+        handshakeTimeout:
+          type: integer
+          default: 10
+          minimum: 10
+          maximum: 600
+        retryInterval:
+          type: integer
+          default: 60
+          minimum: 10
+          maximum: 3600
+        clearSession:
+          type: boolean
+          default: true
+        certificateOverTLS:
+          type: boolean
+          default: false
+        clientID:
+          type: string
+          description: 'Max length: 65536 in V3.1.1, 23 in V3.1'
+        userName:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          maxLength: 255
+        tlsVersion:
+          type: string
+          default: 1.2
+          enum:
+          - '1.3'
+          - '1.2'
+          - '1.1'
+          - '1.0'
+        insecureSkipVerify:
+          type: boolean
+          default: false
+        certificate:
+          properties:
+            rootCaCertFile:
+              type: string
+            caCertFile:
+              type: string
+            caPkFile:
+              type: string
+        qos:
+          type: integer
+          description: support qos 0,1,2
+          default: 1
+        retain:
+          type: boolean
+          default: false
+        willMessage:
+          properties:
+            enable:
+              type: boolean
+              default: false
+            topic:
+              description: 'refer: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718106'
+              type: string
+              minLength: 1
+              maxLength: 65536
+            message:
+              type: string
+            qos:
+              type: integer
+            retain:
+              type: boolean
+        remoteAPI:
+          description: |
+            - ThingsPro Edge REST API invocation(request/response patten)
+            - required headers:
+            -  * request-expired-time: UTC
+            -  * request-id: int string
+          properties:
+            enable:
+              type: boolean
+              default: false
+            requestSubTopic:
+              description: 'refer: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718106'
+              type: string
+              minLength: 1
+              maxLength: 65536
+            responsePubTopic:
+              description: 'refer: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718106'
+              type: string
+              minLength: 1
+              maxLength: 65536
+            qos:
+              default: 1
+              type: integer
+            retain:
+              default: false
+              type: boolean
+      example:
+        id: 1
+        enable: true
+        status: connected
+        protocolVersion: 3.1.1
+        server: 127.0.0.1
+        port: 1883
+        keepAliveSec: 60
+        handshakeTimeout: 10
+        retryInterval: 60
+        clearSession: true
+        certificateOverTLS: false
+        clientID: mydevice1
+        userName: moxa
+        password: '123'
+        tlsVersion: '1.2'
+        insecureSkipVerify: false
+        certificate:
+          rootCaCertFile: ''
+          caCertFile: ''
+          caPkFile: ''
+        qos: 1
+        retain: false
+        willMessage:
+          enable: true
+          topic: /devices/1/will
+          message: dead
+          qos: 1
+          retain: true
+        remoteAPI:
+          enable: true
+          requestSubTopic: /devices/1/request
+          responsePubTopic: /devices/1/response
+          ttl: 60
+          qos: 1
+          retain: false
+    DLMConfiguration:
+      title: DLM configuration
+      description: |
+        - "DLM connection status."
+        - "Event: reference thingspro event/log API to listen events(label=[\"notification\", \"dlm\"])"
+      properties:
+        ready:
+          type: boolean
+          example: true
+        connection:
+          type: object
+          properties:
+            enable:
+              type: boolean
+              description: DLM enable/disable
+              default: true
+            retryDelaySec:
+              type: integer
+              description: Delay between retries.
+              default: 10
+              minimum: 10
+              maximum: 86400
+            picTarget:
+              type: string
+              description: PIC target
+              default: prod
+              enum:
+              - prod
+              - stage
+              - develop
+        certificates:
+          type: object
+          properties:
+            caCertFile:
+              type: string
+              description: device ca certificate file name
+            caPkFile:
+              description: device ca private key file name
+              type: string
+            certificateInfo:
+              type: object
+              readOnly: true
+              properties:
+                issuerCN:
+                  type: string
+                  readOnly: true
+                notBefore:
+                  type: string
+                  readOnly: true
+                notAfter:
+                  type: string
+                  readOnly: true
+                modelName:
+                  type: string
+                  readOnly: true
+                macAddress:
+                  type: string
+                  readOnly: true
+                serialNumber:
+                  type: string
+                  readOnly: true
+        connectionStatus:
+          type: object
+          properties:
+            projectName:
+              type: string
+              readOnly: true
+            status:
+              type: string
+              description: DLM connection status.
+              readOnly: true
+              enum:
+                - connecting
+                - connectFailure
+                - connected
+            message:
+              type: string
+              readOnly: true
+              description: DLM error message.
+            lastConnectTime:
+              readOnly: true
+              type: string
+              description: "last connect start time, format: \"Mon Jan _2 15:04:05 2006\""
+            lastConnectedTime:
+              readOnly: true
+              type: string
+              description: "last connected time, format: \"Mon Jan _2 15:04:05 2006\""
+            statuslastUpdateTime:
+              readOnly: true
+              type: string
+              description: "connection status last update time, format: \"Mon Jan _2 15:04:05 2006\""
+      example: 
+        data:
+          ready: true
+          connection:
+            enable: true
+            retryDelaySec: 10
+          certificates:
+            caPkFile: device.key
+            caCertFile: device.crt
+            certificateInfo:
+              issuerCN: Apollo intermediate CA
+              notBefore: 'Sep 20, 2019, 01:07:06'
+              notAfter: 'Jul 7, 2037, 01:07:06'
+              modelName: UC-8100A-ME-T
+              macAddress: 00:90:e8:00:02:42
+              serialNumber: MOXA00000469
+          connectionStatus:
+            projectName: myProject
+            status: connecting
+            message: ""
+            lastConnectedTime: "Sep 23, 2019, 10:00:01"
+            lastConnectTime: "Sep 23, 2019, 10:00:01"
+            statuslastUpdateTime: "Sep 24, 2019, 08:31:44"
+    AzureIoTDeviceConfiguration:
+      title: Azure IoT Device configuration
+      properties:
+        status:
+          type: string
+          readOnly: true
+          description: The iot device service status.
+          default: disconnect
+          enum:
+            - disconnect
+            - connecting
+            - connectFailure
+            - connected
+        provisioning:
+          properties:
+            enable:
+              type: boolean
+              default: false
+            protocol:
+              type: object
+              properties:
+                capabilities:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      protocol:
+                        type: string
+                      port:
+                        type: string
+                protocol:
+                  type: string
+                  description: Communication protocol
+                  default: mqtt
+                port:
+                  type: integer
+                  readOnly: true
+                  description: Communication protocol used port
+            keepAlive:
+              type: integer
+              description: 'unit: second'
+              default: 60
+              minimum: 1
+              maximum: 3600
+            supportTwin:
+              type: boolean
+              default: true
+            authenticationType:
+              type: string
+              description: The identity provisioning mode of the iot device.
+              default: symmetricKey
+              enum: 
+              - x509
+              - symmetricKey
+            connectionString:
+              type: string
+              minLength: 1
+              maxLength: 1024
+            certificate:
+              description: X509 certificate
+              properties:
+                caCertFile:
+                  type: string
+                  description: device ca certificate file name
+                caPkFile:
+                  description: device ca private key file name
+                  type: string
+            rootCaCertFile:
+                  description: root ca certificate file name
+                  type: string
+      example: 
+        status: connected
+        provisioning:
+          authenticationType: symmetricKey
+          connectionString: '[connection string]'
+          enable: true
+          protocol:
+            capabilities:
+            - protocol: mqtt
+              port: 8883
+            - protocol: mqttOverWebsocket
+              port: 443
+            - protocol: amqp
+              port: 5671
+            - protocol: amqpOverWebsocket
+              port: 443
+            protocol: mqtt
+            port: 8883
+          supportTwin: true
+          certificate:
+            caPkFile: device.key
+            caCertFile: device.crt
+          rootCaCertFile: root.crt
+    AwsIoTCoreConfiguration:
+      title: AWS IoT Device configuration
+      properties:
+        status:
+          type: string
+          readOnly: true
+          description: The iot device service status.
+          enum:
+            - disconnect
+            - connecting
+            - connectFailure
+            - connected
+        provisioning:
+          properties:
+            enable:
+              type: boolean
+              default: false
+            host:
+              type: string
+            port:
+              type: integer
+              default: 8883
+            thingID:
+              type: string
+            messageQOS:
+              type: integer
+              default: 0
+            keepAliveSec:
+              type: integer
+              description: 'unit: second'
+              default: 60
+              minimum: 1
+              maximum: 3600
+            supportDM:
+              type: boolean
+              default: true
+            certificate:
+              properties:
+                rootCaCertFile:
+                  type: string
+                caCertFile:
+                  type: string
+                caPkFile:
+                  type: string
+      example: 
+        status: connected
+        provisioning:
+          enable: true
+          host: a22j5sm6o3yzc5.iot.us-east-1.amazonaws.com
+          port: 8883
+          thingID: MyThingsproEdge
+          supportDM: true
+          messageQOS: 0
+          certificate:
+            rootCaCertFile: rootCA.crt
+            caPkFile: private.key
+            caCertFile: device.crt
+    BlukConfiguration:
+      title: Bluk Upload Configuration
+      description: Bulk data upload to server after device status change to connected.
+      required:
+      - enable
+      - size
+      properties:
+        enable:
+          type: boolean
+          default: false
+        size:
+          type: integer
+          description: "unit: KB"
+          default: 128
+          minimum: 1
+          maximum: 1024
+    SparkplugBrokerConfiguration:
+      title: Sparkplug broker configuration
+      required:
+      - server
+      - port
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+          description: Connection status.
+          enum:
+          - disconnect
+          - connecting
+          - connectFailure
+          - connected
+        lastConectedTime:
+          type: string
+          readOnly: true
+          default: ''
+        enable:
+          type: boolean
+          default: false
+        server:
+          type: string
+          description: MQTT server(broker) ip or url
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65536
+        keepAliveSec:
+          type: integer
+          default: 60
+          minimum: 10
+          maximum: 65536
+        certificateOverTLS:
+          type: boolean
+          default: false
+        clientID:
+          type: string
+          description: 'Max length: 65536 in V3.1.1, 23 in V3.1'
+        userName:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          maxLength: 255
+        tlsVersion:
+          type: string
+          default: 1.2
+          enum:
+          - '1.3'
+          - '1.2'
+          - '1.1'
+          - '1.0'
+        insecureSkipVerify:
+          type: boolean
+          default: false
+        certificate:
+          properties:
+            rootCaCertFile:
+              type: string
+            caCertFile:
+              type: string
+            caPkFile:
+              type: string
+      example: 
+        id: 1
+        enable: true
+        status: connected
+        lastConnectedTime: May 20, 2020, 14:05
+        server: test.sparkplug.org
+        port: 1883
+        keepAliveSec: 10
+        userName: admin
+        password: password
+    SparkplugConfiguration:
+      title: Sparkplug configuration
+      required:
+      - nodeID
+      - groupID
+      properties:
+        enable:
+          type: boolean
+          default: false
+        enableDM:
+          type: boolean
+          default: false
+        nodeID:
+          description: 'The format can be valid UTF-8 alphanumeric String with the exception of the reserved characters of "+", "/", "#"' 
+          type: string
+          minLength: 1
+          maxLength: 255
+        groupID:
+          description: 'The format can be valid UTF-8 alphanumeric String with the exception of the reserved characters of "+", "/", "#"' 
+          type: string
+          minLength: 1
+          maxLength: 255
+        uuid:
+          description: 'The format can be valid UTF-8 alphanumeric String. UUID to track message type in terms of schema definitions'
+          type: string
+          minLength: 0
+          maxLength: 255
+        primaryHostID:
+          type: string
+          description: 'The format can be valid UTF-8 alphanumeric String.'
+          minLength: 0
+          maxLength: 255
+        handshakeTimeout:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 600
+        maxRetries:
+          type: integer
+          default: 3
+          minimum: 0
+          maximum: 60
+        retryInterval:
+          type: integer
+          default: 60
+          minimum: 10
+          maximum: 3600
+        brokerList:
+          type: array
+          items:
+            $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+      example: 
+        enable: true
+        enableDM: false
+        nodeID: gary
+        groupID: thingspro-edges
+        uuid: ''
+        primaryHostID: garyig
+        handshakeTimeout: 10
+        retryInterval: 10
+        maxRetries: 3
+        brokerList:
+          - id: 1
+            enable: true
+            status: connected
+            lastConnectedTime: May 20, 2020, 14:05
+            server: test.sparkplug.org
+            port: 1883
+            keepAliveSec: 10
+            userName: admin
+            password: password
+    AzureIoTEdgeConfiguration:
+      title: Azure IoT Edge configuration
+      properties:
+        iotedge:
+          description: IoT Edge runtime information
+          properties:
+            version:
+              type: string
+              readOnly: true
+            status:
+              type: string
+              enum:
+              - resetting
+              - running
+              - dead
+              - exited
+              - waiting
+              readOnly: true
+            since:
+              type: string
+              example : 'Mon 2016-10-07 09:49:16 CST'
+              readOnly: true
+            match:
+              type: boolean
+              readOnly: true
+            suggestion:
+              type: string
+              readOnly: true
+            modules:
+              type: array
+              items:
+                description: IoT Edge modules runtime information
+                type: object
+                properties:
+                  status:
+                    description: One of created, restarting, running, removing, paused, exited, or dead
+                    readOnly: true
+                    type: string
+                  config:
+                    description: docker image URL
+                    readOnly: true
+                    type: string
+                  description:
+                    readOnly: true
+                    type: string
+                  name:
+                    description: module name
+                    readOnly: true
+                    type: string
+                  match:
+                    type: boolean
+                    readOnly: true
+                  suggestion:
+                    type: string
+                    readOnly: true
+        provisioning:
+          properties:
+            enable:
+              type: boolean
+              default: false
+            supportTwin:
+              type: boolean
+            globalEndpoint:
+              type: string
+              description: DPS url
+              default: https://global.azure-devices-provisioning.net
+            source:
+              type: string
+              description: The identity provisioning mode of the iotedge.
+              default: manual
+              enum: 
+                - manual
+                - dps
+            method:
+              type: string
+              description: The identity provisioning mode of the iotedge.
+              default: tpm
+              enum: 
+                - tpm
+                - symmetricKey
+                - x509
+            connectionString:
+              type: string
+              description: for source:manual
+              minLength: 1
+              maxLength: 1024
+            scopeId:
+              description: for source:dps; Value of a specific DPS instance's ID scope
+              type: string
+              minLength: 1
+              maxLength: 128
+            symmetricKey:
+              description: for source:dps,method:symmetricKey
+              type: string
+              minLength: 1
+              maxLength: 256
+            identityCert:
+              description: for source:dps,method:x509
+              type: string
+              minLength: 1
+              maxLength: 1024
+            identityPk:
+              description: for source:dps,method:x509
+              type: string
+              minLength: 1
+              maxLength: 1024
+            registrationId:
+              description: |
+                Use only lowercase alphanumeric and dash ('-') characters. For example, symm-key-device-007
+              type: string
+              minLength: 1
+              maxLength: 128
+            endorsementKey:
+              description: for source:dps,method:tpm;
+              type: string
+              readOnly: true
+        downstreamCerts:
+          properties:
+            mode:
+              type: string
+              description: The identity certication mode of the iotedge.
+              default: default
+              enum: 
+                - default
+                - user
+                - moxa
+            caCertFile:
+              type: string
+              description: device ca certificate file name
+            caPkFile:
+              description: device ca private key file name
+              type: string
+            trustedCaFile:
+              type: string
+              description: a file containing all the trusted CA
+            certificateInfo:
+              type: object
+              readOnly: true
+              properties:
+                issuer:
+                  type: string
+                  readOnly: true
+                notAfter:
+                  type: string
+                  readOnly: true
+                subject:
+                  type: object
+                  properties:
+                    cn:
+                      type: string
+                      readOnly: true
+        edgeAgentURI:
+          type: string
+          description: default edgeAgent image
+          default: 'mcr.microsoft.com/azureiotedge-agent:1.4.23'
+    StoreAndForward:
+      title: Store and forward configuration
+      properties:
+        enable:
+          type: boolean
+          default: false
+        targetDiskName:
+          type: string
+        desiredDiskCacheSizeMB:
+          type: integer
+        timeToLiveSec:
+          type: integer
+        dropBehavior:
+          type: string
+          enum:
+            - oldest
+            - newest
+        disks:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                readOnly: true
+              mount:
+                type: string
+                readOnly: true
+              device:
+                type: string
+                readOnly: true
+              total:
+                type: integer
+                readOnly: true
+              used:
+                type: integer
+                readOnly: true
+              free:
+                type: integer
+                readOnly: true
+      example:
+        enable: true
+        targetDiskName: System
+        desiredDiskCacheSizeMB: 8
+        timeToLiveSec: 7200
+        dropBehavior: oldest
+        disks:
+        - name: System
+          mount: /
+          device: /dev/root
+          total: 3206059008
+          used: 6059008
+          free: 3200000000
+    StoreAndForwardWithBulkUpload:
+      title: Store and forward configuration with bulk upload
+      properties:
+        enable:
+          type: boolean
+          default: false
+        targetDiskName:
+          type: string
+        desiredDiskCacheSizeMB:
+          type: integer
+        timeToLiveSec:
+          type: integer
+        dropBehavior:
+          type: string
+          enum:
+            - oldest
+            - newest
+        disks:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                readOnly: true
+              mount:
+                type: string
+                readOnly: true
+              device:
+                type: string
+                readOnly: true
+              total:
+                type: integer
+                readOnly: true
+              used:
+                type: integer
+                readOnly: true
+              free:
+                type: integer
+                readOnly: true
+        bulkUpload:
+          $ref: '#/components/schemas/BlukConfiguration'
+      example:
+        enable: true
+        targetDiskName: System
+        desiredDiskCacheSizeMB: 8
+        timeToLiveSec: 7200
+        dropBehavior: oldest
+        bulkUpload:
+          enable: false
+          size: 128
+        disks:
+        - name: System
+          mount: /
+          device: /dev/root
+          total: 3206059008
+          used: 6059008
+          free: 3200000000
+    MessagePolicyV20:
+      title: "Message upload group configuration (version: 2.0)"
+      required:
+      - id
+      - enable
+      - tags
+      - pollingInterval
+      - sentOutThreshold
+      - outputTopic
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        enable:
+          type: boolean
+        properties:
+          type: array
+          items:
+            type: object
+            required:
+            - key
+            - value
+            properties:
+              key:
+                type: string
+                minLength: 1
+              value:
+                type: string
+                minLength: 1
+        tags:
+          type: object
+          properties:
+            moduleName:
+              type: object
+              properties:
+                sourceName:
+                  type: array
+                  items:
+                    description: tag name
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+        outputTopic:
+          type: string
+          default: sample
+          minLength: 1
+        pollingInterval:
+          type: integer
+          description: "unit:second"
+          default: 0
+          minLength: 0
+          maxLength: 86400
+        sendOutThreshold:
+          type: object
+          properties:
+            size:
+              description: "unit:byte"
+              type: integer
+              default: 4096
+              minimum: 0
+              maximum: 262144
+            time:
+              description: "unit:second"
+              type: integer
+              default: 60
+              minimum: 0
+              maximum: 86400
+        format:
+          description: |
+            jq filter string, use to change message format.
+            - empty means use default message format: `{tags:{(.prvdName):{(.srcName):{(.tagName):{values:[{updateTimeStamp:(.ts/1000|todateiso8601),value:.dataValue}]}}}}}`
+          type: string
+          default: ""
+          minLength: 0
+          maxLength: 4096
+      example: 
+        id: 1
+        enable: true
+        outputTopic: sample2
+        properties: []
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+          system:
+            system:
+            - cpuUsage
+            - memoryUsage
+        pollingInterval: 5
+        sendOutThreshold:
+          size: 4096
+          time: 120
+        format: ''
+    MessagePolicy:
+      title: Message upload group configuration
+      required:
+      - id
+      - enable
+      - tags
+      - sendOutThreshold
+      - outputTopic
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        enable:
+          type: boolean
+        description:
+          type: string
+          maxLength: 1024
+        format:
+          description: |
+            jq filter string, use to change message format.
+            - empty means use default message format: {tags:{(.prvdName):{(.srcName):{(.tagName):{values:[{updateTimeStamp:(.ts/1000|todateiso8601),value:.dataValue}]}}}}}
+          type: string
+          default: ""
+          minLength: 0
+          maxLength: 4096
+        properties:
+          type: array
+          items:
+            type: object
+            required:
+            - key
+            - value
+            properties:
+              key:
+                type: string
+                minLength: 1
+              value:
+                type: string
+                minLength: 1
+        tags:
+          type: object
+          properties:
+            moduleName:
+              type: object
+              properties:
+                sourceName:
+                  type: array
+                  items:
+                    description: tag name
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+        outputTopic:
+          type: string
+          default: sample
+          minLength: 1
+        onChange:
+          description: drop data if same with latest when enable onChange. 
+          type: boolean
+          readOnly: true
+        minPublishInterval:
+          description: a fixed interval between the two publish. unit:second
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 60
+        samplingMode:
+          type: string
+          default: allChangedValues
+          enum: 
+          - allValues
+          - latestValues
+          - allChangedValues
+          - latestChangedValues
+        customSamplingRate:
+          description: enable will use the pollingInterval that user input.
+          type: boolean
+          default: false
+        pollingInterval:
+          type: integer
+          description: "unit:second, 0 means subscribe mode"
+          default: 0
+          minLength: 0
+          maxLength: 86400
+        sendOutThreshold:
+          type: object
+          properties:
+            mode:
+              type: string
+              default: byTime
+              enum:
+              - byTime
+              - bySize
+              - immediately
+            time:
+              description: "unit:second"
+              type: integer
+              default: 60
+              minimum: 0
+              maximum: 86400
+            size:
+              description: "unit:byte"
+              type: integer
+              default: 4096
+              minimum: 0
+              maximum: 262144
+            sizeIdleTimer:
+              type: object
+              properties:
+                enable:
+                  type: boolean
+                  default: true
+                time:
+                  description: "unit:second"
+                  type: integer
+                  default: 60
+                  minimum: 0
+                  maximum: 86400
+      example:
+        id: 1
+        enable: true
+        description: my message group
+        outputTopic: sample
+        properties: []
+        onChange: false
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: false
+        format: ''
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    SparkplugMessagePolicy:
+      title: Sparkplug Message upload group configuration
+      required:
+      - id
+      - enable
+      - tags
+      - sendOutThreshold
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        enable:
+          type: boolean
+        description:
+          type: string
+          maxLength: 1024
+        tags:
+          type: object
+          properties:
+            moduleName:
+              type: object
+              properties:
+                sourceName:
+                  type: array
+                  items:
+                    description: tag name
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+        onChange:
+          description: drop data if same with latest when enable onChange. 
+          type: boolean
+          readOnly: true
+        minPublishInterval:
+          description: a fixed interval between the two publish. unit:second
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 10
+        samplingMode:
+          type: string
+          default: allChangedValues
+          enum: 
+          - allValues
+          - latestValues
+          - allChangedValues
+          - latestChangedValues
+        customSamplingRate:
+          description: enable will use the pollingInterval that user input.
+          type: boolean
+          default: false
+        pollingInterval:
+          type: integer
+          description: "unit:second, 0 means subscribe mode"
+          default: 10
+          minLength: 0
+          maxLength: 86400
+        sendOutThreshold:
+          type: object
+          properties:
+            mode:
+              type: string
+              default: byTime
+              enum:
+              - byTime
+              - bySize
+              - immediately
+            time:
+              description: "unit:second"
+              type: integer
+              default: 60
+              minimum: 1
+              maximum: 86400
+            size:
+              description: "unit:byte"
+              type: integer
+              default: 4096
+              minimum: 1
+              maximum: 262144
+            sizeIdleTimer:
+              type: object
+              properties:
+                enable:
+                  type: boolean
+                  default: true
+                time:
+                  description: "unit:second"
+                  type: integer
+                  default: 60
+                  minimum: 1
+                  maximum: 86400
+      example:
+        id: 1
+        enable: true
+        description: my message group
+        properties: []
+        onChange: false
+        minPublishInterval: 0
+        samplingMode: allValues
+        customSamplingRate: false
+        tags:
+          modbus:
+            myDevice1:
+            - di0
+            - di1
+        pollingInterval: 0
+        sendOutThreshold:
+          mode: byTime
+          time: 60
+    Tag:
+      type: object
+      properties:
+        srcName:
+          type: string
+        tagName:
+          type: string
+        dataType:
+          type: string
+          enum:
+            - uint8
+            - uint16
+            - uint32
+            - uint64
+            - int16
+            - int32
+            - int64
+            - float32
+            - float64
+            - string
+            - boolean
+            - bytearray
+        duration:
+          type: integer
+          format: int32
+        dataUnit:
+          type: string
+        access:
+          type: string
+          enum:
+            - ro
+            - wo
+            - rw
+      example: 
+        srcName: system
+        tagName: cpuUsage
+        dataType: int32
+        duration: 1000
+        dataUnit: '%'
+        access: ro
+    DeviceProperties:
+      type: object
+      properties:
+        $origin:
+          type: object
+          properties:
+            $resource:
+              type: array
+              items:
+                type: object
+                required:
+                - reportedPath
+                - desiredPath
+                properties:
+                  source:
+                    type: string
+                    description: json path of property in resource; empty == "."(complete json object/array)
+                  reportedPath:
+                    type: string
+                    description: json path of reported property.
+                  desiredPath:
+                    type: string
+                    description: json path of desired property.
+      example:
+        device:
+          general:
+            - reportedPath: general
+              desiredPath: general
+          wan:
+            - reportedPath: wan
+              desiredPath: wan
+    CloudSupportList:
+      type: string
+      description: Cloud APP support cloud list.
+      enum:
+        - azure-iotedge
+        - azure-device
+        - dlm
+        - mqtt
+        - aws
+    CloudRuntimeInformation:
+      title: cloud service runtime information
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - Warning
+          - Disable
+          readOnly: true
+        connectionStatus:
+          type: string
+          enum:
+          - Disconnected
+          - Connect Fail
+          - Connected
+          readOnly: true
+        lastD2CUploadStatus:
+          type: string
+          enum:
+          - Success
+          - --
+          - Fail
+          readOnly: true
+        lastD2CUploadTime:
+          type: string
+          description: D2C message upload time, empty if there is no upload record
+        lastConnectFailTime:
+          type: string
+        lastConnectedTime:
+          type: string
+      example:
+        status: Warning
+        connectionStatus: Connect Fail
+        lastD2CUploadStatus: Fail
+        lastD2CUploadTime: May 31, 2022, 14:04:50
+        lastConnectFailTime: May 31, 2022, 14:05:01
+        lastConnectedTime: May 29, 2022, 01:51:33
+    CloudRuntimeListInformation:
+      title: cloud service runtime information
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - Warning
+          - Disable
+          readOnly: true
+        clients:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              connectionStatus:
+                type: string
+                enum:
+                - Disconnected
+                - Connect Fail
+                - Connected
+                readOnly: true
+              lastD2CUploadStatus:
+                type: string
+                enum:
+                - Success
+                - --
+                - Fail
+                readOnly: true
+              lastD2CUploadTime:
+                type: string
+                description: D2C message upload time, empty if there is no upload record
+              lastConnectFailTime:
+                type: string
+              lastConnectedTime:
+                type: string
+      example:
+        status: Warning
+        clients:
+          - name: test.mosquitto.org
+            connectionStatus: Connect Fail
+            lastD2CUploadStatus: Fail
+            lastD2CUploadTime: May 31, 2022, 14:04:50
+            lastConnectFailTime: May 31, 2022, 14:05:01
+            lastConnectedTime: May 29, 2022, 01:51:33
+          - name: '10.123.12.138:1883'
+            connectionStatus: Connected
+            lastD2CUploadStatus: Success
+            lastD2CUploadTime: May 31, 2022, 14:04:50
+            lastConnectFailTime: May 31, 2022, 14:05:01
+            lastConnectedTime: May 29, 2022, 01:51:33
+
+security:
+  - bearerAuth: []
+
+paths:
+  /remotectl/services:
+    get:
+      description: Get Northbound services' information.
+      tags: ["northbound"]
+      responses:
+        200:
+          description: Northbound services' information.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/Serviceinformation'
+  /mqtt:
+    get:
+      description: Get MQTT client configuration.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: MQTT client configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/MQTTConfiguration'
+    post:
+      description: Create a MQTT client configuration.
+      tags: ["mqtt"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MQTTConfiguration'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                rootCaCertFile:
+                  description: trusted ca certificate
+                  format: binary
+                  type: string
+                caCertFile:
+                  description: device ca certificate
+                  format: binary
+                  type: string
+                caPkFile:
+                  description: device ca private key
+                  format: binary
+                  type: string
+      responses:
+        200:
+          description: MQTT client configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/MQTTConfiguration'
+  /mqtt/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: the `id` in the configuration of mqtt clients.
+      schema:
+        type: integer
+      required: true
+    put:
+      description: Edit MQTT client configuration.
+      tags: ["mqtt"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MQTTConfiguration'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                rootCaCertFile:
+                  description: trusted ca certificate
+                  format: binary
+                  type: string
+                caCertFile:
+                  description: device ca certificate
+                  format: binary
+                  type: string
+                caPkFile:
+                  description: device ca private key
+                  format: binary
+                  type: string
+      responses:
+        200:
+          description: MQTT client configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MQTTConfiguration'
+    delete:
+      description: delete MQTT client configuration.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: MQTT client configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/MQTTConfiguration'
+  /mqtt/monitor:
+    get:
+      description: Get MQTT runtime information.  
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: MQTT runtime information..
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CloudRuntimeListInformation'
+  /mqtt/check:
+    put:
+      description: Execute MQTT runtime diagnostic
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: streaming
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+  /mqtt/{id}/certificates:
+    parameters:
+      - name: id
+        in: path
+        description: the `id` in the configuration of mqtt clients.
+        schema:
+          type: integer
+        required: true
+    delete:
+      description: delete certficate.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: MQTT client configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MQTTConfiguration'
+  /mqtt/{id}/store-and-forward:
+    parameters:
+      - name: id
+        in: path
+        description: the `id` in the configuration of mqtt clients.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get store and forward setting.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForward'
+    put:
+      description: update store and forward setting.
+      tags: ["mqtt"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAndForward'
+            example:
+              enable: true
+              targetDiskName: System
+              desiredDiskCacheSizeMB: 8
+              timeToLiveSec: 7200
+              dropBehavior: oldest
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForward'
+  /mqtt/{id}/messages:
+    parameters:
+      - name: id
+        in: path
+        description: the `id` in the configuration of mqtt clients.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get message groups setting.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+    post:
+      description: create a message group.
+      tags: ["mqtt"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /mqtt/{id}/messages/{group_id}:
+    parameters:
+      - name: id
+        in: path
+        description: the `id` in the configuration of mqtt clients.
+        schema:
+          type: integer
+        required: true
+      - name: group_id
+        in: path
+        description: the `id` in the configuration of message groups.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get message group setting.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: message policy setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    put:
+      description: update message group setting.
+      tags: ["mqtt"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    delete:
+      description: delete message group setting.
+      tags: ["mqtt"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /mqtt/{id}/messages/test:
+    parameters:
+      - name: id
+        in: path
+        description: the `id` in the configuration of mqtt clients.
+        schema:
+          type: integer
+        required: true
+    put:
+      description: test custom payload.
+      tags: ["mqtt"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                format:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Tag'
+            example:
+              format: "{time: (now|todateiso8601), (.srcName): { (.tagName): .dataValue} }"
+              tags:
+              - srcName: system
+                tagName: cpuUsage
+                dataType: int32
+                duration: 1000
+                access: ro
+      responses:
+        200:
+          description: custom payload test results
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  error:
+                    type: string
+              example:
+                data:
+                  system:
+                    cpuUsage: 60
+                  time: '2019-09-27T11:42:34Z'
+
+  /azure-device:
+    get:
+      description: Get azure iot device configuration.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: Azure iot device configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTDeviceConfiguration'
+    put:
+      description: Update provisioning configuration.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AzureIoTDeviceConfiguration'
+            examples:
+              symmetricKey mode:
+                value:
+                  provisioning:
+                    enable: true
+                    authenticationType: symmetricKey
+                    supportTwin: true
+                    connectionString: 'connection-string-test'
+                    keepAlive: 60
+                    protocol: 
+                      protocol: mqtt
+              switch to X509 mode (need import certificate):
+                value:
+                  provisioning:
+                    enable: true
+                    authenticationType: x509
+                    supportTwin: false
+                    connectionString: 'connection-string-test'
+                    keepAlive: 60
+                    protocol: 
+                      protocol: mqtt
+                    certificate:
+                      caPkFile: 'device.crt'
+                      caCertFile: 'device.key'
+              enable/disable device management:
+                value:
+                  provisioning:
+                    enable: true
+                    authenticationType: symmetricKey
+                    supportTwin: false
+                    connectionString: 'connection-string-test'
+                    keepAlive: 60
+                    protocol: 
+                      protocol: mqtt
+              change communication protocol:
+                value:
+                  provisioning:
+                    enable: true
+                    authenticationType: symmetricKey
+                    supportTwin: true
+                    connectionString: 'connection-string-test'
+                    keepAlive: 60
+                    protocol: 
+                      protocol: mqttOverWebsocket
+      responses:
+        200:
+          description: azure iot device configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTDeviceConfiguration'
+              example:
+                data:
+                  provisioning:
+                    authenticationType: symmetricKey
+                    connectionString: 'connection-string-test'
+                    enable: true
+                    supportTwin: true
+                    certificate:
+                      caPkFile: ''
+                      caCertFile: ''
+                      certificateInfo:
+                        notAfter: ''
+                        subject:
+                          cn: ''
+                        issuer: ''
+                  status: connected
+    post:
+      description: Setup x509 certificates.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                caCertFile:
+                  description: device ca certificate
+                  format: binary
+                  type: string
+                caPkFile:
+                  description: device ca private key
+                  format: binary
+                  type: string
+                rootCaCertFile:
+                  description: root ca certificate
+                  format: binary
+                  type: string
+                connectionString:
+                  type: string
+                  minLength: 1
+                  maxLength: 1024
+                protocol:
+                  type: string
+                  description: Communication protocol
+                  enum: 
+                  - mqtt
+                  - mqttOverWebsocket
+                  - amqp
+                  - amqpOverWebsocket
+      responses:
+        200:
+          description: azure iot device configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTDeviceConfiguration'
+  /azure-device/monitor:
+    get:
+      description: Get azure device runtime information.  
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: Azure device runtime information..
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CloudRuntimeInformation'
+  /azure-device/check:
+    put:
+      description: Execute azure device runtime diagnostic
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: streaming
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+  /azure-device/twin/properties:
+    get:
+      description: get twin properties setting.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeviceProperties'
+    put:
+      description: update twin properties setting.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceProperties'
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeviceProperties'
+  /azure-device/twin/reported:
+    put:
+      description: reported twin properties.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+              example:
+                data: ok
+  /azure-device/twin/clear:
+    put:
+      description: clear twin properties.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            example:
+              - general
+              - ethernets
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+              example:
+                data: ok
+  /azure-device/store-and-forward:
+    get:
+      description: get store and forward setting.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForward'
+    put:
+      description: update store and forward setting.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAndForward'
+            example:
+              enable: true
+              targetDiskName: System
+              desiredDiskCacheSizeMB: 8
+              timeToLiveSec: 7200
+              dropBehavior: oldest
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForward'
+  /azure-device/messages:
+    get:
+      description: get message groups setting.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+    post:
+      description: create a message group.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /azure-device/messages/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: message group id.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get message group setting.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: message policy setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    put:
+      description: update message group setting.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    delete:
+      description: delete message group setting.
+      tags: ["azure_device"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /azure-device/messages/test:
+    put:
+      description: test custom payload.
+      tags: ["azure_device"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                format:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Tag'
+            example:
+              format: "{ time : (now|todateiso8601), (.srcName) : { (.tagName) : .dataValue}}"
+              tags:
+              - srcName: system
+                tagName: cpuUsage
+                dataType: int32
+                duration: 1000
+                dataUnit: '%'
+                access: ro
+      responses:
+        200:
+          description: custom payload test results
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  error:
+                    type: string
+              example:
+                data:
+                  system:
+                    cpuUsage: 60
+                  time: '2019-09-27T11:42:34Z'
+
+  /aws:
+    get:
+      description: Get AWS iot device configuration. 
+      tags: ["aws"]
+      responses:
+        200:
+          description: AWS iot device configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AwsIoTCoreConfiguration'
+    put:
+      description: Update provisioning configuration.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwsIoTCoreConfiguration'
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/AwsIoTCoreConfiguration'
+                - type: object
+                  properties:
+                    rootCaCertFile:
+                      description: trusted ca certificate
+                      format: binary
+                      type: string
+                    caCertFile:
+                      description: device ca certificate
+                      format: binary
+                      type: string
+                    caPkFile:
+                      description: device ca private key
+                      format: binary
+                      type: string
+      responses:
+        200:
+          description: AWS iot device configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AwsIoTCoreConfiguration'
+  /aws/monitor:
+    get:
+      description: Get AWS runtime information.  
+      tags: ["aws"]
+      responses:
+        200:
+          description: AWS runtime information..
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CloudRuntimeInformation'
+  /aws/check:
+    put:
+      description: Execute AWS runtime diagnostic
+      tags: ["aws"]
+      responses:
+        200:
+          description: streaming
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+  /aws/shadow/properties:
+    get:
+      description: get shadow properties setting.
+      tags: ["aws"]
+      responses:
+        200:
+          description: shadow properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeviceProperties'
+    put:
+      description: update shadow properties setting.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceProperties'
+      responses:
+        200:
+          description: shadow properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeviceProperties'
+  /aws/shadow/reported:
+    put:
+      description: reported shadow properties.
+      tags: ["aws"]
+      responses:
+        200:
+          description: shadow properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+              example:
+                data: ok
+  /aws/shadow/clear:
+    put:
+      description: clear shadow properties.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            example:
+              - general
+              - ethernets
+      responses:
+        200:
+          description: shadow properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+              example:
+                data: ok
+  /aws/store-and-forward:
+    get:
+      description: get store and forward setting.
+      tags: ["aws"]
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForward'
+    put:
+      description: update store and forward setting.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAndForward'
+            example:
+              enable: true
+              targetDiskName: System
+              desiredDiskCacheSizeMB: 8
+              timeToLiveSec: 7200
+              dropBehavior: oldest
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForward'
+  /aws/messages:
+    get:
+      description: get message groups setting.
+      tags: ["aws"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+    post:
+      description: create a message group.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /aws/messages/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: message group id.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get message group setting.
+      tags: ["aws"]
+      responses:
+        200:
+          description: message policy setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    put:
+      description: update message group setting.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    delete:
+      description: delete message group setting.
+      tags: ["aws"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /aws/messages/test:
+    put:
+      description: test custom payload.
+      tags: ["aws"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                format:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Tag'
+            example:
+              format: "{ time : (now|todateiso8601), (.srcName) : { (.tagName) : .dataValue}}"
+              tags:
+              - srcName: system
+                tagName: cpuUsage
+                dataType: int32
+                duration: 1000
+                dataUnit: '%'
+                access: ro
+      responses:
+        200:
+          description: custom payload test results
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  error:
+                    type: string
+              example:
+                data:
+                  system:
+                    cpuUsage: 60
+                  time: '2019-09-27T11:42:34Z'
+
+  /azure-iotedge:
+    get:
+      description: Get azure iotedge configuration.  
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: Azure iotedge configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+    patch:
+      description: Update azure iotedge configuration.
+      tags: ["azure_iotedge"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+            examples:
+              enable-service:
+                value:
+                  provisioning:
+                    enable: true
+              provisioning-manual:
+                value:
+                  provisioning:
+                    source: manual
+                    connectionString: '[YOUR CONNECTION STRING]'
+              provisioning-dps-tpm:
+                value:
+                  provisioning:
+                    source: dps
+                    method: tpm
+                    globalEndpoint: 'https://global.azure-devices-provisioning.net'
+                    registrationId: '[registration ID]'
+                    scopeId: '[DEVICE SCOPE ID]'
+              provisioning-dps-symmetricKey:
+                value:
+                  provisioning:
+                    source: dps
+                    method: symmetricKey
+                    globalEndpoint: 'https://global.azure-devices-provisioning.net'
+                    registrationId: '[registration ID]'
+                    scopeId: '[DEVICE SCOPE ID]'
+                    symmetricKey: '[symmetric Key]'
+              provisioning-dps-x509:
+                value:
+                  provisioning:
+                    source: dps
+                    method: x509
+                    globalEndpoint: 'https://global.azure-devices-provisioning.net'
+                    scopeId: '[SCOPE ID]'
+                    registrationId: ''
+                    identityCert: '[CERT FILE CONTENT]'
+                    identityPk: '[KEY CONTENT]'
+              downstreamCerts-default:
+                value:
+                  downstreamCerts:
+                    mode: default
+              downstreamCerts-moxa:
+                value:
+                  downstreamCerts:
+                    mode: moxa
+      responses:
+        200:
+          description: azure iotedge configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+  /azure-iotedge/reset:
+    put:
+      description: Reset AIE APP(include iotedge runtime pkgs).
+      tags: ["azure_iotedge"]
+      responses:
+        202:
+          description: restart azure iotedge service success
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+                example:
+                  data:
+                    iotedge:
+                      status: resetting
+        400:
+          description: reset failed
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "reset iotedge failed"
+  /azure-iotedge/restart:
+    put:
+      description: Control azure iotedge service.
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: restart azure iotedge service success
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+        400:
+          description: restart azure iotedge service failed
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "restart iotedge failed"
+  /azure-iotedge/modules/{name}/restart:
+    put:
+      description: Restart azure module.
+      tags: ["azure_iotedge"]
+      parameters:
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+          enum:
+          - restart
+        description: control action.
+      responses:
+        200:
+          description: Restart azure iotedge modules success
+          content:
+            application/json:
+              schema:
+                properties:
+                  data: 
+                    type: string
+                example:
+                  data: "edgeAgent enable task is accepted"
+        400:
+          description: Restart azure iotedge service/modules failed
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "stop module is not allowed"
+  /azure-iotedge/certificates:
+    post:
+      description: Import user certificates and update azure iotedge configuration.
+      tags: ["azure_iotedge"]
+      requestBody:
+        description: The uploaded certificates and configuration.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                caCertFile:
+                  description: device ca certificate
+                  format: binary
+                  type: string
+                caPkFile:
+                  description: device ca private key
+                  format: binary
+                  type: string
+                trustedCaFile:
+                  description: a file containing all the trusted CA
+                  format: binary
+                  type: string
+      responses:
+        200:
+          description: azure iotedge configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+  /azure-iotedge/twin/properties:
+    get:
+      description: get twin properties setting.
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeviceProperties'
+    put:
+      description: update twin properties setting.
+      tags: ["azure_iotedge"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceProperties'
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeviceProperties'
+  /azure-iotedge/twin/reported:
+    put:
+      description: reported twin properties.
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+              example:
+                data: ok
+  /azure-iotedge/twin/clear:
+    put:
+      description: clear twin properties.
+      tags: ["azure_iotedge"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            example:
+              - general
+              - ethernets
+      responses:
+        200:
+          description: twin properties setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: string
+              example:
+                data: ok
+  /azure-iotedge/messages:
+    get:
+      description: get message groups setting.
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+    post:
+      description: create a message group.
+      tags: ["azure_iotedge"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /azure-iotedge/messages/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: message group id.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get message group setting.
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: message policy setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    put:
+      description: update message group setting.
+      tags: ["azure_iotedge"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessagePolicy'
+    delete:
+      description: delete message group setting.
+      tags: ["azure_iotedge"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessagePolicy'
+  /azure-iotedge/messages/test:
+    put:
+      description: test custom payload.
+      tags: ["azure_iotedge"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                format:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Tag'
+            example:
+              format: "{ time : (now|todateiso8601), (.srcName) : { (.tagName) : .dataValue}}"
+              tags:
+              - srcName: system
+                tagName: cpuUsage
+                dataType: int32
+                duration: 1000
+                dataUnit: '%'
+                access: ro
+      responses:
+        200:
+          description: custom payload test results
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  error:
+                    type: string
+              example:
+                data:
+                  system:
+                    cpuUsage: 60
+                  time: '2019-09-27T11:42:34Z'
+
+
+  /sparkplug:
+    get:
+      parameters:
+      - in: query
+        description: 'Get runtime status, ex: {"brokerList":[{"id":1,"status":"connected"}]}'
+        name: event
+        schema:
+          type: boolean
+      description: Get Sparkplug configuration. 
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: Sparkplug configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SparkplugConfiguration'
+    put:
+      description: Update Sparkplug configuration.(BrokerList is readOnly in this endpoint)
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SparkplugConfiguration'
+      responses:
+        200:
+          description: Sparkplug configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SparkplugConfiguration'
+  /sparkplug/configuration:
+    get:
+      tags: ["sparkplug"]
+      summary: Download configurations
+      parameters:
+      - description: Use password to encryption (default:true)
+        in: query
+        name: encryption
+        schema:
+          default: true
+          type: boolean
+      - description: password
+        in: header
+        name: password
+        schema:
+          type: string
+      responses:
+        200:
+          content:
+            application/zip:
+              schema:
+                format: binary
+                type: string
+          description: success
+    put:
+      tags: ["sparkplug"]
+      summary: Upload configurations
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                decryption:
+                  default: true
+                  description: Use password to decryption (default:true)
+                  type: boolean
+                file:
+                  description: configuration file
+                  format: binary
+                  type: string
+                password:
+                  description: password
+                  type: string
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              example:
+                data:
+                  fileName: 2019-12-19-13-52-backup.zip
+                  fileSize: 46272
+              schema:
+                properties:
+                  data:
+                    properties:
+                      filename:
+                        type: string
+                      filesize:
+                        type: integer
+          description: success
+        400:
+          content:
+            application/json:
+              examples:
+                extract1:
+                  summary: failed to extract
+                  value:
+                    error:
+                      code: 10001
+                      message: 'extract: zip: not a valid zip file'
+                extract2:
+                  summary: password error
+                  value:
+                    error:
+                      code: 10001
+                      message: 'extract: zip: decryption error'
+                filesize:
+                  summary: file size is over limitation
+                  value:
+                    error:
+                      code: 10000
+                      message: file is over size
+              schema:
+                properties:
+                  error:
+                    properties:
+                      code:
+                        type: integer
+                      message:
+                        type: string
+          description: error
+  /sparkplug/brokers:
+    get:
+      description: Get Sparkplug brokers configuration. 
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: Sparkplug brokers configuration.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+    put:
+      description: Update Sparkplug brokers configuration.
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+      responses:
+        200:
+          description: Sparkplug configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+    post:
+      description: Create a new Sparkplug broker configuration.
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+                - type: object
+                  properties:
+                    rootCaCertFile:
+                      description: trusted ca certificate
+                      format: binary
+                      type: string
+                    caCertFile:
+                      description: device ca certificate
+                      format: binary
+                      type: string
+                    caPkFile:
+                      description: device ca private key
+                      format: binary
+                      type: string
+            example:
+              enable: true
+              server: test.sparkplug.org
+              port: 1883
+              keepAliveSec: 10
+              userName: admin
+              password: password
+      responses:
+        200:
+          description: Sparkplug configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+  /sparkplug/brokers/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: broker id.
+      schema:
+        type: integer
+      required: true
+    put:
+      description: Update Sparkplug broker configuration.
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+                - type: object
+                  properties:
+                    rootCaCertFile:
+                      description: trusted ca certificate
+                      format: binary
+                      type: string
+                    caCertFile:
+                      description: device ca certificate
+                      format: binary
+                      type: string
+                    caPkFile:
+                      description: device ca private key
+                      format: binary
+                      type: string
+      responses:
+        200:
+          description: Sparkplug configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+    delete:
+      description: Delete Sparkplug broker configuration.
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: Sparkplug configuration
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SparkplugBrokerConfiguration'
+              example:
+                  data: []
+  /sparkplug/node/properties:
+      get:
+        description: get node properties setting.
+        tags: ["sparkplug"]
+        responses:
+          200:
+            description: node properties setting.
+            content:
+              application/json:
+                schema:
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeviceProperties'
+      put:
+        description: update twin properties setting.
+        tags: ["sparkplug"]
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceProperties'
+        responses:
+          200:
+            description: twin properties setting.
+            content:
+              application/json:
+                schema:
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeviceProperties'
+  /sparkplug/node/reported:
+      put:
+        description: reported node properties.
+        tags: ["sparkplug"]
+        responses:
+          200:
+            description: node properties setting.
+            content:
+              application/json:
+                schema:
+                  properties:
+                    data:
+                      type: string
+                example:
+                  data: ok
+  /sparkplug/node/clear:
+      put:
+        description: clear node properties.
+        tags: ["sparkplug"]
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - general
+                - ethernets
+        responses:
+          200:
+            description: node properties setting.
+            content:
+              application/json:
+                schema:
+                  properties:
+                    data:
+                      type: string
+                example:
+                  data: ok
+  /sparkplug/store-and-forward:
+    get:
+      description: get store and forward setting.
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForwardWithBulkUpload'
+    put:
+      description: update store and forward setting.
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAndForwardWithBulkUpload'
+            example:
+              enable: true
+              targetDiskName: System
+              desiredDiskCacheSizeMB: 8
+              timeToLiveSec: 7200
+              dropBehavior: oldest
+              bulkUpload: 
+                enable: false
+                size: 128
+      responses:
+        200:
+          description: store and forward setting.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StoreAndForwardWithBulkUpload'
+  /sparkplug/properties:
+      get:
+        description: get node properties setting.
+        tags: ["sparkplug"]
+        responses:
+          200:
+            description: node properties setting.
+            content:
+              application/json:
+                schema:
+                  properties:
+                    data:
+                      properties:
+                        selections:
+                          type: object
+                          properties:
+                            moduleName:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  source:
+                                    type: string
+                                  reportedPath:
+                                    type: string
+                example:
+                  selections:
+                    device:
+                      cellulars:
+                        - source: ip
+                          reportedPath: Properties.Cellular IP
+      put:
+        description: edit node properties setting.
+        tags: ["sparkplug"]
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  selections:
+                    type: object
+                    properties:
+                      moduleName:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            source:
+                              type: string
+                            reportedPath:
+                              type: string
+              example:
+                selections:
+                  device:
+                    cellulars:
+                      - source: ip
+                        reportedPath: Properties.Cellular IP
+        responses:
+          200:
+            description: node properties setting.
+            content:
+              application/json:
+                schema:
+                  properties:
+                    data:
+                      properties:
+                        selections:
+                          type: object
+                          properties:
+                            moduleName:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  source:
+                                    type: string
+                                  reportedPath:
+                                    type: string
+                example:
+                  selections:
+                    device:
+                      cellulars:
+                        - source: ip
+                          reportedPath: Properties.Cellular IP
+  /sparkplug/messages:
+    parameters:
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum: 
+            - node
+            - device
+    get:
+      description: get message groups setting.
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SparkplugMessagePolicy'
+    post:
+      description: create a message group.
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SparkplugMessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SparkplugMessagePolicy'
+  /sparkplug/messages/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: message group id.
+        schema:
+          type: integer
+        required: true
+    get:
+      description: get message group setting.
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: message policy setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SparkplugMessagePolicy'
+    put:
+      description: update message group setting.
+      tags: ["sparkplug"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SparkplugMessagePolicy'
+      responses:
+        200:
+          description: message group setting
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SparkplugMessagePolicy'
+    delete:
+      description: delete message group setting.
+      tags: ["sparkplug"]
+      responses:
+        200:
+          description: message groups setting
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SparkplugMessagePolicy'
+#  /dlm:
+#    get:
+#      description: Get DLM configuration.
+#      tags: ["dlm"]
+#      responses:
+#        200:
+#          description: DLM configuration.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/DLMConfiguration'
+#    patch:
+#      description: Update DLM configuration.
+#      tags: ["dlm"]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/DLMConfiguration'
+#            examples:
+#              connection-enable:
+#                value:
+#                  connection:
+#                    picTarget: prod
+#                    enable: true
+#                    retryDelaySec: 10
+#              connection-disable:
+#                value:
+#                  connection:
+#                    enable: false
+#      responses:
+#        200:
+#          description: DLM configuration.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/DLMConfiguration'
+#    post:
+#      description: Import certificates and update DLM configuration.
+#      tags: ["dlm"]
+#      requestBody:
+#        description: The uploaded certificates and configuration.
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              properties:
+#                cert:
+#                  description: device ca certificate content
+#                  type: string
+#                certFilename:
+#                  description: device ca certificate file name
+#                  type: string
+#                key:
+#                  description: device ca private key content
+#                  type: string
+#                keyFilename:
+#                  description: device ca private key file name
+#                  type: string
+#                enable:
+#                  type: boolean
+#                  description: DLM enable/disable
+#                  default: true
+#                retryDelaySec:
+#                  type: integer
+#                  description: Delay between retries.
+#                  default: 10
+#                  minimum: 10
+#                  maximum: 86400
+#          multipart/form-data:
+#            schema:
+#              type: object
+#              properties:
+#                caCertFile:
+#                  description: device ca certificate
+#                  format: binary
+#                  type: string
+#                caPkFile:
+#                  description: device ca private key
+#                  format: binary
+#                  type: string
+#                enable:
+#                  type: boolean
+#                  description: DLM enable/disable
+#                  default: true
+#                retryDelaySec:
+#                  type: integer
+#                  description: Delay between retries.
+#                  default: 10
+#                  minimum: 10
+#                  maximum: 86400
+#      responses:
+#        200:
+#          description: DLM configuration.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/DLMConfiguration'
+#  /dlm/store-and-forward:
+#    get:
+#      description: get store and forward setting.
+#      tags: ["dlm"]
+#      responses:
+#        200:
+#          description: store and forward setting.
+#          content:
+#            application/json:
+#              schema:
+#                properties:
+#                  data:
+#                    $ref: '#/components/schemas/StoreAndForward'
+#    put:
+#      description: update store and forward setting.
+#      tags: ["dlm"]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/StoreAndForward'
+#            example:
+#              enable: true
+#              targetDiskName: System
+#              desiredDiskCacheSizeMB: 8
+#              timeToLiveSec: 7200
+#              dropBehavior: oldest
+#      responses:
+#        200:
+#          description: store and forward setting.
+#          content:
+#            application/json:
+#              schema:
+#                properties:
+#                  data:
+#                    $ref: '#/components/schemas/StoreAndForward'
+#  /dlm/messages:
+#    get:
+#      description: get message groups setting.
+#      tags: ["dlm"]
+#      responses:
+#        200:
+#          description: message groups setting
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/MessagePolicy'
+#    put:
+#      description: update message groups setting.
+#      tags: ["dlm"]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              type: array
+#              items:
+#                $ref: '#/components/schemas/MessagePolicy'
+#      responses:
+#        200:
+#          description: message groups setting
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/MessagePolicy'
+#    post:
+#      description: create a message group.
+#      tags: ["dlm"]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/MessagePolicy'
+#      responses:
+#        200:
+#          description: message group setting
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/MessagePolicy'
+#              examples:
+#                byInterval-allValues-publish-60sec:
+#                  $ref: '#/components/examples/byInterval-allValues'
+#                byInterval-latestValues-60sec:
+#                  $ref: '#/components/examples/byInterval-latestValues'
+#                byInterval-allChangedValues:
+#                  $ref: '#/components/examples/byInterval-allChangedValues'
+#                byInterval-latestChangedValues:
+#                  $ref: '#/components/examples/byInterval-latestChangedValues'
+#                byInterval-custom-sampling-rate:
+#                  $ref: '#/components/examples/byInterval-custom'
+#                immediately-onchange:
+#                  $ref: '#/components/examples/immediately-onchange'
+#                bySize-enable-idle-timer:
+#                  $ref: '#/components/examples/bySize-enable-idle-timer'
+#                bySize-disable-idle-timer:
+#                  $ref: '#/components/examples/bySize-disable-idle-timer'
+#  /dlm/messages/{id}:
+#    parameters:
+#      - name: id
+#        in: path
+#        description: message group id.
+#        schema:
+#          type: integer
+#        required: true
+#    get:
+#      description: get message group setting.
+#      tags: ["dlm"]
+#      responses:
+#        200:
+#          description: message policy setting
+#          content:
+#            application/json:
+#              schema:
+#                properties:
+#                  data:
+#                    $ref: '#/components/schemas/MessagePolicy'
+#    put:
+#      description: update message group setting.
+#      tags: ["dlm"]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/MessagePolicy'
+#      responses:
+#        200:
+#          description: message group setting
+#          content:
+#            application/json:
+#              schema:
+#                properties:
+#                  data:
+#                    $ref: '#/components/schemas/MessagePolicy'
+#    delete:
+#      description: delete message group setting.
+#      tags: ["dlm"]
+#      responses:
+#        200:
+#          description: message groups setting
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/MessagePolicy'
+#  /dlm/messages/test:
+#    put:
+#      description: test custom payload.
+#      tags: ["dlm"]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              properties:
+#                format:
+#                  type: string
+#                tags:
+#                  type: array
+#                  items:
+#                    $ref: '#/components/schemas/Tag'
+#            example:
+#              format: "{ time : (now|todateiso8601), (.srcName) : { (.tagName) : .dataValue}}"
+#              tags:
+#              - srcName: system
+#                tagName: cpuUsage
+#                dataType: int32
+#                duration: 1000
+#                dataUnit: '%'
+#                access: ro
+#      responses:
+#        200:
+#          description: custom payload test results
+#          content:
+#            application/json:
+#              schema:
+#                properties:
+#                  data:
+#                    type: object
+#                  error:
+#                    type: string
+#              example:
+#                data:
+#                  system:
+#                    cpuUsage: 60
+#                  time: '2019-09-27T11:42:34Z'
+
+servers:
+  - url: http://127.0.0.1/api/v1

@@ -1,0 +1,280 @@
+openapi: '3.0.0'
+
+info:
+  version: '2.0.0'
+  title: 'General Information API'
+  description: |
+        Release Date: 2020/06/08
+        General Information API
+
+components:
+  schemas:
+    GeneralInformation:
+      title: Device general configuration
+      properties:
+        type:
+          type: string
+          description: Interface type.
+          minLength: 7
+          maxLength: 7
+          pattern: '^general$'
+          example: general
+          readOnly: true
+        description:
+          type: string
+          description: device description.
+          minLength: 0
+          maxLength: 512
+          example: This is My Thingspro Edge.
+        hostName:
+          type: string
+          description: device hostname. <br>
+             - Hostname must be between 1 and 64 octets inclusive.<br>
+             - Each label in the hostname (component separated by ".") must be between 1 and 63 octets inclusive. <br>
+             - Each label must start with an ASCII alphabet character (a-z, A-Z), end with an ASCII alphanumeric character (a-z, A-Z, 0-9), and must contain only ASCII alphanumeric characters or hyphens (a-z, A-Z, 0-9, "-").
+          minLength: 1
+          maxLength: 64
+          pattern: '^[a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$'
+          example: Moxa
+        modelName:
+          type: string
+          description: Model name of device.
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: UC-8100A-ME-T-LX
+        serialNumber:
+          type: string
+          description: Serial number of device.
+          minLength: 12
+          maxLength: 12
+          readOnly: true
+          example: IMOXA1234567
+        thingsproVersion:
+          type: string
+          description: ThingsPro version.
+          minLength: 5
+          maxLength: 255
+          readOnly: true
+          example: 2.0.0-1600
+        firmwareVersion:
+          type: string
+          description: device firmware version.
+          minLength: 3
+          maxLength: 255
+          readOnly: true
+          example: '1.0'
+        biosVersion:
+          type: string
+          description: device BIOS/Bootloader version.
+          minLength: 3
+          maxLength: 255
+          readOnly: true
+          example: '1.0.0S06'
+        memorySize:
+          type: integer
+          description: device memory size(unit:byte).
+          minimum: 1
+          maximum: 2147483647
+          readOnly: true
+          example: 2116034560
+        cpu:
+          type: string
+          description: device cpu information.
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: ARMv7 Processor rev 5 (v7l)
+        disk:
+          type: array
+          description: device disk information.
+          readOnly: true
+          items:
+            type: object
+            readOnly: true
+            properties:
+              name:
+                type: string
+                description: disk name.
+                minLength: 1
+                maxLength: 255
+                readOnly: true
+                example: 'System'
+              mount:
+                type: string
+                description: disk mount point
+                minLength: 1
+                maxLength: 255
+                readOnly: true
+                example: '/'
+              device:
+                type: string
+                description: disk physical device node path
+                minLength: 1
+                maxLength: 255
+                readOnly: true
+                example: '/dev/root'
+              total:
+                description: 'disk Total size (unit: byte)'
+                type: integer
+                minimum: 1
+                maximum: 18446744073709551615
+                readOnly: true
+                example: 6948147200
+              free:
+                description: 'disk Free size (unit: byte)'
+                type: integer
+                minimum: 1
+                maximum: 18446744073709551615
+                readOnly: true
+                example: 4857821184
+              used:
+                description: 'disk Used size (unit: byte)'
+                type: integer
+                minimum: 1
+                maximum: 18446744073709551615
+                readOnly: true
+                example: 1798492160
+              percent:
+                description: 'Percent of used size'
+                type: number
+                minimum: 0.0
+                maximum: 100.0
+                readOnly: true
+                example: 27.019343397064695
+              tags:
+                type: object
+                description: system tag lists
+                readOnly: true
+                properties:
+                  used:
+                    type: string
+                    description: tag name of used disk size in byte
+                    minLength: 1
+                    maxLength: 255
+                    readOnly: true
+                    example: 'systemDiskUsed'
+                  free:
+                    type: string
+                    description: tag name of free disk size in byte
+                    minLength: 1
+                    maxLength: 255
+                    readOnly: true
+                    example: 'systemDiskFree'
+                  percent:
+                    type: string
+                    description: tag name of used disk percentage
+                    minLength: 1
+                    maxLength: 255
+                    readOnly: true
+                    example: 'systemDiskPercent'
+        lastBootTime:
+          type: string
+          description: |
+            device last boot time. (format in RFC 3339)
+            ('2020-06-04T5:45:44Z or '2020-06-04T13:45:44.000+08:00')
+          minLength: 20
+          maxLength: 29
+          readOnly: true
+          example: '2020-06-04T13:45:44+08:00'
+
+paths:
+  /device/general:
+    get:
+      description: Get device general configuration.
+      tags: ["device", "general"]
+      responses:
+        200:
+          description: Device general configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralInformation'
+              example:
+                data:
+                  type: general
+                  description: This is My Thingspro Edge.
+                  hostName: Moxa
+                  modelName: UC-8112A-ME-T-LX-EU
+                  serialNumber: IMOXA1234567
+                  thingsproVersion: 2.0.0-1600
+                  firmwareVersion: 1.0.0
+                  biosVersion: 1.0.0S01
+                  lastRebootTime: "2019-06-27T10:10:16+08:00"
+                  memorySize: 1056120832
+                  cpu: ARMv7 Processor rev 2 (v7l)
+                  disk:
+                    - name: System
+                      mount: '/'
+                      device: '/dev/root'
+                      total: 3206059008
+                      free: 1905097752
+                      used: 1138657820
+                      percent: 35.5
+                      tags:
+                        used: systemDiskUsed
+                        free: systemDiskFree
+                        percent: systemDiskPercent
+    patch:
+      tags: ["device", "general"]
+      description: Update device general configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  type: string
+                  description: This is My Thingspro Edge.
+                  maximum: 512
+                  example: MyThingsproEdge
+                hostName:
+                  type: string
+                  description: device hostname. <br>
+                    - Hostname must be between 1 and 64 octets inclusive.<br>
+                    - Each label in the hostname (component separated by ".") must be between 1 and 63 octets inclusive. <br>
+                    - Each label must start with an ASCII alphabet character (a-z, A-Z), end with an ASCII alphanumeric character (a-z, A-Z, 0-9), and must contain only ASCII alphanumeric characters or hyphens (a-z, A-Z, 0-9, "-").
+                  minimum: 1
+                  maximum: 64
+                  pattern: '^[a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$'
+                  example: Moxa
+            examples:
+              update device display name:
+                value:
+                  description: This is My Thingspro Edge.
+              update device hostname:
+                value:
+                  hostName: MyHost
+      responses:
+        200:
+          description: Device general configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralInformation'
+              example:
+                data:
+                  type: general
+                  description: This is My Thingspro Edge.
+                  hostName: MyHost
+                  modelName: UC-8112A-ME-T-LX-EU
+                  serialNumber: IMOXA1234567
+                  thingsproVersion: 2.0.0-1600
+                  firmwareVersion: 1.0.0
+                  biosVersion: 1.0.0S01
+                  lastRebootTime: "2019-06-27T10:10:16+08:00"
+                  memorySize: 1056120832
+                  cpu: ARMv7 Processor rev 2 (v7l)
+                  disk:
+                    - name: System
+                      mount: '/'
+                      device: '/dev/root'
+                      total: 3206059008
+                      free: 1905097752
+                      used: 1138657820
+                      percent: 35.5
+                      tags:
+                        used: systemDiskUsed
+                        free: systemDiskFree
+                        percent: systemDiskPercent

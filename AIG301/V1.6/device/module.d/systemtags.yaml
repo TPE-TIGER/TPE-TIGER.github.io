@@ -1,0 +1,268 @@
+openapi: '3.0.0'
+
+info:
+  version: '1.1.0'
+  title: 'System Tags Information API'
+  description: |
+        Release Date: 2019/06/29
+        System Tags Information API
+
+components:
+  schemas:
+    Tag:
+      type: object
+      properties:
+        prvdName:
+          type: string
+        srcName:
+          type: string
+        tagName:
+          type: string
+        ts:
+          type: integer
+          format: int64
+        dataType:
+          type: string
+          enum:
+            - uint8
+            - uint16
+            - uint32
+            - uint64
+            - int16
+            - int32
+            - int64
+            - float32
+            - float64
+            - string
+            - boolean
+            - bytearray
+        dataValue:
+          type: object
+    TagList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+
+paths:
+  /tags/monitor/system/status:
+    get:
+      description: Get data of system status tags.
+      tags: ["device", "systemtags"]
+      parameters:
+        - in: query
+          name: streamInterval
+          description: stream interval with msec
+          required: true
+          schema:
+            type: integer
+          example: 1000
+        - in: query
+          name: tags
+          description: |
+            tag name(s).
+            for cellular signal, it could be `cellular1Signal` for cellular module 1,
+            `cellular2Signal` for cellular module 2.
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - cpuUser
+                - cpuSystem
+                - cpuIdle
+                - cpuNice
+                - cpuIowait
+                - cpuIrq
+                - cpuSoftirq
+                - cpuSteal
+                - cpuUsage
+                - memoryTotal
+                - memoryUsed
+                - memoryFree
+                - memoryShared
+                - memoryBuffers
+                - memoryCached
+                - memoryUsage
+                - gpsSignal
+                - cellular1Signal
+          explode: false
+          examples:
+            multipleTags:
+              summary: example of multiple tags
+              value:
+              - cpuUsage
+              - memoryTotal
+              - memoryUsage
+      responses:
+        200:
+          description: The request has succeeded.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/TagList'
+              examples:
+                multipleTags:
+                  summary: example of multiple tags
+                  value:
+                  - prvdName: system
+                    srcName: status
+                    tagName: cpuUsage
+                    ts: 1590135215774
+                    dataType: int64
+                    dataValue: 44
+                  - prvdName: system
+                    srcName: status
+                    tagName: memoryTotal
+                    ts: 1590135211806
+                    dataType: uint64
+                    dataValue: 2116034560
+                  - prvdName: system
+                    srcName: status
+                    tagName: memoryUsage
+                    ts: 1590135214896
+                    dataType: uint64
+                    dataValue: 26
+
+  /tags/monitor/system/storage:
+    get:
+      description: Get data of system storage tags.
+      tags: ["device", "systemtags"]
+      parameters:
+        - in: query
+          name: streamInterval
+          description: stream interval with msec
+          required: true
+          schema:
+            type: integer
+          example: 1000
+        - in: query
+          name: tags
+          description: |
+            tag name(s).
+            for SD card inserted and enabled, `sd1-1DiskUsed`, `sd1-1DiskFree`, `sd1-1DiskPercent` will be available.
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - systemDiskUsed
+                - systemDiskFree
+                - systemDiskPercent
+                - sd1-1DiskUsed
+                - sd1-1DiskFree
+                - sd1-1DiskPercent
+          explode: false
+          examples:
+            multipleTags:
+              summary: example of multiple tags
+              value:
+              - systemDiskPercent
+              - sd1-1DiskPercent
+      responses:
+        200:
+          description: The request has succeeded.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/TagList'
+              examples:
+                multipleTags:
+                  summary: example of multiple tags
+                  value:
+                  - prvdName: system
+                    srcName: storage
+                    tagName: systemDiskPercent
+                    ts: 1590135558356
+                    dataType: double
+                    dataValue: 26.705404330196146
+                  - prvdName: system
+                    srcName: storage
+                    tagName: sd1-1DiskPercent
+                    ts: 1590135558363
+                    dataType: double
+                    dataValue: 10.081168276727597
+
+  /tags/monitor/system/network:
+    get:
+      description: Get data of system network usage tags.
+      tags: ["device", "systemtags"]
+      parameters:
+        - in: query
+          name: streamInterval
+          description: stream interval with msec
+          required: true
+          schema:
+            type: integer
+          example: 1000
+        - in: query
+          name: tags
+          description: |
+            tag name(s).
+            for `networkStatus` has value of `NotConnected`, `NoInternetAccess`, `ConnectedToInternet`
+            for WAN interface use `networkUsage`, `networkTx`, `networkRx`.
+            for cellular module inserted and enabled, `cellular1NetworkUsage`, `cellular1NetworkTx`, `cellular1NetworkRx` will be available.
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - networkStatus
+                - networkUsage
+                - networkTx
+                - networkRx
+                - cellular1NetworkUsage
+                - cellular1NetworkTx
+                - cellular1NetworkRx
+                - lan1NetworkUsage
+                - lan1NetworkTx
+                - lan1NetworkRx
+          explode: false
+          examples:
+            multipleTags:
+              summary: example of multiple tags
+              value:
+              - networkUsage
+              - networkTx
+              - networkRx
+      responses:
+        200:
+          description: The request has succeeded.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/TagList'
+              examples:
+                multipleTags:
+                  summary: example of multiple tags
+                  value:
+                  - prvdName: system
+                    srcName: network
+                    tagName: networkUsage
+                    ts: 1590135784561
+                    dataType: uint64
+                    dataValue: 64842809
+                  - prvdName: system
+                    srcName: network
+                    tagName: networkTx
+                    ts: 1590135784567
+                    dataType: uint64
+                    dataValue: 4107946
+                  - prvdName: system
+                    srcName: network
+                    tagName: networkRx
+                    ts: 1590135784573
+                    dataType: uint64
+                    dataValue: 60734927
+
+                  - prvdName: system
+                    srcName: network
+                    tagName: networkStatus
+                    ts: 1590135784573
+                    dataType: string
+                    dataValue: ConnectedToInternet

@@ -1,5 +1,12 @@
 # API version release notes
-## V1.5 (2023-12)
+## V1.4.0 (2024-10)
+The functionality and changes below were added in AIG-501 V1.4.0
+
+### New Features
+- Support Modbus Slave
+- Support Backup Logging for Modbus Slave
+
+## V1.3.0 (2023-12)
 The functionality and changes below were added in AIG-501 V1.3.0
 
 ### New
