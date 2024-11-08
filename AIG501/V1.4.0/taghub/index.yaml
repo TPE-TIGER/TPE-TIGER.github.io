@@ -15,14 +15,52 @@ security:
 paths:
   /tags/list:
     parameters:
-      - name: provider
+      - description: Limit the number of tags (default:0).
         in: query
+        name: limit
+        schema:
+          type: integer
+      - description: Log starting from the offset (default:0).
+        in: query
+        name: offset
+        schema:
+          type: integer
+      - description: Order by key (default:provider).
+        in: query
+        name: order
+        schema:
+          enum:
+          - provider
+          - source
+          - name
+          type: string
+      - description: sorting (default:asc).
+        in: query
+        name: sort
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+      - description: Match by provider name which keywords seperated by comma(,)
+        in: query
+        name: provider
+        schema:
+          type: string
+      - description: Match by source name which keywords seperated by comma(,)
+        in: query
+        name: source
+        schema:
+          type: string
+      - description: Match by tag name which keywords seperated by comma(,)
+        in: query
+        name: name
         schema:
           type: string
     get:
       tags:
         - tag
-      summary: Get the list of all tags
+      summary: Get tag list
       responses:
         '200':
           description: The request has succeeded.
@@ -98,6 +136,61 @@ paths:
               examples:
                 modbus_tcp_master:
                   $ref: '#/components/examples/tags-monitor'
+  /tags/publish:
+    post:
+      tags:
+        - publish
+      summary: Publish tag value
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prvdName:
+                  type: string
+                  description: Provider name
+                  example: "myprvd"
+                srcName:
+                  type: string
+                  description: Source name
+                  example: "mysrc"
+                tagName:
+                  type: string
+                  description: Tag name
+                  example: "int64_t"
+                dataType:
+                  type: string
+                  description: Data type of the tag
+                  example: "int64"
+                dataUnit:
+                  type: string
+                  description: Unit of the data
+                  example: "unit"
+                dataValue:
+                  type: integer
+                  description: Value of the data
+                  example: 32
+              required:
+                - prvdName
+                - srcName
+                - tagName
+                - dataType
+                - dataUnit
+                - dataValue
+      responses:
+        '200':
+          description: Successful tag publishing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tag published successfully"
+
   /tags/access/{provider}/{source}/{tag}:
     parameters:
       - name: provider
@@ -322,6 +415,14 @@ components:
     tag-list:
       type: object
       properties:
+        count:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
         data:
           type: array
           items:
@@ -433,6 +534,10 @@ components:
           ts: 1541409957933
     systemTagList:
       value:
+        count: 1
+        limit: 1
+        offset: 0
+        total: 1
         data:
           - prvdName: system
             srcName: cpu
@@ -442,6 +547,10 @@ components:
             access: r
     modbusmasterTagList:
       value:
+        count: 1
+        limit: 1
+        offset: 0
+        total: 1
         data:
           - prvdName: modbus_tcp_master
             srcName: ioLogik
