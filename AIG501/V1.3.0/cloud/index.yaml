@@ -911,6 +911,12 @@ components:
               type: string
               minLength: 1
               maxLength: 1024
+            identityCertContent:
+              description: for source:dps,method:x509, certificate content
+              type: string
+            identityPkContent:
+              description: for source:dps,method:x509, private key content
+              type: string
             registrationId:
               description: |
                 Use only lowercase alphanumeric and dash ('-') characters. For example, symm-key-device-007
@@ -1790,7 +1796,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/CloudRuntimeListInformation'
   /mqtt/check:
-    put:
+    get:
       description: Execute MQTT runtime diagnostic
       tags: ["mqtt"]
       responses:
@@ -2156,7 +2162,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/CloudRuntimeInformation'
   /azure-device/check:
-    put:
+    get:
       description: Execute azure device runtime diagnostic
       tags: ["azure_device"]
       responses:
@@ -2463,7 +2469,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/CloudRuntimeInformation'
   /aws/check:
-    put:
+    get:
       description: Execute AWS runtime diagnostic
       tags: ["aws"]
       responses:
@@ -2764,8 +2770,10 @@ paths:
                     globalEndpoint: 'https://global.azure-devices-provisioning.net'
                     scopeId: '[SCOPE ID]'
                     registrationId: ''
-                    identityCert: '[CERT FILE CONTENT]'
-                    identityPk: '[KEY CONTENT]'
+                    identityCert: '[CERT FILE NAME]'
+                    identityPk: '[KEY NAME]'
+                    identityCertContent: '[CERT FILE CONTENT]'
+                    identityPkContent: '[KEY CONTENT]'
               downstreamCerts-default:
                 value:
                   downstreamCerts:
