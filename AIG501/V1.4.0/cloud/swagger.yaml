@@ -2707,6 +2707,22 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+        400:
+          description: patch config fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                serviceBusy:
+                  value:
+                    error: "Azure IoT Edge service is busy, please try again later."
+                badRequest:
+                  value:
+                    error: "input config fail"
+
   /azure-iotedge/reset:
     put:
       description: Reset AIE APP(include iotedge runtime pkgs).
@@ -2732,8 +2748,13 @@ paths:
                 properties:
                   error:
                     type: string
-                example:
-                  error: "reset iotedge failed"
+              examples:
+                serviceBusy:
+                  value:
+                    error: "Azure IoT Edge service is busy"
+                badRequest:
+                  value: 
+                    error: "reset failed"
   /azure-iotedge/restart:
     put:
       description: Control azure iotedge service.
@@ -2780,7 +2801,7 @@ paths:
                   data: 
                     type: string
                 example:
-                  data: "edgeAgent enable task is accepted"
+                  data: "$module restart success"
         400:
           description: Restart azure iotedge service/modules failed
           content:
@@ -2789,8 +2810,14 @@ paths:
                 properties:
                   error:
                     type: string
-                example:
-                  error: "stop module is not allowed"
+              examples:
+                noInputModule:
+                  value:
+                    error: "Need input module name"
+                badRequest:
+                  value:
+                    error: "Can't restart $module" 
+                  
   /azure-iotedge/certificates:
     post:
       description: Import user certificates and update azure iotedge configuration.
@@ -2824,6 +2851,24 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/AzureIoTEdgeConfiguration'
+        400:
+          description: Import certificates fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                serviceBusy:
+                  value:
+                    error: "Azure IoT Edge service is busy"
+                wrongFormat:
+                  value:
+                    erroe: "wrong format: $error"
+                badRequest:
+                  value: 
+                    error: "error message"
   /azure-iotedge/twin/properties:
     get:
       description: get twin properties setting.
@@ -2855,6 +2900,27 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/DeviceProperties'
+        400:
+          description: update twin properties setting fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                noConnectionID:
+                  value:
+                    error: "Need input connectionID"
+                connectionIDnotExist:
+                  value:
+                    error: "connectionID is not exist"
+                invalidPayload:
+                  value:
+                    error: "invalid payload, err: $error"
+                badRequest:
+                  value: 
+                    error: "error message"
   /azure-iotedge/twin/reported:
     put:
       description: reported twin properties.
@@ -2870,6 +2936,22 @@ paths:
                     type: string
               example:
                 data: ok
+        400:
+          description: reported twin properties fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                noConnectionID:
+                  value:
+                    error: "Need input connectionID"
+                reportFail:
+                  value:
+                    error: "reported failed, err: $error"
+
   /azure-iotedge/twin/clear:
     put:
       description: clear twin properties.
@@ -2896,6 +2978,22 @@ paths:
                     type: string
               example:
                 data: ok
+        400:
+          description: clear twin properties fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                noConnectionID:
+                  value:
+                    error: "Need input connectionID"
+                invalidPayload:
+                  value:
+                    error: "invalid payload, err: $error"
+
   /azure-iotedge/messages:
     get:
       description: get message groups setting.
@@ -2947,6 +3045,24 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/MessagePolicy'
+        400:
+          description: get message group setting fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                noConnectionID:
+                  value:
+                    error: "Need input connectionID"
+                noParamID:
+                  value:
+                    error: "Need input param:id"
+                idNotFound:
+                  value:
+                    error: "message policy $id, is not found"      
     put:
       description: update message group setting.
       tags: ["azure_iotedge"]
@@ -2965,6 +3081,27 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/MessagePolicy'
+        400:
+          description: update message group setting fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                noConnectionID:
+                  value:
+                    error: "Need input connectionID"
+                noParamID:
+                  value:
+                    error: "Need input param:id"
+                invalidPayload:
+                  value:
+                    error: "invalid payload, err: $error"               
+                idNotFound:
+                  value:
+                    error: "message policy $id, is not found" 
     delete:
       description: delete message group setting.
       tags: ["azure_iotedge"]
@@ -2977,6 +3114,24 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MessagePolicy'
+        400:
+          description: update message group setting fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                noConnectionID:
+                  value:
+                    error: "Need input connectionID"
+                noParamID:
+                  value:
+                    error: "Need input param:id"
+                idNotFound:
+                  value:
+                    error: "message policy $id, is not found"                   
   /azure-iotedge/messages/test:
     put:
       description: test custom payload.
@@ -3018,7 +3173,18 @@ paths:
                   system:
                     cpuUsage: 60
                   time: '2019-09-27T11:42:34Z'
-
+        400:
+          description: custom payload test results fail
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+              examples:
+                invalidPayload:
+                  value:
+                    error: "input payload is invalid, err: $error"               
 
   /sparkplug:
     get:
