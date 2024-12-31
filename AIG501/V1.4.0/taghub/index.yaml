@@ -140,7 +140,7 @@ paths:
     post:
       tags:
         - publish
-      summary: Publish tag value
+      summary: Publish tag value (modbus master tag only)
       requestBody:
         required: true
         content:
