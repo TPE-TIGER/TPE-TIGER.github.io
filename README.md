@@ -10,7 +10,8 @@
 ## AIG 302 Series
 | Version | Date | REST API  | Changelog | Latest |
 |  ----  | ----  | ----  | ----  | ----  |
-| V1.0.0 | 2024-06 |- [All](https://TPE-TIGER.github.io/AIG302/V1.0.0/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG302/CHANGELOG.md) | V |
+| V1.4.0 | 2026-04 |- [All](https://TPE-TIGER.github.io/AIG302/V1.4.0/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG302/CHANGELOG.md) | V |
+| V1.0.0 | 2024-06 |- [All](https://TPE-TIGER.github.io/AIG302/V1.0.0/#) | [Changelog](https://github.com/TPE-TIGER/TPE-TIGER.github.io/blob/main/AIG302/CHANGELOG.md) | |
 
 ## AIG 301 Series
 | Version | Date | REST API  | Changelog | Latest |
